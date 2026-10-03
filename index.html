@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>اسکن تجهیز - HSE</title>
+  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: Tahoma, Arial, sans-serif; background: #f0f2f5; min-height: 100vh; padding: 16px; }
+    .header { background: #1e3c72; color: #fff; padding: 16px; border-radius: 12px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; }
+    .header h1 { font-size: 18px; }
+    .header .user { font-size: 13px; opacity: 0.9; }
+    .logout-btn { background: rgba(255,255,255,0.2); border: none; color: #fff; padding: 8px 14px; border-radius: 8px; cursor: pointer; font-family: inherit; font-size: 13px; }
+    .card { background: #fff; border-radius: 12px; padding: 20px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+    .card h2 { font-size: 16px; color: #1e3c72; margin-bottom: 14px; }
+    #reader { width: 100%; border-radius: 12px; overflow: hidden; margin-bottom: 12px; }
+    .divider { text-align: center; color: #999; margin: 20px 0; font-size: 13px; position: relative; }
+    .divider::before, .divider::after { content: ''; position: absolute; top: 50%; width: 40%; height: 1px; background: #ddd; }
+    .divider::before { right: 0; }
+    .divider::after { left: 0; }
+    .search-group { display: flex; gap: 8px; }
+    .search-group input { flex: 1; padding: 14px 16px; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 15px; font-family: inherit; }
+    .search-group input:focus { outline: none; border-color: #2a5298; }
+    .search-group button { padding: 14px 20px; background: #1e3c72; color: #fff; border: none; border-radius: 10px; font-family: inherit; font-size: 15px; font-weight: bold; cursor: pointer; }
+    .start-btn { width: 100%; padding: 14px; background: #2a5298; color: #fff; border: none; border-radius: 10px; font-family: inherit; font-size: 15px; font-weight: bold; cursor: pointer; margin-top: 12px; }
+    .start-btn:disabled { background: #999; }
+    .loading-box { text-align: center; padding: 20px; color: #666; }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <div>
+      <h1>اسکن تجهیز</h1>
+      <div class="user" id="userInfo"></div>
+    </div>
+    <button class="logout-btn" onclick="doLogout()">خروج</button>
+  </div>
+
+  <div class="card">
+    <h2>اسکن با دوربین</h2>
+    <div id="reader"></div>
+    <button class="start-btn" id="startScanBtn" onclick="startScanner()">شروع اسکن</button>
+  </div>
+
+  <div class="card">
+    <div class="divider">یا</div>
+    <h2>جستجوی دستی</h2>
+    <div class="search-group">
+      <input type="text" id="manualInput" placeholder="کد تجهیز را وارد کنید">
+      <button onclick="manualSearch()">جستجو</button>
+    </div>
+  </div>
+
+  <div class="card" id="statusCard" style="display:none;">
+    <div class="loading-box" id="statusBox"></div>
+  </div>
+
+  <script>
+   https://script.google.com/macros/s/AKfycbzIeUBuwleQj1ByQBKjRDcDXUE6pv-rky7AtIyJV04OumHnBqT9bT5fcV-2wX5eFMCY/exec';
+    var currentToken = '';
+    var currentUser = '';
+    var html5QrCode = null;
+    var isScanning = false;
+
+    function goToLogin() {
+      window.location.href = EXEC_URL + '?page=Login';
+    }
+
+    function showStatus(msg, color) {
+      var card = document.getElementById('statusCard');
+      var box = document.getElementById('statusBox');
+      card.style.display = 'block';
+      box.textContent = msg;
+      box.style.color = color || '#666';
+    }
+
+    function hideStatus() {
+      document.getElementById('statusCard').style.display = 'none';
+    }
+
+    // API call via POST
+    function apiCall(request) {
+      return fetch(EXEC_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify(request),
+        redirect: 'follow'
+      }).then(function(r) { return r.json(); });
+    }
+
+    (function initPage() {
+      currentToken = localStorage.getItem('token');
+      currentUser = localStorage.getItem('fullName') || localStorage.getItem('username');
+
+      if (!currentToken) { goToLogin(); return; }
+
+      apiCall({ action: 'auth.me', token: currentToken })
+        .then(function(response) {
+          if (!response.success) {
+            localStorage.clear();
+            goToLogin();
+            return;
+          }
+          document.getElementById('userInfo').textContent = currentUser;
+          bindEvents();
+        })
+        .catch(function() {
+          localStorage.clear();
+          goToLogin();
+        });
+    })();
+
+    function bindEvents() {
+      document.getElementById('manualInput').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') manualSearch();
+      });
+    }
+
+    function doLogout() {
+      apiCall({ action: 'auth.logout', token: currentToken }).then(function() {
+        localStorage.clear();
+        goToLogin();
+      });
+    }
+
+    function startScanner() {
+      if (isScanning) return;
+
+      var btn = document.getElementById('startScanBtn');
+      btn.disabled = true;
+      btn.textContent = 'در حال راه‌اندازی دوربین...';
+
+      if (!html5QrCode) {
+        html5QrCode = new Html5Qrcode('reader');
+      }
+
+      html5QrCode.start(
+        { facingMode: 'environment' },
+        { fps: 10, qrbox: { width: 250, height: 250 } },
+        onScanSuccess,
+        function() {}
+      ).then(function() {
+        isScanning = true;
+        btn.textContent = 'دوربین فعال است';
+      }).catch(function(err) {
+        btn.disabled = false;
+        btn.textContent = 'شروع اسکن';
+        alert('خطا در دسترسی به دوربین: ' + err);
+      });
+    }
+
+    function stopScanner() {
+      if (html5QrCode && isScanning) {
+        html5QrCode.stop().then(function() {
+          isScanning = false;
+          var btn = document.getElementById('startScanBtn');
+          btn.disabled = false;
+          btn.textContent = 'شروع اسکن';
+        });
+      }
+    }
+
+    function onScanSuccess(decodedText) {
+      stopScanner();
+      goToChecklist(decodedText);
+    }
+
+    function manualSearch() {
+      var input = document.getElementById('manualInput');
+      var code = input.value.trim();
+      if (!code) {
+        alert('لطفاً کد تجهیز را وارد کنید.');
+        return;
+      }
+      goToChecklist(code);
+    }
+
+    function goToChecklist(barcode) {
+      showStatus('در حال بررسی ' + barcode + '...', '#666');
+      sessionStorage.setItem('currentBarcode', barcode);
+
+      apiCall({
+        action: 'inventory.get',
+        token: currentToken,
+        payload: { barcode: barcode }
+      }).then(function(response) {
+        if (!response.success) {
+          showStatus(response.error, '#d32f2f');
+          return;
+        }
+        window.location.href = EXEC_URL + '?page=Checklist';
+      }).catch(function(err) {
+        showStatus('خطا در ارتباط با سرور: ' + err.message, '#d32f2f');
+      });
+    }
+  </script>
+
+</body>
+</html>
