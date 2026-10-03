@@ -25,7 +25,6 @@
     .search-group button { padding: 14px 20px; background: #1e3c72; color: #fff; border: none; border-radius: 10px; font-family: inherit; font-size: 15px; font-weight: bold; cursor: pointer; }
     .start-btn { width: 100%; padding: 14px; background: #2a5298; color: #fff; border: none; border-radius: 10px; font-family: inherit; font-size: 15px; font-weight: bold; cursor: pointer; margin-top: 12px; }
     .start-btn:disabled { background: #999; }
-    .loading-box { text-align: center; padding: 20px; color: #666; }
   </style>
 </head>
 <body>
@@ -53,41 +52,27 @@
     </div>
   </div>
 
-  <div class="card" id="statusCard" style="display:none;">
-    <div class="loading-box" id="statusBox"></div>
-  </div>
-
   <script>
-   https://script.google.com/macros/s/AKfycbzIeUBuwleQj1ByQBKjRDcDXUE6pv-rky7AtIyJV04OumHnBqT9bT5fcV-2wX5eFMCY/exec';
+    var EXEC_URL = 'https://script.google.com/macros/s/AKfycbzIeUBuwleQj1ByQBKjRDcDXUE6pv-rky7AtIyJV04OumHnBqT9bT5fcV-2wX5eFMCY/exec';
     var currentToken = '';
     var currentUser = '';
     var html5QrCode = null;
     var isScanning = false;
 
+    // Read token from URL hash (sent by Apps Script Login page)
+    (function readTokenFromHash() {
+      if (window.location.hash.indexOf('token=') !== -1) {
+        var params = new URLSearchParams(window.location.hash.substring(1));
+        localStorage.setItem('token', params.get('token') || '');
+        localStorage.setItem('username', params.get('username') || '');
+        localStorage.setItem('role', params.get('role') || '');
+        localStorage.setItem('fullName', params.get('fullName') || '');
+        history.replaceState(null, '', window.location.pathname);
+      }
+    })();
+
     function goToLogin() {
       window.location.href = EXEC_URL + '?page=Login';
-    }
-
-    function showStatus(msg, color) {
-      var card = document.getElementById('statusCard');
-      var box = document.getElementById('statusBox');
-      card.style.display = 'block';
-      box.textContent = msg;
-      box.style.color = color || '#666';
-    }
-
-    function hideStatus() {
-      document.getElementById('statusCard').style.display = 'none';
-    }
-
-    // API call via POST
-    function apiCall(request) {
-      return fetch(EXEC_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        body: JSON.stringify(request),
-        redirect: 'follow'
-      }).then(function(r) { return r.json(); });
     }
 
     (function initPage() {
@@ -96,20 +81,8 @@
 
       if (!currentToken) { goToLogin(); return; }
 
-      apiCall({ action: 'auth.me', token: currentToken })
-        .then(function(response) {
-          if (!response.success) {
-            localStorage.clear();
-            goToLogin();
-            return;
-          }
-          document.getElementById('userInfo').textContent = currentUser;
-          bindEvents();
-        })
-        .catch(function() {
-          localStorage.clear();
-          goToLogin();
-        });
+      document.getElementById('userInfo').textContent = currentUser;
+      bindEvents();
     })();
 
     function bindEvents() {
@@ -119,8 +92,15 @@
     }
 
     function doLogout() {
-      apiCall({ action: 'auth.logout', token: currentToken }).then(function() {
-        localStorage.clear();
+      var token = currentToken;
+      localStorage.clear();
+      sessionStorage.clear();
+      fetch(EXEC_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({ action: 'auth.logout', token: token }),
+        redirect: 'follow'
+      }).finally(function() {
         goToLogin();
       });
     }
@@ -178,22 +158,10 @@
     }
 
     function goToChecklist(barcode) {
-      showStatus('در حال بررسی ' + barcode + '...', '#666');
-      sessionStorage.setItem('currentBarcode', barcode);
-
-      apiCall({
-        action: 'inventory.get',
-        token: currentToken,
-        payload: { barcode: barcode }
-      }).then(function(response) {
-        if (!response.success) {
-          showStatus(response.error, '#d32f2f');
-          return;
-        }
-        window.location.href = EXEC_URL + '?page=Checklist';
-      }).catch(function(err) {
-        showStatus('خطا در ارتباط با سرور: ' + err.message, '#d32f2f');
-      });
+      var url = EXEC_URL + '?page=Checklist'
+        + '&barcode=' + encodeURIComponent(barcode)
+        + '&token=' + encodeURIComponent(currentToken);
+      window.location.href = url;
     }
   </script>
 
