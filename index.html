@@ -59,7 +59,6 @@
     var html5QrCode = null;
     var isScanning = false;
 
-    // Read token from URL hash (sent by Apps Script Login page)
     (function readTokenFromHash() {
       if (window.location.hash.indexOf('token=') !== -1) {
         var params = new URLSearchParams(window.location.hash.substring(1));
@@ -158,10 +157,8 @@
     }
 
     function goToChecklist(barcode) {
-      var url = EXEC_URL + '?page=Checklist'
-        + '&barcode=' + encodeURIComponent(barcode)
-        + '&token=' + encodeURIComponent(currentToken);
-      window.location.href = url;
+      sessionStorage.setItem('currentBarcode', barcode);
+      window.location.href = 'checklist.html';
     }
   </script>
 
