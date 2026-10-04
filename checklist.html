@@ -110,7 +110,7 @@
   </div>
 
   <script>
-    var EXEC_URL = 'https://script.google.com/macros/s/AKfycbzIeUBuwleQj1ByQBKjRDcDXUE6pv-rky7AtIyJV04OumHnBqT9bT5fcV-2wX5eFMCY/exec';
+    var EXEC_URL = 'https://script.google.com/macros/s/AKfycbzwCIuePkj1LOuoTMs_3IZMaOsIuLidRDFU6MERh6LTDCyLOVdnv_00vGS-1L0-OnxA/exec';
     var INDEX_URL = 'index.html';
     var currentToken = '';
     var currentBarcode = '';
@@ -141,21 +141,9 @@
       }).then(function(r) { return r.json(); });
     }
 
-    function getHashParams() {
-      var params = {};
-      var hash = window.location.hash.substring(1);
-      if (!hash) return params;
-      hash.split('&').forEach(function(pair) {
-        var parts = pair.split('=');
-        if (parts[0]) params[parts[0]] = decodeURIComponent(parts[1] || '');
-      });
-      return params;
-    }
-
     (function initPage() {
-      var params = getHashParams();
-      currentToken = params.token || localStorage.getItem('token') || '';
-      currentBarcode = params.barcode || sessionStorage.getItem('currentBarcode') || '';
+      currentToken = localStorage.getItem('token') || '';
+      currentBarcode = sessionStorage.getItem('currentBarcode') || '';
       currentUser = localStorage.getItem('fullName') || localStorage.getItem('username') || '';
 
       if (!currentToken) { goToLogin(); return; }
@@ -163,11 +151,6 @@
         alert('کد تجهیز یافت نشد. لطفاً دوباره اسکن کنید.');
         goBack();
         return;
-      }
-
-      // Clean up URL
-      if (window.location.hash) {
-        history.replaceState(null, '', window.location.pathname);
       }
 
       document.getElementById('userInfo').textContent = currentUser;
@@ -299,9 +282,6 @@
       document.getElementById('submitBtn').disabled = !(allConfirmed && finalStatus && photoBase64);
     }
 
-    // ============================================
-    // Camera (inline)
-    // ============================================
     function openCamera() {
       document.getElementById('photoStatus').textContent = 'در حال باز کردن دوربین...';
 
@@ -370,9 +350,6 @@
       updateProgress();
     }
 
-    // ============================================
-    // Submit
-    // ============================================
     function submitInspection() {
       var btn = document.getElementById('submitBtn');
       btn.disabled = true;
