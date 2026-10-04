@@ -48,7 +48,7 @@
     .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); display: none; z-index: 1000; align-items: center; justify-content: center; padding: 20px; }
     .modal-overlay.show { display: flex; }
     .modal { background: #fff; border-radius: 12px; padding: 20px; max-width: 500px; width: 100%; max-height: 90vh; overflow-y: auto; }
-    .modal img { width: 100%; border-radius: 8px; margin-bottom: 12px; }
+    .modal img { width: 100%; border-radius: 8px; margin-bottom: 12px; display: block; }
     .modal h3 { font-size: 16px; color: #1e3c72; margin-bottom: 12px; }
     .modal .row { display: flex; justify-content: space-between; padding: 6px 0; font-size: 14px; border-bottom: 1px solid #eee; }
     .modal .row:last-child { border-bottom: none; }
@@ -169,7 +169,6 @@
 
       if (!currentToken) { goToLogin(); return; }
 
-      // Server-side role verification
       apiCall({ action: 'auth.me', token: currentToken }).then(function(response) {
         if (!response.success) {
           handleSessionExpired();
@@ -464,7 +463,6 @@
         payload: { inspectionIds: ids }
       }).then(function(response) {
         if (response.success) {
-          // Remove only successfully approved items
           response.data.approvedIds.forEach(function(id) {
             removeFromListNoRender(id);
           });
@@ -499,11 +497,27 @@
       delete selectedIds[id];
     }
 
+    function convertDriveLink(url) {
+      if (!url) return '';
+      var match = url.match(/[?&]id=([^&]+)/);
+      if (match) {
+        return 'https://lh3.googleusercontent.com/d/' + match[1];
+      }
+      return url;
+    }
+
     function openViewModal(item) {
       var photo = document.getElementById('modalPhoto');
       if (item.photoUrl) {
-        photo.src = item.photoUrl;
+        photo.src = convertDriveLink(item.photoUrl);
         photo.style.display = 'block';
+        photo.onerror = function() {
+          photo.style.display = 'none';
+          var fallback = document.createElement('div');
+          fallback.style.cssText = 'text-align:center;padding:20px;background:#f5f5f5;border-radius:8px;margin-bottom:12px;';
+          fallback.textContent = 'عکس بارگذاری نشد';
+          photo.parentNode.insertBefore(fallback, photo);
+        };
       } else {
         photo.style.display = 'none';
       }
