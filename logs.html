@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>لاگ‌ها و خطاها</title>
+  <title>اسکن تجهیز - HSE</title>
+  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: Tahoma, Arial, sans-serif; background: #f0f2f5; min-height: 100vh; padding: 16px; }
@@ -11,115 +12,99 @@
     .header h1 { font-size: 18px; }
     .header .user { font-size: 13px; opacity: 0.9; }
     .header-btns { display: flex; gap: 8px; flex-wrap: wrap; }
-    .header-btn { background: rgba(255,255,255,0.2); border: none; color: #fff; padding: 8px 14px; border-radius: 8px; cursor: pointer; font-family: inherit; font-size: 13px; }
-    .tabs { display: flex; gap: 8px; margin-bottom: 16px; background: #fff; padding: 8px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
-    .tab { flex: 1; padding: 12px; background: #f5f5f5; border: none; border-radius: 8px; font-family: inherit; font-size: 14px; font-weight: bold; color: #555; cursor: pointer; }
-    .tab.active { background: #1e3c72; color: #fff; }
+    .logout-btn { background: rgba(255,255,255,0.2); border: none; color: #fff; padding: 8px 14px; border-radius: 8px; cursor: pointer; font-family: inherit; font-size: 13px; }
+    .logout-btn:hover { background: rgba(255,255,255,0.3); }
     .card { background: #fff; border-radius: 12px; padding: 20px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
-    .card h2 { font-size: 16px; color: #1e3c72; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center; }
-    .card h2 .count { font-size: 14px; color: #999; font-weight: normal; }
-    .log-item { background: #f9f9f9; border: 1px solid #e0e0e0; border-radius: 8px; padding: 12px; margin-bottom: 10px; font-size: 13px; }
-    .log-item.critical { background: #ffebee; border-color: #d32f2f; }
-    .log-item.resolved { opacity: 0.6; background: #f0f0f0; }
-    .log-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; gap: 8px; flex-wrap: wrap; }
-    .log-header .func { font-weight: bold; color: #1e3c72; font-size: 14px; }
-    .log-header .time { color: #999; font-size: 12px; }
-    .log-row { display: flex; padding: 3px 0; gap: 6px; font-size: 13px; }
-    .log-row .label { color: #777; min-width: 70px; }
-    .log-row .value { color: #222; word-break: break-word; }
-    .badge { padding: 3px 8px; border-radius: 6px; font-size: 11px; font-weight: bold; }
-    .badge.new { background: #fff3e0; color: #e65100; }
-    .badge.resolved { background: #e8f5e9; color: #2e7d32; }
-    .badge.critical { background: #ffebee; color: #c62828; }
-    .badge.success { background: #e8f5e9; color: #2e7d32; }
-    .badge.fail { background: #ffebee; color: #c62828; }
-    .resolve-btn { padding: 6px 12px; background: #4caf50; color: #fff; border: none; border-radius: 6px; font-family: inherit; font-size: 12px; font-weight: bold; cursor: pointer; margin-top: 8px; }
-    .resolve-btn:disabled { background: #ccc; cursor: not-allowed; }
-    .empty-msg { text-align: center; color: #999; padding: 30px; font-size: 14px; }
-    .loading-box { text-align: center; padding: 40px 20px; color: #666; font-size: 15px; }
-    .stack-toggle { color: #1e3c72; font-size: 12px; cursor: pointer; text-decoration: underline; margin-top: 6px; display: inline-block; }
-    .stack-content { display: none; background: #f0f0f0; padding: 8px; border-radius: 6px; margin-top: 6px; font-family: monospace; font-size: 11px; white-space: pre-wrap; word-break: break-all; max-height: 200px; overflow-y: auto; }
+    .card h2 { font-size: 16px; color: #1e3c72; margin-bottom: 14px; }
+    #reader { width: 100%; border-radius: 12px; overflow: hidden; margin-bottom: 12px; }
+    .divider { text-align: center; color: #999; margin: 20px 0; font-size: 13px; position: relative; }
+    .divider::before, .divider::after { content: ''; position: absolute; top: 50%; width: 40%; height: 1px; background: #ddd; }
+    .divider::before { right: 0; }
+    .divider::after { left: 0; }
+    .search-group { display: flex; gap: 8px; }
+    .search-group input { flex: 1; padding: 14px 16px; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 15px; font-family: inherit; }
+    .search-group input:focus { outline: none; border-color: #2a5298; }
+    .search-group button { padding: 14px 20px; background: #1e3c72; color: #fff; border: none; border-radius: 10px; font-family: inherit; font-size: 15px; font-weight: bold; cursor: pointer; }
+    .start-btn { width: 100%; padding: 14px; background: #2a5298; color: #fff; border: none; border-radius: 10px; font-family: inherit; font-size: 15px; font-weight: bold; cursor: pointer; margin-top: 12px; }
+    .start-btn:disabled { background: #999; }
   </style>
 </head>
 <body>
 
   <div class="header">
     <div>
-      <h1>لاگ‌ها و خطاها</h1>
+      <h1>اسکن تجهیز</h1>
       <div class="user" id="userInfo"></div>
     </div>
     <div class="header-btns">
-      <button class="header-btn" onclick="window.location.href='dashboard.html'">داشبورد</button>
-      <button class="header-btn" onclick="window.location.href='index.html'">اسکنر</button>
-      <button class="header-btn" onclick="doLogout()">خروج</button>
+      <button class="logout-btn" onclick="window.location.href='history.html'">تاریخچه</button>
+      <button class="logout-btn" id="dashboardBtn" style="display:none;" onclick="window.location.href='dashboard.html'">داشبورد</button>
+      <button class="logout-btn" id="logsBtn" style="display:none;" onclick="window.location.href='logs.html'">لاگ‌ها</button>
+      <button class="logout-btn" onclick="doLogout()">خروج</button>
     </div>
   </div>
 
-  <div class="tabs">
-    <button class="tab active" id="tabErrors" onclick="switchTab('errors')">خطاها</button>
-    <button class="tab" id="tabAudit" onclick="switchTab('audit')">عملیات</button>
+  <div class="card">
+    <h2>اسکن با دوربین</h2>
+    <div id="reader"></div>
+    <button class="start-btn" id="startScanBtn" onclick="startScanner()">شروع اسکن</button>
   </div>
 
-  <div class="card" id="contentCard">
-    <h2>
-      <span id="contentTitle">خطاها</span>
-      <span class="count" id="contentCount"></span>
-    </h2>
-    <div id="loadingBox" class="loading-box">در حال بارگذاری...</div>
-    <div id="contentList"></div>
-    <div id="emptyBox" class="empty-msg" style="display:none;">موردی برای نمایش وجود ندارد.</div>
+  <div class="card">
+    <div class="divider">یا</div>
+    <h2>جستجوی دستی</h2>
+    <div class="search-group">
+      <input type="text" id="manualInput" placeholder="کد تجهیز را وارد کنید">
+      <button onclick="manualSearch()">جستجو</button>
+    </div>
   </div>
 
   <script>
     var EXEC_URL = 'https://script.google.com/macros/s/AKfycbzwCIuePkj1LOuoTMs_3IZMaOsIuLidRDFU6MERh6LTDCyLOVdnv_00vGS-1L0-OnxA/exec';
     var currentToken = '';
     var currentUser = '';
-    var activeTab = 'errors';
-    var errorsData = null;
-    var auditData = null;
+    var html5QrCode = null;
+    var isScanning = false;
+
+    (function readTokenFromHash() {
+      if (window.location.hash.indexOf('token=') !== -1) {
+        var params = new URLSearchParams(window.location.hash.substring(1));
+        localStorage.setItem('token', params.get('token') || '');
+        localStorage.setItem('username', params.get('username') || '');
+        localStorage.setItem('role', params.get('role') || '');
+        localStorage.setItem('fullName', params.get('fullName') || '');
+        history.replaceState(null, '', window.location.pathname);
+      }
+    })();
 
     function goToLogin() {
       window.location.href = EXEC_URL + '?page=Login';
     }
 
-    function handleSessionExpired() {
-      localStorage.clear();
-      sessionStorage.clear();
-      goToLogin();
-    }
-
-    function apiCall(request) {
-      return fetch(EXEC_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        body: JSON.stringify(request),
-        redirect: 'follow'
-      }).then(function(r) { return r.json(); });
-    }
-
     (function initPage() {
-      currentToken = localStorage.getItem('token') || '';
-      currentUser = localStorage.getItem('fullName') || localStorage.getItem('username') || '';
+      currentToken = localStorage.getItem('token');
+      currentUser = localStorage.getItem('fullName') || localStorage.getItem('username');
+      var role = localStorage.getItem('role') || '';
 
       if (!currentToken) { goToLogin(); return; }
 
-      apiCall({ action: 'auth.me', token: currentToken }).then(function(response) {
-        if (!response.success) {
-          handleSessionExpired();
-          return;
-        }
-        var role = response.data.role;
-        if (role !== 'admin') {
-          alert('شما به این بخش دسترسی ندارید.');
-          window.location.href = 'index.html';
-          return;
-        }
-        document.getElementById('userInfo').textContent = currentUser;
-        loadErrors();
-      }).catch(function() {
-        handleSessionExpired();
-      });
+      document.getElementById('userInfo').textContent = currentUser;
+
+      if (role === 'manager' || role === 'admin') {
+        document.getElementById('dashboardBtn').style.display = 'inline-block';
+      }
+      if (role === 'admin') {
+        document.getElementById('logsBtn').style.display = 'inline-block';
+      }
+
+      bindEvents();
     })();
+
+    function bindEvents() {
+      document.getElementById('manualInput').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') manualSearch();
+      });
+    }
 
     function doLogout() {
       var token = currentToken;
@@ -135,279 +120,61 @@
       });
     }
 
-    function toFa(n) {
-      return String(n).replace(/\d/g, function(d) {
-        return '۰۱۲۳۴۵۶۷۸۹'[d];
-      });
-    }
+    function startScanner() {
+      if (isScanning) return;
 
-    function switchTab(tab) {
-      activeTab = tab;
-      document.getElementById('tabErrors').classList.toggle('active', tab === 'errors');
-      document.getElementById('tabAudit').classList.toggle('active', tab === 'audit');
-      document.getElementById('contentTitle').textContent = tab === 'errors' ? 'خطاها' : 'عملیات';
-      renderTab();
-    }
+      var btn = document.getElementById('startScanBtn');
+      btn.disabled = true;
+      btn.textContent = 'در حال راه‌اندازی دوربین...';
 
-    function loadErrors() {
-      document.getElementById('loadingBox').style.display = 'block';
-      document.getElementById('contentList').innerHTML = '';
+      if (!html5QrCode) {
+        html5QrCode = new Html5Qrcode('reader');
+      }
 
-      apiCall({
-        action: 'log.errors',
-        token: currentToken,
-        payload: {}
-      }).then(function(response) {
-        document.getElementById('loadingBox').style.display = 'none';
-        if (!response.success) {
-          if (response.error && (response.error.indexOf('نشست') !== -1 || response.error.indexOf('منقضی') !== -1)) {
-            handleSessionExpired();
-            return;
-          }
-          alert('خطا: ' + response.error);
-          return;
-        }
-        errorsData = response.data.logs || [];
-        renderTab();
+      html5QrCode.start(
+        { facingMode: 'environment' },
+        { fps: 10, qrbox: { width: 250, height: 250 } },
+        onScanSuccess,
+        function() {}
+      ).then(function() {
+        isScanning = true;
+        btn.textContent = 'دوربین فعال است';
       }).catch(function(err) {
-        document.getElementById('loadingBox').style.display = 'none';
-        alert('خطا: ' + err.message);
+        btn.disabled = false;
+        btn.textContent = 'شروع اسکن';
+        alert('خطا در دسترسی به دوربین: ' + err);
       });
     }
 
-    function loadAudit() {
-      document.getElementById('loadingBox').style.display = 'block';
-      document.getElementById('contentList').innerHTML = '';
-
-      apiCall({
-        action: 'log.audit',
-        token: currentToken,
-        payload: {}
-      }).then(function(response) {
-        document.getElementById('loadingBox').style.display = 'none';
-        if (!response.success) {
-          alert('خطا: ' + response.error);
-          return;
-        }
-        auditData = response.data.logs || [];
-        renderTab();
-      }).catch(function(err) {
-        document.getElementById('loadingBox').style.display = 'none';
-        alert('خطا: ' + err.message);
-      });
-    }
-
-    function renderTab() {
-      if (activeTab === 'errors') {
-        if (errorsData === null) {
-          loadErrors();
-          return;
-        }
-        renderErrors();
-      } else {
-        if (auditData === null) {
-          loadAudit();
-          return;
-        }
-        renderAudit();
+    function stopScanner() {
+      if (html5QrCode && isScanning) {
+        html5QrCode.stop().then(function() {
+          isScanning = false;
+          var btn = document.getElementById('startScanBtn');
+          btn.disabled = false;
+          btn.textContent = 'شروع اسکن';
+        });
       }
     }
 
-    function renderErrors() {
-      var list = document.getElementById('contentList');
-      list.innerHTML = '';
+    function onScanSuccess(decodedText) {
+      stopScanner();
+      goToChecklist(decodedText);
+    }
 
-      if (errorsData.length === 0) {
-        document.getElementById('emptyBox').style.display = 'block';
-        document.getElementById('contentCount').textContent = '';
+    function manualSearch() {
+      var input = document.getElementById('manualInput');
+      var code = input.value.trim();
+      if (!code) {
+        alert('لطفاً کد تجهیز را وارد کنید.');
         return;
       }
-
-      document.getElementById('emptyBox').style.display = 'none';
-      document.getElementById('contentCount').textContent = toFa(errorsData.length) + ' مورد';
-
-      errorsData.forEach(function(log) {
-        list.appendChild(createErrorCard(log));
-      });
+      goToChecklist(code);
     }
 
-    function createErrorCard(log) {
-      var div = document.createElement('div');
-      div.className = 'log-item';
-      if (log.isCritical) div.className += ' critical';
-      if (log.status === 'resolved') div.className += ' resolved';
-
-      var header = document.createElement('div');
-      header.className = 'log-header';
-
-      var func = document.createElement('span');
-      func.className = 'func';
-      func.textContent = log.functionName || '-';
-      header.appendChild(func);
-
-      var time = document.createElement('span');
-      time.className = 'time';
-      time.textContent = formatDate(log.timestamp);
-      header.appendChild(time);
-
-      div.appendChild(header);
-
-      // Status badges
-      var badges = document.createElement('div');
-      badges.style.cssText = 'display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap;';
-      if (log.isCritical) {
-        var b1 = document.createElement('span'); b1.className = 'badge critical'; b1.textContent = 'بحرانی';
-        badges.appendChild(b1);
-      }
-      var b2 = document.createElement('span');
-      b2.className = 'badge ' + (log.status === 'resolved' ? 'resolved' : 'new');
-      b2.textContent = log.status === 'resolved' ? 'حل شده' : 'جدید';
-      badges.appendChild(b2);
-      div.appendChild(badges);
-
-      appendLogRow(div, 'کاربر', log.username || '-');
-      appendLogRow(div, 'خطا', log.errorMessage || '-');
-
-      if (log.stackTrace) {
-        var toggle = document.createElement('span');
-        toggle.className = 'stack-toggle';
-        toggle.textContent = 'نمایش جزئیات فنی';
-        var stackContent = document.createElement('div');
-        stackContent.className = 'stack-content';
-        stackContent.textContent = log.stackTrace;
-
-        toggle.onclick = function() {
-          if (stackContent.style.display === 'block') {
-            stackContent.style.display = 'none';
-            toggle.textContent = 'نمایش جزئیات فنی';
-          } else {
-            stackContent.style.display = 'block';
-            toggle.textContent = 'پنهان کردن جزئیات';
-          }
-        };
-
-        div.appendChild(toggle);
-        div.appendChild(stackContent);
-      }
-
-      if (log.status !== 'resolved' && log.errorId) {
-        var btn = document.createElement('button');
-        btn.className = 'resolve-btn';
-        btn.textContent = 'حل شد';
-        btn.onclick = function() {
-          btn.disabled = true;
-          btn.textContent = '...';
-          apiCall({
-            action: 'log.errorResolve',
-            token: currentToken,
-            payload: { errorId: log.errorId }
-          }).then(function(res) {
-            if (res.success) {
-              log.status = 'resolved';
-              btn.parentNode.className = 'log-item resolved';
-              btn.remove();
-            } else {
-              alert('خطا: ' + res.error);
-              btn.disabled = false;
-              btn.textContent = 'حل شد';
-            }
-          }).catch(function() {
-            btn.disabled = false;
-            btn.textContent = 'حل شد';
-          });
-        };
-        div.appendChild(btn);
-      }
-
-      return div;
-    }
-
-    function renderAudit() {
-      var list = document.getElementById('contentList');
-      list.innerHTML = '';
-
-      if (auditData.length === 0) {
-        document.getElementById('emptyBox').style.display = 'block';
-        document.getElementById('contentCount').textContent = '';
-        return;
-      }
-
-      document.getElementById('emptyBox').style.display = 'none';
-      document.getElementById('contentCount').textContent = toFa(auditData.length) + ' مورد';
-
-      auditData.forEach(function(log) {
-        list.appendChild(createAuditCard(log));
-      });
-    }
-
-    function createAuditCard(log) {
-      var div = document.createElement('div');
-      div.className = 'log-item';
-
-      var header = document.createElement('div');
-      header.className = 'log-header';
-
-      var action = document.createElement('span');
-      action.className = 'func';
-      action.textContent = translateAction(log.action);
-      header.appendChild(action);
-
-      var time = document.createElement('span');
-      time.className = 'time';
-      time.textContent = formatDate(log.timestamp);
-      header.appendChild(time);
-
-      div.appendChild(header);
-
-      var badge = document.createElement('span');
-      badge.className = 'badge ' + (log.result === 'success' ? 'success' : 'fail');
-      badge.textContent = log.result === 'success' ? 'موفق' : 'ناموفق';
-      badge.style.marginBottom = '8px';
-      badge.style.display = 'inline-block';
-      div.appendChild(badge);
-
-      appendLogRow(div, 'کاربر', log.username || '-');
-      if (log.targetId) appendLogRow(div, 'شناسه', log.targetId);
-      if (log.details) appendLogRow(div, 'جزئیات', log.details);
-
-      return div;
-    }
-
-    function translateAction(action) {
-      if (!action) return '-';
-      var map = {
-        'inspection.save': 'ثبت بازرسی',
-        'inspection.approve': 'تأیید بازرسی',
-        'inspection.rejected': 'رد بازرسی',
-        'inspection.batch_approve': 'تأیید گروهی',
-        'error.resolve': 'حل خطا',
-        'auth.login': 'ورود',
-        'auth.logout': 'خروج'
-      };
-      return map[action] || action;
-    }
-
-    function appendLogRow(parent, label, value) {
-      var row = document.createElement('div');
-      row.className = 'log-row';
-      var l = document.createElement('span'); l.className = 'label'; l.textContent = label + ':';
-      var v = document.createElement('span'); v.className = 'value'; v.textContent = String(value);
-      row.appendChild(l); row.appendChild(v); parent.appendChild(row);
-    }
-
-    function formatDate(dateVal) {
-      if (!dateVal) return '-';
-      try {
-        var d = new Date(dateVal);
-        var y = d.getFullYear();
-        var m = ('0' + (d.getMonth() + 1)).slice(-2);
-        var day = ('0' + d.getDate()).slice(-2);
-        var hh = ('0' + d.getHours()).slice(-2);
-        var mm = ('0' + d.getMinutes()).slice(-2);
-        return y + '/' + m + '/' + day + ' - ' + hh + ':' + mm;
-      } catch (e) {
-        return String(dateVal);
-      }
+    function goToChecklist(barcode) {
+      sessionStorage.setItem('currentBarcode', barcode);
+      window.location.href = 'checklist.html';
     }
   </script>
 
