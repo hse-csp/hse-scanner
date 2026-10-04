@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>مدیریت کاربران</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: Tahoma, Arial, sans-serif; background: #f0f2f5; min-height: 100vh; padding: 16px; }
+    .header { background: #1e3c72; color: #fff; padding: 16px; border-radius: 12px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .header h1 { font-size: 18px; }
+    .header .user { font-size: 13px; opacity: 0.9; }
+    .header-btns { display: flex; gap: 8px; flex-wrap: wrap; }
+    .header-btn { background: rgba(255,255,255,0.2); border: none; color: #fff; padding: 8px 14px; border-radius: 8px; cursor: pointer; font-family: inherit; font-size: 13px; }
+    .header-btn:hover { background: rgba(255,255,255,0.3); }
+    .card { background: #fff; border-radius: 12px; padding: 20px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+    .card h2 { font-size: 16px; color: #1e3c72; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center; }
+    .card h2 .count { font-size: 14px; color: #999; font-weight: normal; }
+    .add-btn { background: #4caf50; color: #fff; border: none; padding: 10px 20px; border-radius: 8px; font-family: inherit; font-size: 14px; font-weight: bold; cursor: pointer; }
+    .add-btn:hover { background: #388e3c; }
+    .user-list { display: grid; grid-template-columns: 1fr; gap: 12px; }
+    @media (min-width: 600px) { .user-list { grid-template-columns: 1fr 1fr; } }
+    @media (min-width: 900px) { .user-list { grid-template-columns: 1fr 1fr 1fr; } }
+    .user-card { background: #f9f9f9; border: 2px solid #e0e0e0; border-radius: 10px; padding: 16px; position: relative; }
+    .user-card.inactive { opacity: 0.6; background: #f0f0f0; }
+    .user-card .user-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+    .user-card .username { font-size: 16px; font-weight: bold; color: #222; }
+    .user-card .fullname { font-size: 14px; color: #555; margin-bottom: 4px; }
+    .user-card .meta { font-size: 12px; color: #777; margin-bottom: 4px; }
+    .badge { padding: 3px 10px; border-radius: 6px; font-size: 11px; font-weight: bold; display: inline-block; }
+    .badge.active { background: #e8f5e9; color: #2e7d32; }
+    .badge.inactive { background: #ffebee; color: #c62828; }
+    .badge.role-admin { background: #e3f2fd; color: #0d47a1; }
+    .badge.role-manager { background: #fff3e0; color: #e65100; }
+    .badge.role-inspector { background: #f3e5f5; color: #6a1b9a; }
+    .user-actions { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+    .btn { padding: 8px 12px; border: none; border-radius: 6px; font-family: inherit; font-size: 12px; font-weight: bold; cursor: pointer; }
+    .btn-edit { background: #2a5298; color: #fff; }
+    .btn-password { background: #f57c00; color: #fff; }
+    .btn-role { background: #6a1b9a; color: #fff; }
+    .btn-toggle { background: #d32f2f; color: #fff; }
+    .btn-toggle.activate { background: #4caf50; }
+    .btn:disabled { background: #ccc; cursor: not-allowed; }
+    .empty-msg { text-align: center; color: #999; padding: 30px; font-size: 14px; }
+    .loading-box { text-align: center; padding: 40px 20px; color: #666; font-size: 15px; }
+    .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); display: none; z-index: 1000; align-items: center; justify-content: center; padding: 20px; }
+    .modal-overlay.show { display: flex; }
+    .modal { background: #fff; border-radius: 12px; padding: 20px; max-width: 500px; width: 100%; max-height: 90vh; overflow-y: auto; }
+    .modal h3 { font-size: 16px; color: #1e3c72; margin-bottom: 16px; }
+    .modal .form-group { margin-bottom: 14px; }
+    .modal .form-group label { display: block; margin-bottom: 6px; font-size: 14px; font-weight: bold; color: #333; }
+    .modal .form-group input, .modal .form-group select { width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-family: inherit; font-size: 14px; }
+    .modal .form-group input:focus, .modal .form-group select:focus { outline: none; border-color: #2a5298; }
+    .modal-btns { display: flex; gap: 8px; margin-top: 16px; }
+    .modal-btns button { flex: 1; padding: 12px; border: none; border-radius: 8px; font-family: inherit; font-size: 15px; font-weight: bold; cursor: pointer; }
+    .modal-btns .btn-cancel { background: #e0e0e0; color: #333; }
+    .modal-btns .btn-confirm { background: #1e3c72; color: #fff; }
+    .modal-btns .btn-danger { background: #d32f2f; color: #fff; }
+    .error-msg { color: #d32f2f; font-size: 13px; margin-top: 8px; display: none; }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <div>
+      <h1>مدیریت کاربران</h1>
+      <div class="user" id="userInfo"></div>
+    </div>
+    <div class="header-btns">
+      <button class="header-btn" onclick="window.location.href='index.html'">اسکنر</button>
+      <button class="header-btn" onclick="window.location.href='dashboard.html'">داشبورد</button>
+      <button class="header-btn" onclick="window.location.href='logs.html'">لاگ‌ها</button>
+      <button class="header-btn" onclick="window.location.href='history.html'">تاریخچه</button>
+      <button class="header-btn" onclick="doLogout()">خروج</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>
+      <span>کاربران سیستم</span>
+      <span>
+        <span class="count" id="userCount"></span>
+        <button class="add-btn" onclick="openAddModal()">افزودن کاربر جدید</button>
+      </span>
+    </h2>
+
+    <div id="loadingBox" class="loading-box">در حال بارگذاری...</div>
+    <div id="userList" class="user-list"></div>
+    <div id="emptyBox" class="empty-msg" style="display:none;">هیچ کاربری یافت نشد.</div>
+  </div>
+
+  <!-- Add User Modal -->
+  <div class="modal-overlay" id="addModal">
+    <div class="modal">
+      <h3>افزودن کاربر جدید</h3>
+      <div class="form-group">
+        <label>شماره پرسنلی *</label>
+        <input type="text" id="addUsername" placeholder="مثال: 1002" inputmode="numeric">
+      </div>
+      <div class="form-group">
+        <label>رمز عبور *</label>
+        <input type="text" id="addPassword" placeholder="حداقل ۴ کاراکتر">
+      </div>
+      <div class="form-group">
+        <label>نام و نام خانوادگی *</label>
+        <input type="text" id="addFullName" placeholder="مثال: علی رضایی">
+      </div>
+      <div class="form-group">
+        <label>واحد سازمانی</label>
+        <input type="text" id="addDepartment" placeholder="مثال: واحد HSE">
+      </div>
+      <div class="form-group">
+        <label>نقش *</label>
+        <select id="addRole">
+          <option value="inspector">بازرس</option>
+          <option value="manager">مدیر</option>
+          <option value="admin">مدیر سیستم</option>
+        </select>
+      </div>
+      <div class="error-msg" id="addError"></div>
+      <div class="modal-btns">
+        <button class="btn-cancel" onclick="closeModal('addModal')">لغو</button>
+        <button class="btn-confirm" onclick="createUser()">ایجاد کاربر</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit User Modal -->
+  <div class="modal-overlay" id="editModal">
+    <div class="modal">
+      <h3>ویرایش اطلاعات کاربر</h3>
+      <div class="form-group">
+        <label>نام و نام خانوادگی *</label>
+        <input type="text" id="editFullName">
+      </div>
+      <div class="form-group">
+        <label>واحد سازمانی</label>
+        <input type="text" id="editDepartment">
+      </div>
+      <div class="error-msg" id="editError"></div>
+      <div class="modal-btns">
+        <button class="btn-cancel" onclick="closeModal('editModal')">لغو</button>
+        <button class="btn-confirm" onclick="updateUser()">ذخیره تغییرات</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Change Password Modal -->
+  <div class="modal-overlay" id="passwordModal">
+    <div class="modal">
+      <h3>تغییر رمز عبور</h3>
+      <div class="form-group">
+        <label>رمز عبور جدید *</label>
+        <input type="text" id="newPassword" placeholder="حداقل ۴ کاراکتر">
+      </div>
+      <div class="error-msg" id="passwordError"></div>
+      <div class="modal-btns">
+        <button class="btn-cancel" onclick="closeModal('passwordModal')">لغو</button>
+        <button class="btn-confirm" onclick="changePassword()">تغییر رمز</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Change Role Modal -->
+  <div class="modal-overlay" id="roleModal">
+    <div class="modal">
+      <h3>تغییر نقش کاربر</h3>
+      <div class="form-group">
+        <label>نقش جدید *</label>
+        <select id="newRole">
+          <option value="inspector">بازرس</option>
+          <option value="manager">مدیر</option>
+          <option value="admin">مدیر سیستم</option>
+        </select>
+      </div>
+      <div class="error-msg" id="roleError"></div>
+      <div class="modal-btns">
+        <button class="btn-cancel" onclick="closeModal('roleModal')">لغو</button>
+        <button class="btn-confirm" onclick="changeRole()">تغییر نقش</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    var EXEC_URL = 'https://script.google.com/macros/s/AKfycbzwCIuePkj1LOuoTMs_3IZMaOsIuLidRDFU6MERh6LTDCyLOVdnv_00vGS-1L0-OnxA/exec';
+    var currentToken = '';
+    var currentUser = '';
+    var usersList = [];
+    var actionTargetUsername = null;
+
+    function goToLogin() {
+      window.location.href = EXEC_URL + '?page=Login';
+    }
+
+    function handleSessionExpired() {
+      localStorage.clear();
+      sessionStorage.clear();
+      goToLogin();
+    }
+
+    function apiCall(request) {
+      return fetch(EXEC_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify(request),
+        redirect: 'follow'
+      }).then(function(r) { return r.json(); });
+    }
+
+    (function initPage() {
+      currentToken = localStorage.getItem('token') || '';
+      currentUser = localStorage.getItem('fullName') || localStorage.getItem('username') || '';
+
+      if (!currentToken) { goToLogin(); return; }
+
+      apiCall({ action: 'auth.me', token: currentToken }).then(function(response) {
+        if (!response.success) {
+          handleSessionExpired();
+          return;
+        }
+        var role = response.data.role;
+        if (role !== 'admin') {
+          alert('شما به این بخش دسترسی ندارید.');
+          window.location.href = 'index.html';
+          return;
+        }
+        document.getElementById('userInfo').textContent = currentUser;
+        loadUsers();
+      }).catch(function() {
+        handleSessionExpired();
+      });
+    })();
+
+    function doLogout() {
+      var token = currentToken;
+      localStorage.clear();
+      sessionStorage.clear();
+      fetch(EXEC_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({ action: 'auth.logout', token: token }),
+        redirect: 'follow'
+      }).finally(function() {
+        goToLogin();
+      });
+    }
+
+    function toFa(n) {
+      return String(n).replace(/\d/g, function(d) {
+        return '۰۱۲۳۴۵۶۷۸۹'[d];
+      });
+    }
+
+    // ============================================
+    // Load Users
+    // ============================================
+    function loadUsers() {
+      document.getElementById('loadingBox').style.display = 'block';
+      document.getElementById('userList').innerHTML = '';
+
+      apiCall({
+        action: 'user.getAll',
+        token: currentToken,
+        payload: {}
+      }).then(function(response) {
+        document.getElementById('loadingBox').style.display = 'none';
+        if (!response.success) {
+          if (response.error && (response.error.indexOf('نشست') !== -1 || response.error.indexOf('منقضی') !== -1)) {
+            handleSessionExpired();
+            return;
+          }
+          alert('خطا: ' + response.error);
+          return;
+        }
+        usersList = response.data.users || [];
+        renderUsers();
+      }).catch(function(err) {
+        document.getElementById('loadingBox').style.display = 'none';
+        alert('خطا: ' + err.message);
+      });
+    }
+
+    function renderUsers() {
+      var container = document.getElementById('userList');
+      container.innerHTML = '';
+
+      if (usersList.length === 0) {
+        document.getElementById('emptyBox').style.display = 'block';
+        document.getElementById('userCount').textContent = '';
+        return;
+      }
+
+      document.getElementById('emptyBox').style.display = 'none';
+      document.getElementById('userCount').textContent = toFa(usersList.length) + ' کاربر';
+
+      usersList.forEach(function(user) {
+        container.appendChild(createUserCard(user));
+      });
+    }
+
+    function createUserCard(user) {
+      var div = document.createElement('div');
+      div.className = 'user-card' + (user.isActive ? '' : ' inactive');
+
+      var header = document.createElement('div');
+      header.className = 'user-header';
+
+      var username = document.createElement('div');
+      username.className = 'username';
+      username.textContent = user.username;
+      header.appendChild(username);
+
+      var badge = document.createElement('span');
+      badge.className = 'badge ' + (user.isActive ? 'active' : 'inactive');
+      badge.textContent = user.isActive ? 'فعال' : 'غیرفعال';
+      header.appendChild(badge);
+
+      div.appendChild(header);
+
+      var fullname = document.createElement('div');
+      fullname.className = 'fullname';
+      fullname.textContent = user.fullName || '-';
+      div.appendChild(fullname);
+
+      if (user.department) {
+        var dept = document.createElement('div');
+        dept.className = 'meta';
+        dept.textContent = 'واحد: ' + user.department;
+        div.appendChild(dept);
+      }
+
+      var roleLabels = {
+        'inspector': 'بازرس',
+        'manager': 'مدیر',
+        'admin': 'مدیر سیستم'
+      };
+      var roleBadge = document.createElement('span');
+      roleBadge.className = 'badge role-' + user.role;
+      roleBadge.textContent = roleLabels[user.role] || user.role;
+      div.appendChild(roleBadge);
+
+      if (user.lastLogin) {
+        var last = document.createElement('div');
+        last.className = 'meta';
+        last.style.marginTop = '8px';
+        last.textContent = 'آخرین ورود: ' + formatDate(user.lastLogin);
+        div.appendChild(last);
+      }
+
+      var actions = document.createElement('div');
+      actions.className = 'user-actions';
+
+      // Edit
+      var editBtn = document.createElement('button');
+      editBtn.className = 'btn btn-edit';
+      editBtn.textContent = 'ویرایش';
+      editBtn.onclick = function() { openEditModal(user); };
+      actions.appendChild(editBtn);
+
+      // Password
+      var passBtn = document.createElement('button');
+      passBtn.className = 'btn btn-password';
+      passBtn.textContent = 'تغییر رمز';
+      passBtn.onclick = function() { openPasswordModal(user); };
+      actions.appendChild(passBtn);
+
+      // Role
+      var roleBtn = document.createElement('button');
+      roleBtn.className = 'btn btn-role';
+      roleBtn.textContent = 'تغییر نقش';
+      roleBtn.onclick = function() { openRoleModal(user); };
+      actions.appendChild(roleBtn);
+
+      // Toggle Active
+      var toggleBtn = document.createElement('button');
+      toggleBtn.className = 'btn btn-toggle' + (user.isActive ? '' : ' activate');
+      toggleBtn.textContent = user.isActive ? 'غیرفعال' : 'فعال‌سازی';
+      toggleBtn.onclick = function() { toggleActive(user); };
+      actions.appendChild(toggleBtn);
+
+      div.appendChild(actions);
+      return div;
+    }
+
+    function formatDate(dateVal) {
+      if (!dateVal) return '-';
+      try {
+        var d = new Date(dateVal);
+        var y = d.getFullYear();
+        var m = ('0' + (d.getMonth() + 1)).slice(-2);
+        var day = ('0' + d.getDate()).slice(-2);
+        return y + '/' + m + '/' + day;
+      } catch (e) {
+        return String(dateVal);
+      }
+    }
+
+    // ============================================
+    // Modals
+    // ============================================
+    function openModal(id) { document.getElementById(id).classList.add('show'); }
+    function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+
+    function openAddModal() {
+      document.getElementById('addUsername').value = '';
+      document.getElementById('addPassword').value = '';
+      document.getElementById('addFullName').value = '';
+      document.getElementById('addDepartment').value = '';
+      document.getElementById('addRole').value = 'inspector';
+      document.getElementById('addError').style.display = 'none';
+      openModal('addModal');
+    }
+
+    function openEditModal(user) {
+      actionTargetUsername = user.username;
+      document.getElementById('editFullName').value = user.fullName || '';
+      document.getElementById('editDepartment').value = user.department || '';
+      document.getElementById('editError').style.display = 'none';
+      openModal('editModal');
+    }
+
+    function openPasswordModal(user) {
+      actionTargetUsername = user.username;
+      document.getElementById('newPassword').value = '';
+      document.getElementById('passwordError').style.display = 'none';
+      openModal('passwordModal');
+    }
+
+    function openRoleModal(user) {
+      actionTargetUsername = user.username;
+      document.getElementById('newRole').value = user.role || 'inspector';
+      document.getElementById('roleError').style.display = 'none';
+      openModal('roleModal');
+    }
+
+    // ============================================
+    // Actions
+    // ============================================
+    function createUser() {
+      var username = document.getElementById('addUsername').value.trim();
+      var password = document.getElementById('addPassword').value.trim();
+      var fullName = document.getElementById('addFullName').value.trim();
+      var department = document.getElementById('addDepartment').value.trim();
+      var role = document.getElementById('addRole').value;
+
+      var errEl = document.getElementById('addError');
+      errEl.style.display = 'none';
+
+      if (!username || !password || !fullName) {
+        errEl.textContent = 'همه فیلدهای اجباری را پر کنید.';
+        errEl.style.display = 'block';
+        return;
+      }
+
+      apiCall({
+        action: 'user.create',
+        token: currentToken,
+        payload: { username: username, password: password, fullName: fullName, department: department, role: role }
+      }).then(function(response) {
+        if (response.success) {
+          closeModal('addModal');
+          loadUsers();
+        } else {
+          errEl.textContent = response.error;
+          errEl.style.display = 'block';
+        }
+      }).catch(function(err) {
+        errEl.textContent = 'خطا: ' + err.message;
+        errEl.style.display = 'block';
+      });
+    }
+
+    function updateUser() {
+      var fullName = document.getElementById('editFullName').value.trim();
+      var department = document.getElementById('editDepartment').value.trim();
+      var errEl = document.getElementById('editError');
+      errEl.style.display = 'none';
+
+      if (!fullName) {
+        errEl.textContent = 'نام و نام خانوادگی اجباری است.';
+        errEl.style.display = 'block';
+        return;
+      }
+
+      apiCall({
+        action: 'user.update',
+        token: currentToken,
+        payload: { username: actionTargetUsername, fullName: fullName, department: department }
+      }).then(function(response) {
+        if (response.success) {
+          closeModal('editModal');
+          loadUsers();
+        } else {
+          errEl.textContent = response.error;
+          errEl.style.display = 'block';
+        }
+      }).catch(function(err) {
+        errEl.textContent = 'خطا: ' + err.message;
+        errEl.style.display = 'block';
+      });
+    }
+
+    function changePassword() {
+      var newPassword = document.getElementById('newPassword').value.trim();
+      var errEl = document.getElementById('passwordError');
+      errEl.style.display = 'none';
+
+      if (!newPassword || newPassword.length < 4) {
+        errEl.textContent = 'رمز عبور باید حداقل ۴ کاراکتر باشد.';
+        errEl.style.display = 'block';
+        return;
+      }
+
+      apiCall({
+        action: 'user.changePassword',
+        token: currentToken,
+        payload: { username: actionTargetUsername, newPassword: newPassword }
+      }).then(function(response) {
+        if (response.success) {
+          closeModal('passwordModal');
+          alert('رمز عبور با موفقیت تغییر یافت.');
+        } else {
+          errEl.textContent = response.error;
+          errEl.style.display = 'block';
+        }
+      }).catch(function(err) {
+        errEl.textContent = 'خطا: ' + err.message;
+        errEl.style.display = 'block';
+      });
+    }
+
+    function changeRole() {
+      var newRole = document.getElementById('newRole').value;
+      var errEl = document.getElementById('roleError');
+      errEl.style.display = 'none';
+
+      apiCall({
+        action: 'user.changeRole',
+        token: currentToken,
+        payload: { username: actionTargetUsername, role: newRole }
+      }).then(function(response) {
+        if (response.success) {
+          closeModal('roleModal');
+          loadUsers();
+        } else {
+          errEl.textContent = response.error;
+          errEl.style.display = 'block';
+        }
+      }).catch(function(err) {
+        errEl.textContent = 'خطا: ' + err.message;
+        errEl.style.display = 'block';
+      });
+    }
+
+    function toggleActive(user) {
+      var willActivate = !user.isActive;
+      var msg = willActivate ? 'این کاربر فعال شود؟' : 'این کاربر غیرفعال شود؟';
+      if (!confirm(msg)) return;
+
+      apiCall({
+        action: 'user.toggleActive',
+        token: currentToken,
+        payload: { username: user.username, isActive: willActivate }
+      }).then(function(response) {
+        if (response.success) {
+          loadUsers();
+        } else {
+          alert('خطا: ' + response.error);
+        }
+      }).catch(function(err) {
+        alert('خطا: ' + err.message);
+      });
+    }
+  </script>
+
+</body>
+</html>
