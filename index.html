@@ -39,6 +39,7 @@
     <div class="header-btns">
       <button class="logout-btn" onclick="window.location.href='history.html'">تاریخچه</button>
       <button class="logout-btn" id="dashboardBtn" style="display:none;" onclick="window.location.href='dashboard.html'">داشبورد</button>
+      <button class="logout-btn" id="usersBtn" style="display:none;" onclick="window.location.href='users.html'">کاربران</button>
       <button class="logout-btn" id="logsBtn" style="display:none;" onclick="window.location.href='logs.html'">لاگ‌ها</button>
       <button class="logout-btn" onclick="doLogout()">خروج</button>
     </div>
@@ -94,6 +95,7 @@
         document.getElementById('dashboardBtn').style.display = 'inline-block';
       }
       if (role === 'admin') {
+        document.getElementById('usersBtn').style.display = 'inline-block';
         document.getElementById('logsBtn').style.display = 'inline-block';
       }
 
