@@ -8,10 +8,12 @@
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: Tahoma, Arial, sans-serif; background: #f0f2f5; min-height: 100vh; padding: 16px; }
-    .header { background: #1e3c72; color: #fff; padding: 16px; border-radius: 12px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; }
+    .header { background: #1e3c72; color: #fff; padding: 16px; border-radius: 12px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; gap: 8px; }
     .header h1 { font-size: 18px; }
     .header .user { font-size: 13px; opacity: 0.9; }
+    .header-btns { display: flex; gap: 8px; flex-wrap: wrap; }
     .logout-btn { background: rgba(255,255,255,0.2); border: none; color: #fff; padding: 8px 14px; border-radius: 8px; cursor: pointer; font-family: inherit; font-size: 13px; }
+    .logout-btn:hover { background: rgba(255,255,255,0.3); }
     .card { background: #fff; border-radius: 12px; padding: 20px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
     .card h2 { font-size: 16px; color: #1e3c72; margin-bottom: 14px; }
     #reader { width: 100%; border-radius: 12px; overflow: hidden; margin-bottom: 12px; }
@@ -34,7 +36,11 @@
       <h1>اسکن تجهیز</h1>
       <div class="user" id="userInfo"></div>
     </div>
-    <button class="logout-btn" onclick="doLogout()">خروج</button>
+    <div class="header-btns">
+      <button class="logout-btn" onclick="window.location.href='history.html'">تاریخچه</button>
+      <button class="logout-btn" id="dashboardBtn" style="display:none;" onclick="window.location.href='dashboard.html'">داشبورد</button>
+      <button class="logout-btn" onclick="doLogout()">خروج</button>
+    </div>
   </div>
 
   <div class="card">
@@ -77,10 +83,16 @@
     (function initPage() {
       currentToken = localStorage.getItem('token');
       currentUser = localStorage.getItem('fullName') || localStorage.getItem('username');
+      var role = localStorage.getItem('role') || '';
 
       if (!currentToken) { goToLogin(); return; }
 
       document.getElementById('userInfo').textContent = currentUser;
+
+      if (role === 'manager' || role === 'admin') {
+        document.getElementById('dashboardBtn').style.display = 'inline-block';
+      }
+
       bindEvents();
     })();
 
