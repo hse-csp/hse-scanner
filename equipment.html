@@ -24,6 +24,16 @@
     .add-btn:hover { background: #388e3c; }
     .checkbox-wrap { display: flex; align-items: center; gap: 6px; font-size: 13px; color: #555; }
     .checkbox-wrap input { width: 16px; height: 16px; }
+    .bulk-panel { background: #e8f5e9; border: 2px solid #4caf50; border-radius: 10px; padding: 14px; margin-bottom: 16px; }
+    .bulk-panel h3 { font-size: 14px; color: #2e7d32; margin-bottom: 12px; }
+    .bulk-filters { display: flex; gap: 8px; flex-wrap: wrap; align-items: flex-end; }
+    .bulk-filters .filter-group { flex: 1; min-width: 180px; }
+    .bulk-filters label { display: block; font-size: 12px; color: #555; margin-bottom: 4px; font-weight: bold; }
+    .bulk-filters select, .bulk-filters input { width: 100%; padding: 10px 12px; border: 2px solid #c8e6c9; border-radius: 8px; font-family: inherit; font-size: 13px; background: #fff; }
+    .bulk-filters select:focus, .bulk-filters input:focus { outline: none; border-color: #4caf50; }
+    .bulk-filters button { padding: 10px 20px; background: #4caf50; color: #fff; border: none; border-radius: 8px; font-family: inherit; font-size: 13px; font-weight: bold; cursor: pointer; white-space: nowrap; height: 42px; }
+    .bulk-filters button:hover { background: #388e3c; }
+    .bulk-filters button:disabled { background: #ccc; cursor: not-allowed; }
     .equipment-list { display: grid; grid-template-columns: 1fr; gap: 12px; }
     @media (min-width: 600px) { .equipment-list { grid-template-columns: 1fr 1fr; } }
     @media (min-width: 900px) { .equipment-list { grid-template-columns: 1fr 1fr 1fr; } }
@@ -63,6 +73,7 @@
     .btn-danger { background: #d32f2f; color: #fff; }
     .error-msg { color: #d32f2f; font-size: 13px; margin-top: 8px; display: none; background: #ffebee; padding: 8px 12px; border-radius: 6px; }
     .warning-box { background: #fff3e0; border-right: 4px solid #ff9800; padding: 12px; border-radius: 6px; margin-bottom: 12px; font-size: 13px; color: #e65100; }
+    .info-box { background: #e3f2fd; border-right: 4px solid #1e3c72; padding: 12px; border-radius: 6px; margin-bottom: 12px; font-size: 13px; color: #0d47a1; }
   </style>
 </head>
 <body>
@@ -86,6 +97,29 @@
     <button class="tab" id="tabFireboxes" onclick="switchTab('firebox')">فایر باکس‌ها</button>
   </div>
 
+  <div class="bulk-panel">
+    <h3>تخصیص دسته‌ای</h3>
+    <div class="bulk-filters">
+      <div class="filter-group">
+        <label>کارخانه</label>
+        <select id="bulkPlant">
+          <option value="">همه کارخانه‌ها</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>بازرس فعلی</label>
+        <select id="bulkCurrentInspector">
+          <option value="">همه بازرس‌ها</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>بازرس جدید (شماره پرسنلی)</label>
+        <input type="text" id="bulkNewInspector" placeholder="مثال: 1002" inputmode="numeric">
+      </div>
+      <button onclick="openBulkAssignModal()">تخصیص دسته‌ای</button>
+    </div>
+  </div>
+
   <div class="card">
     <div class="toolbar">
       <input type="text" class="search-input" id="searchInput" placeholder="جستجو در کد یا موقعیت..." oninput="renderList()">
@@ -101,6 +135,7 @@
     <div id="emptyBox" class="empty-msg" style="display:none;">موردی یافت نشد.</div>
   </div>
 
+  <!-- Edit/Add Modal -->
   <div class="modal-overlay" id="editModal">
     <div class="modal">
       <h3 id="modalTitle">افزودن تجهیز</h3>
@@ -147,6 +182,7 @@
     </div>
   </div>
 
+  <!-- Status Modal -->
   <div class="modal-overlay" id="statusModal">
     <div class="modal">
       <h3>تغییر وضعیت تجهیز</h3>
@@ -166,6 +202,7 @@
     </div>
   </div>
 
+  <!-- Delete Modal -->
   <div class="modal-overlay" id="deleteModal">
     <div class="modal">
       <h3>حذف تجهیز</h3>
@@ -178,6 +215,23 @@
       <div class="modal-btns">
         <button class="btn-cancel" onclick="closeModal('deleteModal')">لغو</button>
         <button class="btn-danger" onclick="confirmDelete()">حذف کامل</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bulk Assign Modal -->
+  <div class="modal-overlay" id="bulkModal">
+    <div class="modal">
+      <h3>تأیید تخصیص دسته‌ای</h3>
+      <div class="info-box" id="bulkSummary"></div>
+      <div class="form-group">
+        <label>بازرس جدید (شماره پرسنلی) *</label>
+        <input type="text" id="confirmNewInspector" placeholder="مثال: 1002" inputmode="numeric">
+      </div>
+      <div class="error-msg" id="bulkError"></div>
+      <div class="modal-btns">
+        <button class="btn-cancel" onclick="closeModal('bulkModal')">لغو</button>
+        <button class="btn-confirm" onclick="executeBulkAssign()">تأیید و اعمال</button>
       </div>
     </div>
   </div>
@@ -232,6 +286,7 @@
         }
         document.getElementById('userInfo').textContent = currentUser;
         loadAll();
+        loadFilters();
       }).catch(function() {
         handleSessionExpired();
       });
@@ -283,11 +338,48 @@
       });
     }
 
+    function loadFilters() {
+      apiCall({
+        action: 'equipment.getFilters',
+        token: currentToken,
+        payload: { kind: currentTab }
+      }).then(function(response) {
+        if (!response.success) return;
+
+        var plantSelect = document.getElementById('bulkPlant');
+        var inspSelect = document.getElementById('bulkCurrentInspector');
+
+        plantSelect.innerHTML = '<option value="">همه کارخانه‌ها</option>';
+        inspSelect.innerHTML = '<option value="">همه بازرس‌ها</option>';
+
+        (response.data.plants || []).forEach(function(p) {
+          var opt = document.createElement('option');
+          opt.value = p;
+          opt.textContent = p;
+          plantSelect.appendChild(opt);
+        });
+
+        (response.data.inspectors || []).forEach(function(i) {
+          var opt = document.createElement('option');
+          opt.value = i;
+          opt.textContent = i;
+          inspSelect.appendChild(opt);
+        });
+      }).catch(function() {});
+    }
+
     function switchTab(tab) {
       currentTab = tab;
       document.getElementById('tabCylinders').classList.toggle('active', tab === 'cylinder');
       document.getElementById('tabFireboxes').classList.toggle('active', tab === 'firebox');
+
+      // Reset filters for this tab
+      document.getElementById('bulkPlant').value = '';
+      document.getElementById('bulkCurrentInspector').value = '';
+      document.getElementById('bulkNewInspector').value = '';
+
       renderList();
+      loadFilters();
     }
 
     function renderList() {
@@ -480,6 +572,87 @@
       openModal('deleteModal');
     }
 
+    function openBulkAssignModal() {
+      var plant = document.getElementById('bulkPlant').value;
+      var current = document.getElementById('bulkCurrentInspector').value;
+      var newInsp = document.getElementById('bulkNewInspector').value.trim();
+
+      var errEl = document.getElementById('bulkError');
+      errEl.style.display = 'none';
+
+      if (!plant && !current) {
+        alert('حداقل یکی از فیلترها (کارخانه یا بازرس فعلی) را انتخاب کنید.');
+        return;
+      }
+      if (!newInsp) {
+        alert('شماره پرسنلی بازرس جدید را وارد کنید.');
+        return;
+      }
+
+      // Count matching equipment
+      var list = currentTab === 'cylinder' ? cylindersList : fireboxesList;
+      var count = 0;
+      list.forEach(function(item) {
+        var itemPlant = String(item.Plant || '').trim();
+        var itemAssign = String(item.AssignedTo || '').trim();
+        var matchPlant = plant ? (itemPlant === plant) : true;
+        var matchAssigned = current ? (itemAssign === current) : true;
+        if (matchPlant && matchAssigned) count++;
+      });
+
+      var summary = '';
+      summary += 'تعداد تجهیزات مطابق فیلتر: <b>' + count + '</b><br>';
+      if (plant) summary += 'کارخانه: <b>' + plant + '</b><br>';
+      if (current) summary += 'بازرس فعلی: <b>' + current + '</b><br>';
+      summary += 'بازرس جدید: <b>' + newInsp + '</b>';
+
+      document.getElementById('bulkSummary').innerHTML = summary;
+      document.getElementById('confirmNewInspector').value = newInsp;
+
+      openModal('bulkModal');
+    }
+
+    function executeBulkAssign() {
+      var plant = document.getElementById('bulkPlant').value;
+      var current = document.getElementById('bulkCurrentInspector').value;
+      var newInsp = document.getElementById('confirmNewInspector').value.trim();
+      var errEl = document.getElementById('bulkError');
+      errEl.style.display = 'none';
+
+      if (!newInsp) {
+        errEl.textContent = 'شماره پرسنلی بازرس جدید اجباری است.';
+        errEl.style.display = 'block';
+        return;
+      }
+
+      if (!confirm('آیا از تخصیص دسته‌ای مطمئن هستید؟')) return;
+
+      apiCall({
+        action: 'equipment.bulkAssign',
+        token: currentToken,
+        payload: {
+          kind: currentTab,
+          plant: plant,
+          currentAssignedTo: current,
+          newAssignedTo: newInsp
+        }
+      }).then(function(response) {
+        if (response.success) {
+          closeModal('bulkModal');
+          alert('تخصیص انجام شد. تعداد: ' + response.data.updated);
+          document.getElementById('bulkNewInspector').value = '';
+          loadAll();
+          loadFilters();
+        } else {
+          errEl.textContent = response.error;
+          errEl.style.display = 'block';
+        }
+      }).catch(function(err) {
+        errEl.textContent = 'خطا: ' + err.message;
+        errEl.style.display = 'block';
+      });
+    }
+
     function submitForm() {
       var barcode = document.getElementById('inputBarcode').value.trim();
       var location = document.getElementById('inputLocation').value.trim();
@@ -519,6 +692,7 @@
         if (response.success) {
           closeModal('editModal');
           loadAll();
+          loadFilters();
         } else {
           errEl.textContent = response.error;
           errEl.style.display = 'block';
@@ -576,6 +750,7 @@
           closeModal('deleteModal');
           deleteTarget = null;
           loadAll();
+          loadFilters();
         } else {
           errEl.textContent = response.error;
           errEl.style.display = 'block';
