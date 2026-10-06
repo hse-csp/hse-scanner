@@ -7,11 +7,12 @@
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: Tahoma, Arial, sans-serif; background: #f0f2f5; min-height: 100vh; padding: 16px; padding-bottom: 100px; }
-    .header { background: #1e3c72; color: #fff; padding: 16px; border-radius: 12px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; }
+    .header { background: #1e3c72; color: #fff; padding: 16px; border-radius: 12px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
     .header h1 { font-size: 18px; }
     .header .user { font-size: 13px; opacity: 0.9; }
-    .header-btns { display: flex; gap: 8px; }
+    .header-btns { display: flex; gap: 8px; flex-wrap: wrap; }
     .header-btn { background: rgba(255,255,255,0.2); border: none; color: #fff; padding: 8px 14px; border-radius: 8px; cursor: pointer; font-family: inherit; font-size: 13px; }
+    .header-btn:hover { background: rgba(255,255,255,0.3); }
     .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 16px; }
     .stat-card { background: #fff; border-radius: 12px; padding: 16px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
     .stat-card .num { font-size: 28px; font-weight: bold; margin-bottom: 6px; }
@@ -22,6 +23,14 @@
     .card { background: #fff; border-radius: 12px; padding: 20px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
     .card h2 { font-size: 16px; color: #1e3c72; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center; }
     .card h2 .count { font-size: 14px; color: #999; font-weight: normal; }
+    .overdue-card { border-right: 5px solid #d32f2f; }
+    .overdue-card h2 { color: #d32f2f; }
+    .overdue-item { background: #ffebee; border: 1px solid #ffcdd2; border-radius: 8px; padding: 12px; margin-bottom: 10px; }
+    .overdue-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-bottom: 8px; }
+    .overdue-barcode { font-size: 15px; font-weight: bold; color: #c62828; }
+    .overdue-days { font-size: 12px; color: #d32f2f; font-weight: bold; background: #fff; padding: 3px 10px; border-radius: 6px; }
+    .overdue-row { font-size: 13px; color: #555; padding: 3px 0; }
+    .overdue-row .label { color: #888; }
     .select-all-bar { display: flex; justify-content: space-between; align-items: center; padding: 12px; background: #f5f5f5; border-radius: 8px; margin-bottom: 12px; font-size: 14px; }
     .select-all-bar label { display: flex; align-items: center; gap: 8px; cursor: pointer; }
     .select-all-bar input { width: 18px; height: 18px; }
@@ -58,6 +67,9 @@
     .reject-modal textarea { width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-family: inherit; font-size: 14px; min-height: 80px; resize: vertical; margin-bottom: 12px; }
     .reject-modal textarea:focus { outline: none; border-color: #d32f2f; }
     .reject-modal .reject-confirm { background: #d32f2f; }
+    .overdue-filter { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+    .overdue-filter input { flex: 1; min-width: 200px; padding: 10px 14px; border: 2px solid #e0e0e0; border-radius: 8px; font-family: inherit; font-size: 14px; }
+    .overdue-filter input:focus { outline: none; border-color: #d32f2f; }
   </style>
 </head>
 <body>
@@ -68,7 +80,10 @@
       <div class="user" id="userInfo"></div>
     </div>
     <div class="header-btns">
-      <button class="header-btn" onclick="goToScanner()">اسکنر</button>
+      <button class="header-btn" onclick="window.location.href='index.html'">اسکنر</button>
+      <button class="header-btn" onclick="window.location.href='equipment.html'">تجهیزات</button>
+      <button class="header-btn" onclick="window.location.href='users.html'">کاربران</button>
+      <button class="header-btn" onclick="window.location.href='logs.html'">لاگ‌ها</button>
       <button class="header-btn" onclick="doLogout()">خروج</button>
     </div>
   </div>
@@ -86,6 +101,18 @@
       <div class="num" id="countRejected">-</div>
       <div class="label">رد شده</div>
     </div>
+  </div>
+
+  <div class="card overdue-card" id="overdueCard" style="display:none;">
+    <h2>
+      <span>⚠️ تجهیزات عقب‌افتاده</span>
+      <span class="count" id="overdueCountLabel"></span>
+    </h2>
+    <div class="overdue-filter">
+      <input type="text" id="overdueSearch" placeholder="جستجو در کد یا موقعیت..." oninput="renderOverdue()">
+    </div>
+    <div id="overdueList"></div>
+    <div id="overdueEmpty" class="empty-msg" style="display:none;">هیچ تجهیز عقب‌افتاده‌ای وجود ندارد.</div>
   </div>
 
   <div class="card">
@@ -137,15 +164,12 @@
     var currentUser = '';
     var currentRole = '';
     var pendingList = [];
+    var overdueList = [];
     var selectedIds = {};
     var rejectTargetId = null;
 
     function goToLogin() {
       window.location.href = EXEC_URL + '?page=Login';
-    }
-
-    function goToScanner() {
-      window.location.href = INDEX_URL;
     }
 
     function handleSessionExpired() {
@@ -178,13 +202,14 @@
         currentRole = response.data.role;
         if (currentRole !== 'manager' && currentRole !== 'admin') {
           alert('شما به این بخش دسترسی ندارید.');
-          goToScanner();
+          window.location.href = 'index.html';
           return;
         }
 
         document.getElementById('userInfo').textContent = currentUser;
         loadCounts();
         loadPending();
+        loadOverdue();
       }).catch(function() {
         handleSessionExpired();
       });
@@ -204,6 +229,15 @@
       });
     }
 
+    function toFa(n) {
+      return String(n).replace(/\d/g, function(d) {
+        return '۰۱۲۳۴۵۶۷۸۹'[d];
+      });
+    }
+
+    // ============================================
+    // Counts
+    // ============================================
     function loadCounts() {
       apiCall({
         action: 'dashboard.counts',
@@ -214,7 +248,6 @@
             handleSessionExpired();
             return;
           }
-          console.error('loadCounts: ' + response.error);
           return;
         }
         document.getElementById('countPending').textContent = toFa(response.data.pending);
@@ -225,12 +258,108 @@
       });
     }
 
-    function toFa(n) {
-      return String(n).replace(/\d/g, function(d) {
-        return '۰۱۲۳۴۵۶۷۸۹'[d];
+    // ============================================
+    // Overdue
+    // ============================================
+    function loadOverdue() {
+      apiCall({
+        action: 'dashboard.overdue',
+        token: currentToken
+      }).then(function(response) {
+        if (!response.success) return;
+        overdueList = response.data.items || [];
+        renderOverdue();
+      }).catch(function() {});
+    }
+
+    function renderOverdue() {
+      var card = document.getElementById('overdueCard');
+      var list = document.getElementById('overdueList');
+      var empty = document.getElementById('overdueEmpty');
+
+      if (overdueList.length === 0) {
+        card.style.display = 'none';
+        return;
+      }
+
+      card.style.display = 'block';
+      list.innerHTML = '';
+
+      var search = (document.getElementById('overdueSearch').value || '').trim().toLowerCase();
+      var filtered = overdueList;
+
+      if (search) {
+        filtered = overdueList.filter(function(item) {
+          return String(item.barcode).toLowerCase().indexOf(search) !== -1 ||
+                 String(item.location).toLowerCase().indexOf(search) !== -1 ||
+                 String(item.plant).toLowerCase().indexOf(search) !== -1;
+        });
+      }
+
+      document.getElementById('overdueCountLabel').textContent = toFa(filtered.length) + ' مورد';
+
+      if (filtered.length === 0) {
+        empty.style.display = 'block';
+        return;
+      }
+
+      empty.style.display = 'none';
+
+      filtered.forEach(function(item) {
+        list.appendChild(createOverdueCard(item));
       });
     }
 
+    function createOverdueCard(item) {
+      var div = document.createElement('div');
+      div.className = 'overdue-item';
+
+      var header = document.createElement('div');
+      header.className = 'overdue-header';
+
+      var barcode = document.createElement('span');
+      barcode.className = 'overdue-barcode';
+      barcode.textContent = item.barcode + (item.kind === 'firebox' ? ' (فایر باکس)' : '');
+      header.appendChild(barcode);
+
+      var days = document.createElement('span');
+      days.className = 'overdue-days';
+      var daysNum = parseInt(item.daysUntilOverdue, 10);
+      if (isNaN(daysNum)) {
+        days.textContent = 'بدون بازرسی';
+      } else if (daysNum < 0) {
+        days.textContent = toFa(Math.abs(daysNum)) + ' روز عقب';
+      } else if (daysNum === 0) {
+        days.textContent = 'امروز';
+      } else {
+        days.textContent = toFa(daysNum) + ' روز مانده';
+      }
+      header.appendChild(days);
+
+      div.appendChild(header);
+
+      appendOverdueRow(div, 'موقعیت', item.location || '-');
+      if (item.plant) appendOverdueRow(div, 'کارخانه', item.plant);
+      if (item.assignedTo) appendOverdueRow(div, 'بازرس', item.assignedTo);
+      appendOverdueRow(div, 'آخرین بازرسی', item.lastInspection || 'ندارد');
+      if (item.daysSince !== '' && item.daysSince !== null && item.daysSince !== undefined) {
+        appendOverdueRow(div, 'روز از آخرین بازرسی', toFa(item.daysSince) + ' روز');
+      }
+
+      return div;
+    }
+
+    function appendOverdueRow(parent, label, value) {
+      var row = document.createElement('div');
+      row.className = 'overdue-row';
+      var l = document.createElement('span'); l.className = 'label'; l.textContent = label + ': ';
+      var v = document.createElement('span'); v.textContent = String(value);
+      row.appendChild(l); row.appendChild(v); parent.appendChild(row);
+    }
+
+    // ============================================
+    // Pending Inspections
+    // ============================================
     function loadPending() {
       apiCall({
         action: 'dashboard.pending',
@@ -511,13 +640,6 @@
       if (item.photoUrl) {
         photo.src = convertDriveLink(item.photoUrl);
         photo.style.display = 'block';
-        photo.onerror = function() {
-          photo.style.display = 'none';
-          var fallback = document.createElement('div');
-          fallback.style.cssText = 'text-align:center;padding:20px;background:#f5f5f5;border-radius:8px;margin-bottom:12px;';
-          fallback.textContent = 'عکس بارگذاری نشد';
-          photo.parentNode.insertBefore(fallback, photo);
-        };
       } else {
         photo.style.display = 'none';
       }
