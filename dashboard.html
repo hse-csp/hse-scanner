@@ -59,6 +59,7 @@
     .modal { background: #fff; border-radius: 12px; padding: 20px; max-width: 500px; width: 100%; max-height: 90vh; overflow-y: auto; }
     .modal img { width: 100%; border-radius: 8px; margin-bottom: 12px; display: block; }
     .modal h3 { font-size: 16px; color: #1e3c72; margin-bottom: 12px; }
+    .modal h4 { font-size: 14px; color: #1e3c72; margin: 16px 0 10px 0; padding-bottom: 6px; border-bottom: 2px solid #e0e0e0; }
     .modal .row { display: flex; justify-content: space-between; padding: 6px 0; font-size: 14px; border-bottom: 1px solid #eee; }
     .modal .row:last-child { border-bottom: none; }
     .modal .row .l { color: #666; }
@@ -70,6 +71,14 @@
     .overdue-filter { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
     .overdue-filter input { flex: 1; min-width: 200px; padding: 10px 14px; border: 2px solid #e0e0e0; border-radius: 8px; font-family: inherit; font-size: 14px; }
     .overdue-filter input:focus { outline: none; border-color: #d32f2f; }
+    .items-list { display: flex; flex-direction: column; gap: 6px; }
+    .item-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 10px; border-radius: 6px; font-size: 13px; }
+    .item-row.salem { background: #e8f5e9; color: #2e7d32; }
+    .item-row.defective { background: #ffebee; color: #c62828; }
+    .item-row.needsRepair { background: #fff3e0; color: #e65100; }
+    .item-row .item-name { flex: 1; }
+    .item-row .item-status { font-weight: bold; padding: 3px 8px; border-radius: 4px; background: rgba(255,255,255,0.6); font-size: 11px; }
+    .items-loading { text-align: center; color: #999; padding: 12px; font-size: 13px; }
   </style>
 </head>
 <body>
@@ -84,6 +93,7 @@
       <button class="header-btn" onclick="window.location.href='equipment.html'">تجهیزات</button>
       <button class="header-btn" onclick="window.location.href='users.html'">کاربران</button>
       <button class="header-btn" onclick="window.location.href='logs.html'">لاگ‌ها</button>
+      <button class="header-btn" onclick="window.location.href='report.html'">گزارش</button>
       <button class="header-btn" onclick="doLogout()">خروج</button>
     </div>
   </div>
@@ -142,6 +152,10 @@
       <h3>جزئیات بازرسی</h3>
       <img id="modalPhoto" src="" alt="عکس بازرسی" style="display:none;">
       <div id="modalDetails"></div>
+      <h4>موارد بررسی‌شده</h4>
+      <div id="modalItems">
+        <div class="items-loading">در حال بارگذاری آیتم‌ها...</div>
+      </div>
       <button class="modal-close" onclick="closeViewModal()">بستن</button>
     </div>
   </div>
@@ -167,6 +181,12 @@
     var overdueList = [];
     var selectedIds = {};
     var rejectTargetId = null;
+
+    var STATUS_LABELS = {
+      'salem': 'سالم',
+      'defective': 'معیوب',
+      'needsRepair': 'نیاز به اصلاح'
+    };
 
     function goToLogin() {
       window.location.href = EXEC_URL + '?page=Login';
@@ -235,9 +255,6 @@
       });
     }
 
-    // ============================================
-    // Counts
-    // ============================================
     function loadCounts() {
       apiCall({
         action: 'dashboard.counts',
@@ -258,9 +275,6 @@
       });
     }
 
-    // ============================================
-    // Overdue
-    // ============================================
     function loadOverdue() {
       apiCall({
         action: 'dashboard.overdue',
@@ -357,9 +371,6 @@
       row.appendChild(l); row.appendChild(v); parent.appendChild(row);
     }
 
-    // ============================================
-    // Pending Inspections
-    // ============================================
     function loadPending() {
       apiCall({
         action: 'dashboard.pending',
@@ -435,11 +446,6 @@
       meta.textContent = 'بازرس: ' + item.inspector + ' | ' + formatDate(item.date);
       title.appendChild(meta);
 
-      var finalLabels = {
-        'salem': 'سالم',
-        'defective': 'معیوب',
-        'needsRepair': 'نیاز به اصلاح'
-      };
       var finalClasses = {
         'salem': 'salem',
         'defective': 'defective',
@@ -447,7 +453,7 @@
       };
       var badge = document.createElement('span');
       badge.className = 'final-badge ' + (finalClasses[item.finalStatus] || '');
-      badge.textContent = 'نتیجه: ' + (finalLabels[item.finalStatus] || item.finalStatus);
+      badge.textContent = 'نتیجه: ' + (STATUS_LABELS[item.finalStatus] || item.finalStatus);
       title.appendChild(badge);
 
       header.appendChild(title);
@@ -650,10 +656,59 @@
       appendRow(details, 'نوع', item.source === 'firebox' ? 'فایر باکس' : 'سیلندر');
       appendRow(details, 'بازرس', item.inspector);
       appendRow(details, 'تاریخ', formatDate(item.date));
-      appendRow(details, 'نتیجه', item.finalStatus);
+      appendRow(details, 'نتیجه نهایی', STATUS_LABELS[item.finalStatus] || item.finalStatus);
       if (item.notes) appendRow(details, 'یادداشت', item.notes);
 
+      var itemsEl = document.getElementById('modalItems');
+      itemsEl.innerHTML = '<div class="items-loading">در حال بارگذاری آیتم‌ها...</div>';
+
+      apiCall({
+        action: 'dashboard.items',
+        token: currentToken,
+        payload: { inspectionId: item.inspectionId }
+      }).then(function(response) {
+        if (!response.success) {
+          itemsEl.innerHTML = '<div class="items-loading">خطا در بارگذاری آیتم‌ها</div>';
+          return;
+        }
+        renderItems(response.data.items || []);
+      }).catch(function() {
+        itemsEl.innerHTML = '<div class="items-loading">خطا در بارگذاری آیتم‌ها</div>';
+      });
+
       document.getElementById('viewModal').classList.add('show');
+    }
+
+    function renderItems(items) {
+      var el = document.getElementById('modalItems');
+      el.innerHTML = '';
+
+      if (items.length === 0) {
+        el.innerHTML = '<div class="items-loading">آیتمی برای این بازرسی ثبت نشده است.</div>';
+        return;
+      }
+
+      var list = document.createElement('div');
+      list.className = 'items-list';
+
+      items.forEach(function(item) {
+        var row = document.createElement('div');
+        row.className = 'item-row ' + (item.status || '');
+
+        var name = document.createElement('span');
+        name.className = 'item-name';
+        name.textContent = item.name;
+        row.appendChild(name);
+
+        var status = document.createElement('span');
+        status.className = 'item-status';
+        status.textContent = STATUS_LABELS[item.status] || item.status;
+        row.appendChild(status);
+
+        list.appendChild(row);
+      });
+
+      el.appendChild(list);
     }
 
     function appendRow(parent, label, value) {
