@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>گزارش ماهانه</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: Tahoma, Arial, sans-serif; background: #f0f2f5; min-height: 100vh; padding: 16px; }
+    .header { background: #1e3c72; color: #fff; padding: 16px; border-radius: 12px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .header h1 { font-size: 18px; }
+    .header .user { font-size: 13px; opacity: 0.9; }
+    .header-btns { display: flex; gap: 8px; flex-wrap: wrap; }
+    .header-btn { background: rgba(255,255,255,0.2); border: none; color: #fff; padding: 8px 14px; border-radius: 8px; cursor: pointer; font-family: inherit; font-size: 13px; }
+    .header-btn:hover { background: rgba(255,255,255,0.3); }
+    .card { background: #fff; border-radius: 12px; padding: 20px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+    .card h2 { font-size: 16px; color: #1e3c72; margin-bottom: 14px; }
+    .month-selector { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 16px; }
+    .month-selector label { font-size: 14px; font-weight: bold; color: #333; }
+    .month-selector select { padding: 10px 14px; border: 2px solid #e0e0e0; border-radius: 8px; font-family: inherit; font-size: 14px; min-width: 200px; }
+    .month-selector select:focus { outline: none; border-color: #2a5298; }
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 16px; }
+    .stat-card { background: #f9f9f9; border-radius: 10px; padding: 16px; text-align: center; border: 2px solid #e0e0e0; }
+    .stat-card .num { font-size: 26px; font-weight: bold; margin-bottom: 6px; }
+    .stat-card .label { font-size: 12px; color: #666; }
+    .stat-card.total .num { color: #1e3c72; }
+    .stat-card.salem .num { color: #2e7d32; }
+    .stat-card.defective .num { color: #c62828; }
+    .stat-card.repair .num { color: #e65100; }
+    .stat-card.pending .num { color: #ff9800; }
+    .stat-card.approved .num { color: #4caf50; }
+    .stat-card.rejected .num { color: #d32f2f; }
+    .stat-card.overdue .num { color: #d32f2f; }
+    .breakdown-section { margin-bottom: 20px; }
+    .breakdown-section h3 { font-size: 14px; color: #555; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 2px solid #e0e0e0; }
+    .breakdown-list { display: flex; flex-direction: column; gap: 8px; }
+    .breakdown-row { display: flex; align-items: center; gap: 12px; }
+    .breakdown-row .name { min-width: 120px; font-size: 13px; color: #333; }
+    .breakdown-bar { flex: 1; height: 24px; background: #e0e0e0; border-radius: 6px; overflow: hidden; position: relative; }
+    .breakdown-bar-fill { height: 100%; background: #1e3c72; border-radius: 6px; transition: width 0.5s; }
+    .breakdown-bar-fill.co2 { background: #0d47a1; }
+    .breakdown-bar-fill.powder { background: #e65100; }
+    .breakdown-bar-fill.water { background: #1565c0; }
+    .breakdown-bar-fill.firebox { background: #b71c1c; }
+    .breakdown-bar-fill.salem { background: #4caf50; }
+    .breakdown-bar-fill.defective { background: #d32f2f; }
+    .breakdown-bar-fill.needsRepair { background: #f57c00; }
+    .breakdown-row .val { min-width: 60px; text-align: left; font-size: 14px; font-weight: bold; color: #222; }
+    .inspectors-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .inspectors-table th { background: #f5f5f5; color: #333; padding: 10px; text-align: right; border-bottom: 2px solid #ddd; font-size: 12px; }
+    .inspectors-table td { padding: 10px; border-bottom: 1px solid #eee; text-align: right; }
+    .inspectors-table tr:hover { background: #f9f9f9; }
+    .inspectors-table .rank { font-weight: bold; color: #1e3c72; }
+    .empty-msg { text-align: center; color: #999; padding: 30px; font-size: 14px; }
+    .loading-box { text-align: center; padding: 40px 20px; color: #666; font-size: 15px; }
+    .badge-overdue { display: inline-block; background: #ffebee; color: #c62828; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: bold; }
+    .info-note { background: #e3f2fd; border-right: 4px solid #1e3c72; padding: 10px 14px; border-radius: 6px; font-size: 12px; color: #0d47a1; margin-bottom: 12px; }
+    .two-columns { display: grid; grid-template-columns: 1fr; gap: 20px; }
+    @media (min-width: 768px) { .two-columns { grid-template-columns: 1fr 1fr; } }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <div>
+      <h1>گزارش ماهانه</h1>
+      <div class="user" id="userInfo"></div>
+    </div>
+    <div class="header-btns">
+      <button class="header-btn" onclick="window.location.href='index.html'">اسکنر</button>
+      <button class="header-btn" onclick="window.location.href='dashboard.html'">داشبورد</button>
+      <button class="header-btn" onclick="doLogout()">خروج</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>انتخاب ماه</h2>
+    <div class="month-selector">
+      <label>ماه شمسی:</label>
+      <select id="monthSelect" onchange="loadReport()">
+        <option value="">در حال بارگذاری...</option>
+      </select>
+    </div>
+  </div>
+
+  <div id="loadingBox" class="loading-box">در حال بارگذاری...</div>
+
+  <div id="reportContent" style="display:none;">
+
+    <div class="card">
+      <h2 id="reportTitle">گزارش</h2>
+      <div class="info-note" id="overdueNote" style="display:none;"></div>
+
+      <div class="stats-grid">
+        <div class="stat-card total">
+          <div class="num" id="statTotal">-</div>
+          <div class="label">کل بازرسی‌ها</div>
+        </div>
+        <div class="stat-card approved">
+          <div class="num" id="statApproved">-</div>
+          <div class="label">تأیید شده</div>
+        </div>
+        <div class="stat-card pending">
+          <div class="num" id="statPending">-</div>
+          <div class="label">در انتظار</div>
+        </div>
+        <div class="stat-card rejected">
+          <div class="num" id="statRejected">-</div>
+          <div class="label">رد شده</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>وضعیت نهایی تجهیزات</h2>
+      <div class="stats-grid">
+        <div class="stat-card salem">
+          <div class="num" id="statSalem">-</div>
+          <div class="label">سالم</div>
+        </div>
+        <div class="stat-card repair">
+          <div class="num" id="statNeedsRepair">-</div>
+          <div class="label">نیاز به اصلاح</div>
+        </div>
+        <div class="stat-card defective">
+          <div class="num" id="statDefective">-</div>
+          <div class="label">معیوب</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="two-columns">
+      <div class="card">
+        <h2>تفکیک بر اساس نوع تجهیز</h2>
+        <div class="breakdown-section">
+          <div class="breakdown-list" id="typeBreakdown"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>وضعیت کلی</h2>
+        <div class="breakdown-section">
+          <div class="breakdown-list" id="statusBreakdown"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>عملکرد بازرسان</h2>
+      <div id="inspectorsTableWrap">
+        <table class="inspectors-table">
+          <thead>
+            <tr>
+              <th style="width:50px;">#</th>
+              <th>شماره پرسنلی</th>
+              <th>تعداد بازرسی</th>
+              <th>معیوب</th>
+              <th>نیاز به اصلاح</th>
+            </tr>
+          </thead>
+          <tbody id="inspectorsBody"></tbody>
+        </table>
+      </div>
+      <div id="inspectorsEmpty" class="empty-msg" style="display:none;">هیچ بازرسی‌ای در این ماه ثبت نشده است.</div>
+    </div>
+
+  </div>
+
+  <script>
+    var EXEC_URL = 'https://script.google.com/macros/s/AKfycbzwCIuePkj1LOuoTMs_3IZMaOsIuLidRDFU6MERh6LTDCyLOVdnv_00vGS-1L0-OnxA/exec';
+    var currentToken = '';
+    var currentUser = '';
+    var availableMonths = [];
+
+    function goToLogin() {
+      window.location.href = EXEC_URL + '?page=Login';
+    }
+
+    function handleSessionExpired() {
+      localStorage.clear();
+      sessionStorage.clear();
+      goToLogin();
+    }
+
+    function apiCall(request) {
+      return fetch(EXEC_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify(request),
+        redirect: 'follow'
+      }).then(function(r) { return r.json(); });
+    }
+
+    (function initPage() {
+      currentToken = localStorage.getItem('token') || '';
+      currentUser = localStorage.getItem('fullName') || localStorage.getItem('username') || '';
+
+      if (!currentToken) { goToLogin(); return; }
+
+      apiCall({ action: 'auth.me', token: currentToken }).then(function(response) {
+        if (!response.success) {
+          handleSessionExpired();
+          return;
+        }
+        var role = response.data.role;
+        if (role !== 'manager' && role !== 'admin') {
+          alert('شما به این بخش دسترسی ندارید.');
+          window.location.href = 'index.html';
+          return;
+        }
+        document.getElementById('userInfo').textContent = currentUser;
+        loadMonths();
+      }).catch(function() {
+        handleSessionExpired();
+      });
+    })();
+
+    function doLogout() {
+      var token = currentToken;
+      localStorage.clear();
+      sessionStorage.clear();
+      fetch(EXEC_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({ action: 'auth.logout', token: token }),
+        redirect: 'follow'
+      }).finally(function() {
+        goToLogin();
+      });
+    }
+
+    function toFa(n) {
+      return String(n).replace(/\d/g, function(d) { return '۰۱۲۳۴۵۶۷۸۹'[d]; });
+    }
+
+    function loadMonths() {
+      apiCall({
+        action: 'report.months',
+        token: currentToken
+      }).then(function(response) {
+        document.getElementById('loadingBox').style.display = 'none';
+        if (!response.success) {
+          if (response.error && (response.error.indexOf('نشست') !== -1 || response.error.indexOf('منقضی') !== -1)) {
+            handleSessionExpired();
+            return;
+          }
+          alert('خطا: ' + response.error);
+          return;
+        }
+        availableMonths = response.data.months || [];
+        populateMonthSelect();
+        if (availableMonths.length > 0) {
+          loadReport();
+        }
+      }).catch(function(err) {
+        document.getElementById('loadingBox').style.display = 'none';
+        alert('خطا: ' + err.message);
+      });
+    }
+
+    function populateMonthSelect() {
+      var select = document.getElementById('monthSelect');
+      select.innerHTML = '';
+
+      if (availableMonths.length === 0) {
+        select.innerHTML = '<option value="">ماهی یافت نشد</option>';
+        return;
+      }
+
+      availableMonths.forEach(function(m, idx) {
+        var opt = document.createElement('option');
+        opt.value = m.year + '-' + m.month;
+        opt.textContent = m.label;
+        select.appendChild(opt);
+      });
+
+      // Select first (most recent)
+      select.value = availableMonths[0].year + '-' + availableMonths[0].month;
+    }
+
+    function loadReport() {
+      var val = document.getElementById('monthSelect').value;
+      if (!val) return;
+
+      var parts = val.split('-');
+      var year = parseInt(parts[0], 10);
+      var month = parseInt(parts[1], 10);
+
+      document.getElementById('loadingBox').style.display = 'block';
+      document.getElementById('reportContent').style.display = 'none';
+
+      apiCall({
+        action: 'report.monthly',
+        token: currentToken,
+        payload: { year: year, month: month }
+      }).then(function(response) {
+        document.getElementById('loadingBox').style.display = 'none';
+
+        if (!response.success) {
+          alert('خطا: ' + response.error);
+          return;
+        }
+
+        renderReport(response.data);
+      }).catch(function(err) {
+        document.getElementById('loadingBox').style.display = 'none';
+        alert('خطا: ' + err.message);
+      });
+    }
+
+    function renderReport(r) {
+      document.getElementById('reportContent').style.display = 'block';
+      document.getElementById('reportTitle').textContent = 'گزارش ' + r.monthLabel;
+
+      document.getElementById('statTotal').textContent = toFa(r.totalInspections);
+      document.getElementById('statApproved').textContent = toFa(r.approvalStatus.approved);
+      document.getElementById('statPending').textContent = toFa(r.approvalStatus.pending);
+      document.getElementById('statRejected').textContent = toFa(r.approvalStatus.rejected);
+
+      document.getElementById('statSalem').textContent = toFa(r.statusBreakdown.salem);
+      document.getElementById('statNeedsRepair').textContent = toFa(r.statusBreakdown.needsRepair);
+      document.getElementById('statDefective').textContent = toFa(r.statusBreakdown.defective);
+
+      // Overdue note
+      var note = document.getElementById('overdueNote');
+      if (r.overdueCount > 0) {
+        var src = r.overdueSource === 'history' ? 'پایان ماه' : 'وضعیت امروز (ماه جاری)';
+        note.innerHTML = '⚠️ تعداد تجهیزات عقب‌افتاده: <b>' + toFa(r.overdueCount) + '</b> (' + src + ')' +
+                         '<br>تجهیزات فعال: <b>' + toFa(r.totalEquipment) + '</b>';
+        note.style.display = 'block';
+      } else {
+        note.style.display = 'none';
+      }
+
+      // Type breakdown
+      renderBreakdown('typeBreakdown', [
+        { name: 'سیلندر CO2', val: r.byType.CO2, cls: 'co2' },
+        { name: 'سیلندر پودری', val: r.byType.powder, cls: 'powder' },
+        { name: 'سیلندر آب', val: r.byType.water, cls: 'water' },
+        { name: 'فایر باکس', val: r.byType.firebox, cls: 'firebox' }
+      ], r.totalInspections);
+
+      // Status breakdown
+      renderBreakdown('statusBreakdown', [
+        { name: 'سالم', val: r.statusBreakdown.salem, cls: 'salem' },
+        { name: 'نیاز به اصلاح', val: r.statusBreakdown.needsRepair, cls: 'needsRepair' },
+        { name: 'معیوب', val: r.statusBreakdown.defective, cls: 'defective' }
+      ], r.totalInspections);
+
+      // Inspectors
+      renderInspectors(r.inspectors);
+    }
+
+    function renderBreakdown(containerId, items, total) {
+      var container = document.getElementById(containerId);
+      container.innerHTML = '';
+
+      items.forEach(function(item) {
+        var pct = total > 0 ? (item.val / total) * 100 : 0;
+
+        var row = document.createElement('div');
+        row.className = 'breakdown-row';
+
+        var name = document.createElement('span');
+        name.className = 'name';
+        name.textContent = item.name;
+        row.appendChild(name);
+
+        var bar = document.createElement('div');
+        bar.className = 'breakdown-bar';
+
+        var fill = document.createElement('div');
+        fill.className = 'breakdown-bar-fill ' + item.cls;
+        fill.style.width = pct + '%';
+        bar.appendChild(fill);
+        row.appendChild(bar);
+
+        var val = document.createElement('span');
+        val.className = 'val';
+        val.textContent = toFa(item.val);
+        row.appendChild(val);
+
+        container.appendChild(row);
+      });
+    }
+
+    function renderInspectors(inspectors) {
+      var tbody = document.getElementById('inspectorsBody');
+      var empty = document.getElementById('inspectorsEmpty');
+      var wrap = document.getElementById('inspectorsTableWrap');
+
+      tbody.innerHTML = '';
+
+      if (!inspectors || inspectors.length === 0) {
+        wrap.style.display = 'none';
+        empty.style.display = 'block';
+        return;
+      }
+
+      wrap.style.display = 'block';
+      empty.style.display = 'none';
+
+      inspectors.forEach(function(insp, idx) {
+        var tr = document.createElement('tr');
+
+        var td1 = document.createElement('td');
+        td1.className = 'rank';
+        td1.textContent = toFa(idx + 1);
+        tr.appendChild(td1);
+
+        var td2 = document.createElement('td');
+        td2.textContent = insp.username;
+        tr.appendChild(td2);
+
+        var td3 = document.createElement('td');
+        td3.textContent = toFa(insp.count);
+        tr.appendChild(td3);
+
+        var td4 = document.createElement('td');
+        td4.textContent = toFa(insp.defective);
+        td4.style.color = insp.defective > 0 ? '#c62828' : '#666';
+        tr.appendChild(td4);
+
+        var td5 = document.createElement('td');
+        td5.textContent = toFa(insp.needsRepair);
+        td5.style.color = insp.needsRepair > 0 ? '#e65100' : '#666';
+        tr.appendChild(td5);
+
+        tbody.appendChild(tr);
+      });
+    }
+  </script>
+
+</body>
+</html>
