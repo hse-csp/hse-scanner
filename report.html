@@ -3,6 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#1e3c72">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="HSE CSP">
   <title>گزارش ماهانه</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -267,14 +271,13 @@
         return;
       }
 
-      availableMonths.forEach(function(m, idx) {
+      availableMonths.forEach(function(m) {
         var opt = document.createElement('option');
         opt.value = m.year + '-' + m.month;
         opt.textContent = m.label;
         select.appendChild(opt);
       });
 
-      // Select first (most recent)
       select.value = availableMonths[0].year + '-' + availableMonths[0].month;
     }
 
@@ -321,7 +324,6 @@
       document.getElementById('statNeedsRepair').textContent = toFa(r.statusBreakdown.needsRepair);
       document.getElementById('statDefective').textContent = toFa(r.statusBreakdown.defective);
 
-      // Overdue note
       var note = document.getElementById('overdueNote');
       if (r.overdueCount > 0) {
         var src = r.overdueSource === 'history' ? 'پایان ماه' : 'وضعیت امروز (ماه جاری)';
@@ -332,7 +334,6 @@
         note.style.display = 'none';
       }
 
-      // Type breakdown
       renderBreakdown('typeBreakdown', [
         { name: 'سیلندر CO2', val: r.byType.CO2, cls: 'co2' },
         { name: 'سیلندر پودری', val: r.byType.powder, cls: 'powder' },
@@ -340,14 +341,12 @@
         { name: 'فایر باکس', val: r.byType.firebox, cls: 'firebox' }
       ], r.totalInspections);
 
-      // Status breakdown
       renderBreakdown('statusBreakdown', [
         { name: 'سالم', val: r.statusBreakdown.salem, cls: 'salem' },
         { name: 'نیاز به اصلاح', val: r.statusBreakdown.needsRepair, cls: 'needsRepair' },
         { name: 'معیوب', val: r.statusBreakdown.defective, cls: 'defective' }
       ], r.totalInspections);
 
-      // Inspectors
       renderInspectors(r.inspectors);
     }
 
@@ -431,5 +430,6 @@
     }
   </script>
 
+  <script src="pwa.js" defer></script>
 </body>
-</html>
+  </html>
