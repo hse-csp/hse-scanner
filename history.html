@@ -3,14 +3,18 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#1e3c72">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="HSE CSP">
   <title>تاریخچه بازرسی‌ها</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: Tahoma, Arial, sans-serif; background: #f0f2f5; min-height: 100vh; padding: 16px; }
-    .header { background: #1e3c72; color: #fff; padding: 16px; border-radius: 12px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; }
+    .header { background: #1e3c72; color: #fff; padding: 16px; border-radius: 12px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
     .header h1 { font-size: 18px; }
     .header .user { font-size: 13px; opacity: 0.9; }
-    .header-btns { display: flex; gap: 8px; }
+    .header-btns { display: flex; gap: 8px; flex-wrap: wrap; }
     .header-btn { background: rgba(255,255,255,0.2); border: none; color: #fff; padding: 8px 14px; border-radius: 8px; cursor: pointer; font-family: inherit; font-size: 13px; }
     .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 16px; }
     .stat-card { background: #fff; border-radius: 12px; padding: 14px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
@@ -47,11 +51,20 @@
     .modal { background: #fff; border-radius: 12px; padding: 20px; max-width: 500px; width: 100%; max-height: 90vh; overflow-y: auto; }
     .modal img { width: 100%; border-radius: 8px; margin-bottom: 12px; display: block; }
     .modal h3 { font-size: 16px; color: #1e3c72; margin-bottom: 12px; }
+    .modal h4 { font-size: 14px; color: #1e3c72; margin: 16px 0 10px 0; padding-bottom: 6px; border-bottom: 2px solid #e0e0e0; }
     .modal .row { display: flex; justify-content: space-between; padding: 6px 0; font-size: 14px; border-bottom: 1px solid #eee; }
     .modal .row:last-child { border-bottom: none; }
     .modal .row .l { color: #666; }
     .modal .row .v { font-weight: bold; color: #222; }
     .modal-close { width: 100%; padding: 12px; background: #1e3c72; color: #fff; border: none; border-radius: 8px; font-family: inherit; font-size: 15px; font-weight: bold; cursor: pointer; margin-top: 16px; }
+    .items-list { display: flex; flex-direction: column; gap: 6px; }
+    .item-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 10px; border-radius: 6px; font-size: 13px; }
+    .item-row.salem { background: #e8f5e9; color: #2e7d32; }
+    .item-row.defective { background: #ffebee; color: #c62828; }
+    .item-row.needsRepair { background: #fff3e0; color: #e65100; }
+    .item-row .item-name { flex: 1; }
+    .item-row .item-status { font-weight: bold; padding: 3px 8px; border-radius: 4px; background: rgba(255,255,255,0.6); font-size: 11px; }
+    .items-loading { text-align: center; color: #999; padding: 12px; font-size: 13px; }
   </style>
 </head>
 <body>
@@ -62,7 +75,7 @@
       <div class="user" id="userInfo"></div>
     </div>
     <div class="header-btns">
-      <button class="header-btn" onclick="goToScanner()">اسکنر</button>
+      <button class="header-btn" onclick="window.location.href='index.html'">اسکنر</button>
       <button class="header-btn" onclick="doLogout()">خروج</button>
     </div>
   </div>
@@ -105,6 +118,10 @@
       <h3>جزئیات بازرسی</h3>
       <img id="modalPhoto" src="" alt="عکس بازرسی" style="display:none;">
       <div id="modalDetails"></div>
+      <h4>موارد بررسی‌شده</h4>
+      <div id="modalItems">
+        <div class="items-loading">در حال بارگذاری آیتم‌ها...</div>
+      </div>
       <button class="modal-close" onclick="closeViewModal()">بستن</button>
     </div>
   </div>
@@ -116,6 +133,12 @@
     var currentUser = '';
     var allHistory = [];
     var activeFilter = 'all';
+
+    var STATUS_LABELS = {
+      'salem': 'سالم',
+      'defective': 'معیوب',
+      'needsRepair': 'نیاز به اصلاح'
+    };
 
     function goToLogin() {
       window.location.href = EXEC_URL + '?page=Login';
@@ -173,9 +196,7 @@
     }
 
     function toFa(n) {
-      return String(n).replace(/\d/g, function(d) {
-        return '۰۱۲۳۴۵۶۷۸۹'[d];
-      });
+      return String(n).replace(/\d/g, function(d) { return '۰۱۲۳۴۵۶۷۸۹'[d]; });
     }
 
     function loadHistory() {
@@ -233,9 +254,7 @@
 
       var filtered = allHistory;
       if (activeFilter !== 'all') {
-        filtered = allHistory.filter(function(item) {
-          return item.status === activeFilter;
-        });
+        filtered = allHistory.filter(function(item) { return item.status === activeFilter; });
       }
 
       if (filtered.length === 0) {
@@ -272,28 +291,15 @@
       meta.textContent = formatDate(item.date);
       title.appendChild(meta);
 
-      var finalLabels = {
-        'salem': 'سالم',
-        'defective': 'معیوب',
-        'needsRepair': 'نیاز به اصلاح'
-      };
-      var finalClasses = {
-        'salem': 'salem',
-        'defective': 'defective',
-        'needsRepair': 'repairs'
-      };
+      var finalClasses = { 'salem': 'salem', 'defective': 'defective', 'needsRepair': 'repairs' };
       var fbadge = document.createElement('span');
       fbadge.className = 'final-badge ' + (finalClasses[item.finalStatus] || '');
-      fbadge.textContent = 'نتیجه: ' + (finalLabels[item.finalStatus] || item.finalStatus);
+      fbadge.textContent = 'نتیجه: ' + (STATUS_LABELS[item.finalStatus] || item.finalStatus);
       title.appendChild(fbadge);
 
       header.appendChild(title);
 
-      var statusLabels = {
-        'pending': 'در انتظار',
-        'approved': 'تأیید شده',
-        'rejected': 'رد شده'
-      };
+      var statusLabels = { 'pending': 'در انتظار', 'approved': 'تأیید شده', 'rejected': 'رد شده' };
       var sbadge = document.createElement('span');
       sbadge.className = 'status-badge ' + item.status;
       sbadge.textContent = statusLabels[item.status] || item.status;
@@ -327,17 +333,13 @@
         var hh = ('0' + d.getHours()).slice(-2);
         var mm = ('0' + d.getMinutes()).slice(-2);
         return y + '/' + m + '/' + day + ' - ' + hh + ':' + mm;
-      } catch (e) {
-        return String(dateVal);
-      }
+      } catch (e) { return String(dateVal); }
     }
 
     function convertDriveLink(url) {
       if (!url) return '';
       var match = url.match(/[?&]id=([^&]+)/);
-      if (match) {
-        return 'https://lh3.googleusercontent.com/d/' + match[1];
-      }
+      if (match) return 'https://lh3.googleusercontent.com/d/' + match[1];
       return url;
     }
 
@@ -355,7 +357,7 @@
       appendRow(details, 'کد تجهیز', item.barcode);
       appendRow(details, 'نوع', item.source === 'firebox' ? 'فایر باکس' : 'سیلندر');
       appendRow(details, 'تاریخ', formatDate(item.date));
-      appendRow(details, 'نتیجه نهایی', item.finalStatus);
+      appendRow(details, 'نتیجه نهایی', STATUS_LABELS[item.finalStatus] || item.finalStatus);
       appendRow(details, 'وضعیت', item.status);
 
       if (item.status === 'approved' && item.approvedBy) {
@@ -364,11 +366,58 @@
       if (item.status === 'rejected' && item.rejectionReason) {
         appendRow(details, 'دلیل رد', item.rejectionReason);
       }
-      if (item.notes) {
-        appendRow(details, 'یادداشت', item.notes);
-      }
+      if (item.notes) appendRow(details, 'یادداشت', item.notes);
+
+      var itemsEl = document.getElementById('modalItems');
+      itemsEl.innerHTML = '<div class="items-loading">در حال بارگذاری آیتم‌ها...</div>';
+
+      apiCall({
+        action: 'dashboard.items',
+        token: currentToken,
+        payload: { inspectionId: item.inspectionId }
+      }).then(function(response) {
+        if (!response.success) {
+          itemsEl.innerHTML = '<div class="items-loading">خطا در بارگذاری آیتم‌ها</div>';
+          return;
+        }
+        renderItems(response.data.items || []);
+      }).catch(function() {
+        itemsEl.innerHTML = '<div class="items-loading">خطا در بارگذاری آیتم‌ها</div>';
+      });
 
       document.getElementById('viewModal').classList.add('show');
+    }
+
+    function renderItems(items) {
+      var el = document.getElementById('modalItems');
+      el.innerHTML = '';
+
+      if (items.length === 0) {
+        el.innerHTML = '<div class="items-loading">آیتمی ثبت نشده است.</div>';
+        return;
+      }
+
+      var list = document.createElement('div');
+      list.className = 'items-list';
+
+      items.forEach(function(item) {
+        var row = document.createElement('div');
+        row.className = 'item-row ' + (item.status || '');
+
+        var name = document.createElement('span');
+        name.className = 'item-name';
+        name.textContent = item.name;
+        row.appendChild(name);
+
+        var status = document.createElement('span');
+        status.className = 'item-status';
+        status.textContent = STATUS_LABELS[item.status] || item.status;
+        row.appendChild(status);
+
+        list.appendChild(row);
+      });
+
+      el.appendChild(list);
     }
 
     function appendRow(parent, label, value) {
@@ -384,5 +433,6 @@
     }
   </script>
 
+  <script src="pwa.js" defer></script>
 </body>
-</html>
+  </html>
