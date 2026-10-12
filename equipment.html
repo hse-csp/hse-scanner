@@ -3,6 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#1e3c72">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="HSE CSP">
   <title>مدیریت تجهیزات</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -135,16 +139,13 @@
     <div id="emptyBox" class="empty-msg" style="display:none;">موردی یافت نشد.</div>
   </div>
 
-  <!-- Edit/Add Modal -->
   <div class="modal-overlay" id="editModal">
     <div class="modal">
       <h3 id="modalTitle">افزودن تجهیز</h3>
-
       <div class="form-group" id="barcodeGroup">
         <label>بارکد *</label>
         <input type="text" id="inputBarcode" placeholder="مثال: CO2-001">
       </div>
-
       <div class="form-group" id="cylinderTypeGroup">
         <label>نوع سیلندر *</label>
         <select id="inputCylinderType">
@@ -153,27 +154,22 @@
           <option value="water">آب</option>
         </select>
       </div>
-
       <div class="form-group">
         <label>موقعیت *</label>
         <input type="text" id="inputLocation" placeholder="مثال: سالن تولید A">
       </div>
-
       <div class="form-group">
         <label>کارخانه</label>
         <input type="text" id="inputPlant" placeholder="مثال: کارخانه مرکزی">
       </div>
-
       <div class="form-group" id="capacityGroup">
         <label>ظرفیت (برای سیلندر)</label>
         <input type="text" id="inputCapacity" placeholder="مثال: 5" inputmode="numeric">
       </div>
-
       <div class="form-group">
         <label>بازرس مسئول (شماره پرسنلی)</label>
         <input type="text" id="inputAssignedTo" placeholder="مثال: 1001" inputmode="numeric">
       </div>
-
       <div class="error-msg" id="modalError"></div>
       <div class="modal-btns">
         <button class="btn-cancel" onclick="closeModal('editModal')">لغو</button>
@@ -182,7 +178,6 @@
     </div>
   </div>
 
-  <!-- Status Modal -->
   <div class="modal-overlay" id="statusModal">
     <div class="modal">
       <h3>تغییر وضعیت تجهیز</h3>
@@ -202,7 +197,6 @@
     </div>
   </div>
 
-  <!-- Delete Modal -->
   <div class="modal-overlay" id="deleteModal">
     <div class="modal">
       <h3>حذف تجهیز</h3>
@@ -219,7 +213,6 @@
     </div>
   </div>
 
-  <!-- Bulk Assign Modal -->
   <div class="modal-overlay" id="bulkModal">
     <div class="modal">
       <h3>تأیید تخصیص دسته‌ای</h3>
@@ -373,7 +366,6 @@
       document.getElementById('tabCylinders').classList.toggle('active', tab === 'cylinder');
       document.getElementById('tabFireboxes').classList.toggle('active', tab === 'firebox');
 
-      // Reset filters for this tab
       document.getElementById('bulkPlant').value = '';
       document.getElementById('bulkCurrentInspector').value = '';
       document.getElementById('bulkNewInspector').value = '';
@@ -589,7 +581,6 @@
         return;
       }
 
-      // Count matching equipment
       var list = currentTab === 'cylinder' ? cylindersList : fireboxesList;
       var count = 0;
       list.forEach(function(item) {
@@ -762,5 +753,6 @@
     }
   </script>
 
+  <script src="pwa.js" defer></script>
 </body>
-</html>
+  </html>
