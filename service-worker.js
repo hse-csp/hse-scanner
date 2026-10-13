@@ -2,7 +2,7 @@
 // HSE CSP Service Worker
 // ============================================
 
-var CACHE_NAME = 'hse-csp-v1';
+var CACHE_NAME = 'hse-csp-v2';
 var STATIC_ASSETS = [
   './',
   './index.html',
@@ -13,8 +13,15 @@ var STATIC_ASSETS = [
   './users.html',
   './equipment.html',
   './report.html',
+  './offline.html',
   './manifest.json',
   './pwa.js',
+  './db.js',
+  './offline.js',
+  './sync.js',
+  './icons/icon.svg',
+  './icons/icon-192.png',
+  './icons/icon-512.png',
   'https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js'
 ];
 
@@ -50,7 +57,9 @@ self.addEventListener('fetch', function(event) {
 
   // Never cache Apps Script API calls
   if (url.indexOf('script.google.com') !== -1 ||
-      url.indexOf('googleusercontent.com') !== -1) {
+      url.indexOf('googleusercontent.com') !== -1 ||
+      url.indexOf('drive.google.com') !== -1 ||
+      url.indexOf('lh3.googleusercontent.com') !== -1) {
     return;
   }
 
@@ -79,7 +88,7 @@ self.addEventListener('fetch', function(event) {
     return;
   }
 
-  // Cache-first for other assets
+  // Cache-first for other assets (JS, CSS, icons, etc.)
   event.respondWith(
     caches.match(event.request).then(function(cached) {
       if (cached) return cached;
@@ -91,6 +100,8 @@ self.addEventListener('fetch', function(event) {
           });
         }
         return response;
+      }).catch(function() {
+        return cached;
       });
     })
   );
