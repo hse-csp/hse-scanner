@@ -55,7 +55,6 @@ self.addEventListener('activate', function(event) {
 self.addEventListener('fetch', function(event) {
   var url = event.request.url;
 
-  // Never cache Apps Script API calls
   if (url.indexOf('script.google.com') !== -1 ||
       url.indexOf('googleusercontent.com') !== -1 ||
       url.indexOf('drive.google.com') !== -1 ||
@@ -63,12 +62,10 @@ self.addEventListener('fetch', function(event) {
     return;
   }
 
-  // Ignore non-GET requests
   if (event.request.method !== 'GET') {
     return;
   }
 
-  // Network-first for HTML pages
   if (event.request.mode === 'navigate' ||
       url.indexOf('.html') !== -1 ||
       url.endsWith('/')) {
@@ -88,7 +85,6 @@ self.addEventListener('fetch', function(event) {
     return;
   }
 
-  // Cache-first for other assets (JS, CSS, icons, etc.)
   event.respondWith(
     caches.match(event.request).then(function(cached) {
       if (cached) return cached;
