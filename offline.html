@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#1e3c72">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="HSE CSP">
+  <title>صف آفلاین</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: Tahoma, Arial, sans-serif; background: #f0f2f5; min-height: 100vh; padding: 16px; }
+    .header { background: #1e3c72; color: #fff; padding: 16px; border-radius: 12px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .header h1 { font-size: 18px; }
+    .header .user { font-size: 13px; opacity: 0.9; }
+    .header-btns { display: flex; gap: 8px; flex-wrap: wrap; }
+    .header-btn { background: rgba(255,255,255,0.2); border: none; color: #fff; padding: 8px 14px; border-radius: 8px; cursor: pointer; font-family: inherit; font-size: 13px; }
+    .header-btn:hover { background: rgba(255,255,255,0.3); }
+    .card { background: #fff; border-radius: 12px; padding: 20px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+    .card h2 { font-size: 16px; color: #1e3c72; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center; }
+    .card h2 .count { font-size: 14px; color: #999; font-weight: normal; }
+    .status-panel { background: #e3f2fd; border-right: 4px solid #1e3c72; padding: 14px; border-radius: 8px; margin-bottom: 16px; }
+    .status-row { display: flex; justify-content: space-between; padding: 6px 0; font-size: 14px; }
+    .status-row .label { color: #555; }
+    .status-row .value { font-weight: bold; color: #222; }
+    .status-row .value.online { color: #2e7d32; }
+    .status-row .value.offline { color: #d32f2f; }
+    .sync-btn { width: 100%; padding: 14px; background: #4caf50; color: #fff; border: none; border-radius: 10px; font-family: inherit; font-size: 15px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+    .sync-btn:hover { background: #388e3c; }
+    .sync-btn:disabled { background: #ccc; cursor: not-allowed; }
+    .pending-item { background: #f9f9f9; border: 2px solid #e0e0e0; border-radius: 10px; padding: 14px; margin-bottom: 12px; }
+    .pending-item.failed { background: #ffebee; border-color: #d32f2f; }
+    .pending-item.syncing { background: #fff3e0; border-color: #f57c00; }
+    .pending-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; gap: 8px; }
+    .pending-barcode { font-size: 15px; font-weight: bold; color: #222; }
+    .pending-status { padding: 3px 10px; border-radius: 6px; font-size: 11px; font-weight: bold; }
+    .pending-status.pending { background: #fff3e0; color: #e65100; }
+    .pending-status.syncing { background: #ffe0b2; color: #e65100; }
+    .pending-status.failed { background: #ffcdd2; color: #c62828; }
+    .pending-row { font-size: 13px; color: #555; padding: 3px 0; }
+    .pending-row .label { color: #888; }
+    .error-box { background: #ffebee; border-right: 3px solid #d32f2f; padding: 8px 12px; border-radius: 6px; font-size: 12px; color: #c62828; margin-top: 8px; }
+    .pending-actions { display: flex; gap: 8px; margin-top: 10px; }
+    .btn { padding: 8px 12px; border: none; border-radius: 6px; font-family: inherit; font-size: 12px; font-weight: bold; cursor: pointer; }
+    .btn-delete { background: #d32f2f; color: #fff; }
+    .empty-msg { text-align: center; color: #999; padding: 30px; font-size: 14px; }
+    .loading-box { text-align: center; padding: 40px 20px; color: #666; font-size: 15px; }
+    .help-text { font-size: 12px; color: #666; margin-top: 8px; line-height: 1.6; }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <div>
+      <h1>صف آفلاین</h1>
+      <div class="user" id="userInfo"></div>
+    </div>
+    <div class="header-btns">
+      <button class="header-btn" onclick="window.location.href='index.html'">اسکنر</button>
+      <button class="header-btn" onclick="window.location.href='history.html'">تاریخچه</button>
+      <button class="header-btn" onclick="doLogout()">خروج</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>وضعیت سیستم</h2>
+    <div class="status-panel">
+      <div class="status-row">
+        <span class="label">اتصال اینترنت:</span>
+        <span class="value" id="connStatus">-</span>
+      </div>
+      <div class="status-row">
+        <span class="label">آخرین همگام‌سازی تجهیزات:</span>
+        <span class="value" id="lastSync">-</span>
+      </div>
+      <div class="status-row">
+        <span class="label">تعداد تجهیزات ذخیره‌شده:</span>
+        <span class="value" id="equipCount">-</span>
+      </div>
+      <div class="status-row">
+        <span class="label">بازرسی‌های در صف:</span>
+        <span class="value" id="pendingCount">-</span>
+      </div>
+    </div>
+    <button class="sync-btn" id="syncBtn" onclick="manualSync()">همگام‌سازی الان</button>
+    <div class="help-text">
+      نکته: بازرسی‌هایی که آفلاین ثبت می‌شوند، در صف می‌مانند و به محض اتصال به اینترنت خودکار ارسال می‌شوند.
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>
+      <span>بازرسی‌های در انتظار ارسال</span>
+      <span class="count" id="listCount"></span>
+    </h2>
+    <div id="loadingBox" class="loading-box">در حال بارگذاری...</div>
+    <div id="pendingList"></div>
+    <div id="emptyBox" class="empty-msg" style="display:none;">صف خالی است. همه بازرسی‌ها ارسال شده‌اند.</div>
+  </div>
+
+  <script src="db.js"></script>
+  <script src="offline.js"></script>
+  <script>
+    var EXEC_URL = 'https://script.google.com/macros/s/AKfycbwem0CLeRJiFSsVGMGDcDeXzrBzzpEhOtJFIvona5Sa9VeKQNX4GU7PnyDkdnkPiRoI/exec';
+    var currentToken = '';
+    var currentUser = '';
+
+    function goToLogin() {
+      window.location.href = EXEC_URL + '?page=Login';
+    }
+
+    (function initPage() {
+      currentToken = localStorage.getItem('token') || '';
+      currentUser = localStorage.getItem('fullName') || localStorage.getItem('username') || '';
+
+      if (!currentToken) { goToLogin(); return; }
+
+      document.getElementById('userInfo').textContent = currentUser;
+      updateOnlineIndicator();
+      refreshAll();
+    })();
+
+    function doLogout() {
+      var token = currentToken;
+      localStorage.clear();
+      sessionStorage.clear();
+      fetch(EXEC_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({ action: 'auth.logout', token: token }),
+        redirect: 'follow'
+      }).finally(function() {
+        goToLogin();
+      });
+    }
+
+    function refreshAll() {
+      refreshConnection();
+      refreshLastSync();
+      refreshEquipmentCount();
+      loadPendingList();
+    }
+
+    function refreshConnection() {
+      var el = document.getElementById('connStatus');
+      if (navigator.onLine) {
+        el.textContent = 'متصل';
+        el.className = 'value online';
+      } else {
+        el.textContent = 'آفلاین';
+        el.className = 'value offline';
+      }
+    }
+
+    function refreshLastSync() {
+      dbGetMeta('hse_last_sync').then(function(v) {
+        var el = document.getElementById('lastSync');
+        if (!v) {
+          el.textContent = 'هنوز انجام نشده';
+        } else {
+          el.textContent = formatOfflineTime(v);
+        }
+      });
+    }
+
+    function refreshEquipmentCount() {
+      dbGetAllEquipment().then(function(items) {
+        document.getElementById('equipCount').textContent = toFa(items.length);
+      });
+    }
+
+    function loadPendingList() {
+      document.getElementById('loadingBox').style.display = 'block';
+      document.getElementById('pendingList').innerHTML = '';
+
+      dbGetAllPending().then(function(items) {
+        document.getElementById('loadingBox').style.display = 'none';
+        document.getElementById('pendingCount').textContent = toFa(items.length);
+        document.getElementById('listCount').textContent = toFa(items.length) + ' مورد';
+
+        if (items.length === 0) {
+          document.getElementById('emptyBox').style.display = 'block';
+          return;
+        }
+
+        document.getElementById('emptyBox').style.display = 'none';
+
+        items.forEach(function(item) {
+          document.getElementById('pendingList').appendChild(createPendingCard(item));
+        });
+      });
+    }
+
+    function createPendingCard(item) {
+      var div = document.createElement('div');
+      div.className = 'pending-item';
+      if (item.status === 'failed') div.className += ' failed';
+      if (item.status === 'syncing') div.className += ' syncing';
+
+      var header = document.createElement('div');
+      header.className = 'pending-header';
+
+      var barcode = document.createElement('span');
+      barcode.className = 'pending-barcode';
+      barcode.textContent = item.barcode;
+      header.appendChild(barcode);
+
+      var statusLabels = {
+        'pending': 'در انتظار',
+        'syncing': 'در حال ارسال',
+        'failed': 'ناموفق'
+      };
+      var status = document.createElement('span');
+      status.className = 'pending-status ' + (item.status || 'pending');
+      status.textContent = statusLabels[item.status] || 'در انتظار';
+      header.appendChild(status);
+
+      div.appendChild(header);
+
+      appendRow(div, 'زمان ثبت', formatOfflineTime(item.createdAt));
+      appendRow(div, 'نتیجه', item.finalStatus || '-');
+      if (item.attempts > 0) {
+        appendRow(div, 'تلاش‌ها', toFa(item.attempts));
+      }
+
+      if (item.lastError) {
+        var errBox = document.createElement('div');
+        errBox.className = 'error-box';
+        errBox.textContent = 'خطا: ' + item.lastError;
+        div.appendChild(errBox);
+      }
+
+      var actions = document.createElement('div');
+      actions.className = 'pending-actions';
+
+      var delBtn = document.createElement('button');
+      delBtn.className = 'btn btn-delete';
+      delBtn.textContent = 'حذف از صف';
+      delBtn.onclick = function() {
+        if (!confirm('این مورد از صف حذف شود؟ (اگر ارسال نشده، اطلاعات از دست می‌رود)')) return;
+        dbDeletePending(item.localId).then(function() {
+          loadPendingList();
+        });
+      };
+      actions.appendChild(delBtn);
+
+      div.appendChild(actions);
+      return div;
+    }
+
+    function appendRow(parent, label, value) {
+      var row = document.createElement('div');
+      row.className = 'pending-row';
+      var l = document.createElement('span'); l.className = 'label'; l.textContent = label + ': ';
+      var v = document.createElement('span'); v.textContent = String(value);
+      row.appendChild(l); row.appendChild(v); parent.appendChild(row);
+    }
+
+    function toFa(n) {
+      return String(n).replace(/\d/g, function(d) {
+        return '۰۱۲۳۴۵۶۷۸۹'[d];
+      });
+    }
+
+    function manualSync() {
+      if (!navigator.onLine) {
+        alert('اتصال اینترنت برقرار نیست.');
+        return;
+      }
+
+      var btn = document.getElementById('syncBtn');
+      btn.disabled = true;
+      btn.textContent = 'در حال همگام‌سازی...';
+
+      Promise.all([
+        syncEquipmentCache(currentToken, EXEC_URL),
+        syncPendingInspections(EXEC_URL)
+      ]).then(function(results) {
+        btn.disabled = false;
+        btn.textContent = 'همگام‌سازی الان';
+
+        var equipRes = results[0];
+        var pendingRes = results[1];
+
+        var msg = '';
+        if (equipRes.success) {
+          msg += 'تجهیزات: ' + equipRes.count + ' مورد به‌روزرسانی شد.\n';
+        }
+        if (pendingRes.synced !== undefined) {
+          msg += 'بازرسی‌ها: ' + pendingRes.synced + ' ارسال، ' + pendingRes.failed + ' ناموفق.';
+        }
+
+        alert(msg || 'همگام‌سازی انجام شد.');
+        refreshAll();
+      }).catch(function(err) {
+        btn.disabled = false;
+        btn.textContent = 'همگام‌سازی الان';
+        alert('خطا: ' + err.message);
+      });
+    }
+
+    window.addEventListener('online', function() {
+      refreshConnection();
+      syncPendingInspections(EXEC_URL).then(function() {
+        loadPendingList();
+      });
+    });
+
+    window.addEventListener('offline', refreshConnection);
+  </script>
+
+  <script src="pwa.js" defer></script>
+</body>
+</html>
