@@ -388,7 +388,6 @@
         console.log('Saved to localStorage:', key);
       } catch (e) {
         console.error('localStorage failed:', e);
-        // Fallback to IndexedDB
         if (typeof savePendingSubmission === 'function') {
           savePendingSubmission(payload).then(function(id) {
             console.log('Fallback IndexedDB saved:', id);
