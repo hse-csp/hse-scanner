@@ -53,7 +53,6 @@
     .submit-btn { width: 100%; padding: 16px; background: #1e3c72; color: #fff; border: none; border-radius: 10px; font-family: inherit; font-size: 16px; font-weight: bold; cursor: pointer; }
     .submit-btn:disabled { background: #ccc; cursor: not-allowed; }
     .loading-box { text-align: center; padding: 40px 20px; color: #666; font-size: 15px; }
-    .offline-banner { background: #fff3e0; border-right: 4px solid #ff9800; padding: 10px 14px; border-radius: 8px; font-size: 12px; color: #e65100; margin-bottom: 12px; display: none; }
   </style>
 </head>
 <body>
@@ -64,10 +63,6 @@
       <div class="user" id="userInfo"></div>
     </div>
     <button class="back-btn" onclick="goBack()">بازگشت</button>
-  </div>
-
-  <div class="offline-banner" id="offlineBanner">
-    📡 حالت آفلاین: بازرسی روی گوشی ذخیره و در فرصت مناسب ارسال می‌شود.
   </div>
 
   <div class="card" id="loadingCard">
@@ -118,8 +113,6 @@
     <button class="submit-btn" id="submitBtn" onclick="submitInspection()" disabled>ثبت بازرسی</button>
   </div>
 
-  <script src="db.js"></script>
-  <script src="offline.js"></script>
   <script>
     var EXEC_URL = 'https://script.google.com/macros/s/AKfycbwem0CLeRJiFSsVGMGDcDeXzrBzzpEhOtJFIvona5Sa9VeKQNX4GU7PnyDkdnkPiRoI/exec';
     var INDEX_URL = 'index.html';
@@ -166,107 +159,32 @@
 
       document.getElementById('userInfo').textContent = currentUser;
 
-      if (!navigator.onLine) {
-        document.getElementById('offlineBanner').style.display = 'block';
-      }
-
-      // Load equipment + checklist
-      loadEquipmentAndChecklist();
-    })();
-
-    function loadEquipmentAndChecklist() {
-      // If online, use API
-      if (navigator.onLine) {
-        apiCall({
-          action: 'inspection.prepare',
-          token: currentToken,
-          payload: { barcode: currentBarcode }
-        }).then(function(response) {
-          if (!response.success) {
-            // Try offline fallback
-            tryOfflineFallback();
-            return;
-          }
-          renderEquipment(response.data.equipment, response.data.checklist);
-        }).catch(function() {
-          // Network error - try offline
-          tryOfflineFallback();
-        });
-      } else {
-        tryOfflineFallback();
-      }
-    }
-
-    function tryOfflineFallback() {
-      if (typeof dbGetEquipmentByBarcode !== 'function') {
-        alert('تجهیز در حافظه یافت نشد.');
-        goBack();
-        return;
-      }
-
-      dbGetEquipmentByBarcode(currentBarcode).then(function(cached) {
-        if (!cached) {
-          alert('تجهیز در حافظه گوشی یافت نشد. لطفاً اتصال اینترنت را بررسی کنید.');
+      apiCall({
+        action: 'inspection.prepare',
+        token: currentToken,
+        payload: { barcode: currentBarcode }
+      }).then(function(response) {
+        if (!response.success) {
+          alert(response.error);
           goBack();
           return;
         }
-
-        // Build a minimal checklist from cache
-        var equipment = {
-          barcode: cached.Barcode,
-          type: cached._kind || 'cylinder',
-          cylinderType: cached.CylinderType,
-          location: cached.Location,
-          capacity: cached.Capacity,
-          plant: cached.Plant,
-          lastInspection: cached.LastInspection,
-          status: cached.Status,
-          assignedTo: cached.AssignedTo
-        };
-
-        // Need checklist items - get from a cached meta or use a fallback
-        var eqType = equipment.type === 'firebox' ? 'firebox' : equipment.cylinderType;
-
-        // Try to load template from server if online, otherwise use a default
-        fetchChecklistOffline(eqType).then(function(items) {
-          if (!items || items.length === 0) {
-            alert('قالب چک‌لیست در حافظه یافت نشد.');
-            goBack();
-            return;
-          }
-          renderEquipment(equipment, items);
-        });
+        currentEquipment = response.data.equipment;
+        checklistItems = response.data.checklist;
+        document.getElementById('loadingCard').style.display = 'none';
+        document.getElementById('equipmentCard').style.display = 'block';
+        document.getElementById('checklistCard').style.display = 'block';
+        document.getElementById('finalSection').style.display = 'block';
+        document.getElementById('photoCard').style.display = 'block';
+        document.getElementById('notesCard').style.display = 'block';
+        document.getElementById('submitBar').style.display = 'block';
+        renderEquipmentInfo();
+        renderChecklist();
+      }).catch(function(err) {
+        alert('خطا در ارتباط با سرور: ' + err.message);
+        goBack();
       });
-    }
-
-    function fetchChecklistOffline(eqType) {
-      return dbGetMeta('checklist_' + eqType).then(function(cached) {
-        if (cached) return cached;
-        return [];
-      });
-    }
-
-    function renderEquipment(equipment, checklist) {
-      currentEquipment = equipment;
-      checklistItems = checklist;
-
-      document.getElementById('loadingCard').style.display = 'none';
-      document.getElementById('equipmentCard').style.display = 'block';
-      document.getElementById('checklistCard').style.display = 'block';
-      document.getElementById('finalSection').style.display = 'block';
-      document.getElementById('photoCard').style.display = 'block';
-      document.getElementById('notesCard').style.display = 'block';
-      document.getElementById('submitBar').style.display = 'block';
-
-      renderEquipmentInfo();
-      renderChecklist();
-
-      // Save checklist template to cache for offline
-      if (typeof dbSetMeta === 'function' && equipment) {
-        var eqType = equipment.type === 'firebox' ? 'firebox' : equipment.cylinderType;
-        dbSetMeta('checklist_' + eqType, checklist);
-      }
-    }
+    })();
 
     function renderEquipmentInfo() {
       var el = document.getElementById('equipmentInfo');
@@ -407,7 +325,7 @@
     function capturePhoto() {
       var video = document.getElementById('cameraPreview');
       var canvas = document.createElement('canvas');
-      var MAX_WIDTH = 1280;
+      var MAX_WIDTH = 1024; // کاهش از 1280 به 1024
       var scale = Math.min(1, MAX_WIDTH / video.videoWidth);
       canvas.width = Math.round(video.videoWidth * scale);
       canvas.height = Math.round(video.videoHeight * scale);
@@ -415,7 +333,7 @@
       var ctx = canvas.getContext('2d');
       ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-      var dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+      var dataUrl = canvas.toDataURL('image/jpeg', 0.5); // کیفیت ۰.۵ به جای ۰.۷
       photoBase64 = dataUrl.split(',')[1];
       photoMimeType = 'image/jpeg';
 
@@ -442,72 +360,87 @@
       btn.textContent = 'در حال ثبت...';
 
       var payload = {
-        barcode: currentEquipment.barcode,
-        items: [],
-        finalStatus: finalStatus,
-        notes: document.getElementById('notesInput').value.trim(),
-        photoData: photoBase64,
-        mimeType: photoMimeType
+        action: 'inspection.save',
+        token: currentToken,
+        payload: {
+          barcode: currentEquipment.barcode,
+          items: [],
+          finalStatus: finalStatus,
+          notes: document.getElementById('notesInput').value.trim(),
+          photoData: photoBase64,
+          mimeType: photoMimeType
+        }
       };
 
       checklistItems.forEach(function(item) {
         if (itemStates[item.templateId]) {
-          payload.items.push({
+          payload.payload.items.push({
             templateId: item.templateId,
             status: itemStates[item.templateId]
           });
         }
       });
 
-      if (navigator.onLine) {
-        apiCall({
-          action: 'inspection.save',
-          token: currentToken,
-          payload: payload
-        }).then(function(response) {
-          if (response.success) {
-            sessionStorage.removeItem('currentBarcode');
-            btn.textContent = 'ثبت شد ✓';
-            btn.style.background = '#4caf50';
-            setTimeout(function() {
-              window.location.href = INDEX_URL;
-            }, 600);
-          } else {
-            alert('خطا: ' + response.error);
-            btn.disabled = false;
-            btn.textContent = 'ثبت بازرسی';
-          }
-        }).catch(function() {
-          saveOfflineFallback(payload, btn);
-        });
-      } else {
-        saveOfflineFallback(payload, btn);
-      }
-    }
-
-    function saveOfflineFallback(payload, btn) {
-      if (typeof saveToOfflineQueue !== 'function') {
-        alert('سیستم آفلاین آماده نیست.');
-        btn.disabled = false;
-        btn.textContent = 'ثبت بازرسی';
-        return;
-      }
-
-      saveToOfflineQueue(payload).then(function() {
+      savePendingSubmission(payload).then(function(recordId) {
+        btn.textContent = 'ثبت شد ✓';
+        btn.style.background = '#4caf50';
         sessionStorage.removeItem('currentBarcode');
-        btn.textContent = 'ذخیره آفلاین ✓';
-        btn.style.background = '#ff9800';
+
+        sendSubmissionAsync(recordId, payload);
+
         setTimeout(function() {
           window.location.href = INDEX_URL;
-        }, 800);
+        }, 600);
+
       }).catch(function(err) {
-        alert('خطا در ذخیره آفلاین: ' + err.message);
+        console.error('IndexedDB save failed:', err);
+        sendSubmissionDirect(payload);
+      });
+    }
+
+    function sendSubmissionAsync(recordId, payload) {
+      fetch(EXEC_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify(payload),
+        redirect: 'follow'
+      }).then(function(r) { return r.json(); }).then(function(response) {
+        if (response.success) {
+          deletePendingSubmission(recordId);
+        } else {
+          incrementRetry(recordId);
+        }
+      }).catch(function() {
+        incrementRetry(recordId);
+      });
+    }
+
+    function sendSubmissionDirect(payload) {
+      fetch(EXEC_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify(payload),
+        redirect: 'follow'
+      }).then(function(r) { return r.json(); }).then(function(response) {
+        if (response.success) {
+          sessionStorage.removeItem('currentBarcode');
+          window.location.href = INDEX_URL;
+        } else {
+          alert('خطا: ' + response.error);
+          var btn = document.getElementById('submitBtn');
+          btn.disabled = false;
+          btn.textContent = 'ثبت بازرسی';
+        }
+      }).catch(function(err) {
+        alert('خطا: ' + err.message);
+        var btn = document.getElementById('submitBtn');
         btn.disabled = false;
         btn.textContent = 'ثبت بازرسی';
       });
     }
   </script>
 
+  <script src="offline.js"></script>
   <script src="pwa.js" defer></script>
 </body>
 </html>
