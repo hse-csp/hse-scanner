@@ -8,6 +8,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="HSE CSP">
   <title>فرم چک‌لیست بازرسی</title>
+  <script src="offline.js"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: Tahoma, Arial, sans-serif; background: #f0f2f5; min-height: 100vh; padding: 16px; padding-bottom: 100px; }
@@ -357,7 +358,6 @@
     function submitInspection() {
       var btn = document.getElementById('submitBtn');
       btn.disabled = true;
-      btn.textContent = 'در حال ثبت...';
 
       var payload = {
         action: 'inspection.save',
@@ -381,53 +381,33 @@
         }
       });
 
-      // Try direct save with keepalive FIRST
-      // If it succeeds quickly, great. If not, we still save to IndexedDB and navigate.
-      var savedToServer = false;
-
-      fetch(EXEC_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        body: JSON.stringify(payload),
-        redirect: 'follow',
-        keepalive: true
-      }).then(function(r) { return r.json(); }).then(function(response) {
-        if (response.success) {
-          savedToServer = true;
-          sessionStorage.removeItem('currentBarcode');
-          btn.textContent = 'ثبت شد ✓';
-          btn.style.background = '#4caf50';
-          setTimeout(function() {
-            window.location.href = INDEX_URL;
-          }, 500);
-        } else {
-          // Server rejected - save to queue for retry, show error
-          savePendingSubmission(payload).then(function() {
-            btn.disabled = false;
-            btn.textContent = 'ثبت بازرسی';
-            btn.style.background = '';
-            alert('خطا: ' + response.error);
+      // 1. Save SYNCHRONOUSLY to localStorage (instant)
+      var key = 'hse_pending_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+      try {
+        localStorage.setItem(key, JSON.stringify(payload));
+        console.log('Saved to localStorage:', key);
+      } catch (e) {
+        console.error('localStorage failed:', e);
+        // Fallback to IndexedDB
+        if (typeof savePendingSubmission === 'function') {
+          savePendingSubmission(payload).then(function(id) {
+            console.log('Fallback IndexedDB saved:', id);
+          }).catch(function(err) {
+            console.error('IndexedDB also failed:', err);
           });
         }
-      }).catch(function(err) {
-        // Network error - save to queue
-        savePendingSubmission(payload).then(function(recordId) {
-          btn.textContent = 'ثبت شد ✓';
-          btn.style.background = '#4caf50';
-          sessionStorage.removeItem('currentBarcode');
-          setTimeout(function() {
-            window.location.href = INDEX_URL;
-          }, 500);
-        }).catch(function() {
-          alert('خطا: ' + err.message);
-          btn.disabled = false;
-          btn.textContent = 'ثبت بازرسی';
-        });
-      });
+      }
+
+      // 2. Show success INSTANTLY
+      btn.textContent = 'ثبت شد ✓';
+      btn.style.background = '#4caf50';
+      sessionStorage.removeItem('currentBarcode');
+
+      // 3. Navigate IMMEDIATELY (no delay)
+      window.location.replace(INDEX_URL);
     }
   </script>
 
-  <script src="offline.js"></script>
   <script src="pwa.js" defer></script>
 </body>
 </html>
