@@ -13,15 +13,9 @@ var STATIC_ASSETS = [
   './users.html',
   './equipment.html',
   './report.html',
-  './offline.html',
   './manifest.json',
   './pwa.js',
-  './db.js',
   './offline.js',
-  './sync.js',
-  './icons/icon.svg',
-  './icons/icon-192.png',
-  './icons/icon-512.png',
   'https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js'
 ];
 
@@ -55,36 +49,51 @@ self.addEventListener('activate', function(event) {
 self.addEventListener('fetch', function(event) {
   var url = event.request.url;
 
+  // Never cache Apps Script API calls
   if (url.indexOf('script.google.com') !== -1 ||
-      url.indexOf('googleusercontent.com') !== -1 ||
-      url.indexOf('drive.google.com') !== -1 ||
-      url.indexOf('lh3.googleusercontent.com') !== -1) {
+      url.indexOf('googleusercontent.com') !== -1) {
     return;
   }
 
+  // Ignore non-GET requests
   if (event.request.method !== 'GET') {
     return;
   }
 
+  // CACHE-FIRST for HTML pages (fast navigation)
   if (event.request.mode === 'navigate' ||
       url.indexOf('.html') !== -1 ||
       url.endsWith('/')) {
     event.respondWith(
-      fetch(event.request).then(function(response) {
-        var copy = response.clone();
-        caches.open(CACHE_NAME).then(function(cache) {
-          cache.put(event.request, copy);
-        });
-        return response;
-      }).catch(function() {
-        return caches.match(event.request).then(function(cached) {
-          return cached || caches.match('./index.html');
+      caches.match(event.request).then(function(cached) {
+        if (cached) {
+          // Serve from cache immediately
+          // Update cache in background (stale-while-revalidate)
+          fetch(event.request).then(function(response) {
+            if (response && response.status === 200) {
+              caches.open(CACHE_NAME).then(function(cache) {
+                cache.put(event.request, response);
+              });
+            }
+          }).catch(function() {});
+          return cached;
+        }
+        // Not in cache - fetch and cache
+        return fetch(event.request).then(function(response) {
+          var copy = response.clone();
+          caches.open(CACHE_NAME).then(function(cache) {
+            cache.put(event.request, copy);
+          });
+          return response;
+        }).catch(function() {
+          return caches.match('./index.html');
         });
       })
     );
     return;
   }
 
+  // Cache-first for other assets
   event.respondWith(
     caches.match(event.request).then(function(cached) {
       if (cached) return cached;
@@ -96,8 +105,6 @@ self.addEventListener('fetch', function(event) {
           });
         }
         return response;
-      }).catch(function() {
-        return cached;
       });
     })
   );
