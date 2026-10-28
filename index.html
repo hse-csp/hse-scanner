@@ -9,6 +9,7 @@
   <meta name="apple-mobile-web-app-title" content="HSE CSP">
   <title>اسکن تجهیز - HSE</title>
   <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+  <script src="offline.js"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: Tahoma, Arial, sans-serif; background: #f0f2f5; min-height: 100vh; padding: 16px; }
@@ -31,7 +32,7 @@
     .search-group button { padding: 14px 20px; background: #1e3c72; color: #fff; border: none; border-radius: 10px; font-family: inherit; font-size: 15px; font-weight: bold; cursor: pointer; }
     .start-btn { width: 100%; padding: 14px; background: #2a5298; color: #fff; border: none; border-radius: 10px; font-family: inherit; font-size: 15px; font-weight: bold; cursor: pointer; margin-top: 12px; }
     .start-btn:disabled { background: #999; }
-    .pending-badge { background: #ff9800; color: #fff; padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: bold; margin-left: 6px; }
+    .pending-badge { background: #ff9800; color: #fff; padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: bold; margin-right: 6px; }
   </style>
 </head>
 <body>
@@ -119,60 +120,92 @@
     }
 
     // ============================================
-    // Process pending submissions (background)
+    // Process pending submissions
     // ============================================
     function processPendingQueue() {
-      if (typeof getPendingSubmissions !== 'function') {
-        console.warn('offline.js not loaded');
+      // 1. Process localStorage queue (main)
+      var keysToProcess = [];
+      for (var i = 0; i < localStorage.length; i++) {
+        var k = localStorage.key(i);
+        if (k && k.indexOf('hse_pending_') === 0) {
+          keysToProcess.push(k);
+        }
+      }
+
+      if (keysToProcess.length > 0) {
+        updateBadge(keysToProcess.length);
+        keysToProcess.forEach(function(key) {
+          trySendFromLocalStorage(key);
+        });
+      }
+
+      // 2. Also process IndexedDB queue (fallback backups)
+      if (typeof getPendingSubmissions === 'function') {
+        getPendingSubmissions().then(function(items) {
+          items.forEach(function(item) {
+            if (item.retries > 5) return;
+            fetch(EXEC_URL, {
+              method: 'POST',
+              headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+              body: JSON.stringify(item.payload),
+              redirect: 'follow'
+            }).then(function(r) { return r.json(); }).then(function(res) {
+              if (res.success) deletePendingSubmission(item.id);
+              else incrementRetry(item.id);
+            }).catch(function() { incrementRetry(item.id); });
+          });
+        }).catch(function() {});
+      }
+    }
+
+    function trySendFromLocalStorage(key) {
+      var raw = localStorage.getItem(key);
+      if (!raw) return;
+
+      var payload;
+      try {
+        payload = JSON.parse(raw);
+      } catch (e) {
+        localStorage.removeItem(key);
         return;
       }
 
-      getPendingSubmissions().then(function(items) {
-        if (items.length === 0) return;
-
-        var badge = document.getElementById('pendingBadge');
-        if (badge) {
-          badge.textContent = items.length;
-          badge.style.display = 'inline-block';
+      fetch(EXEC_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify(payload),
+        redirect: 'follow'
+      }).then(function(r) { return r.json(); }).then(function(res) {
+        if (res.success) {
+          localStorage.removeItem(key);
+          updateBadgeFromLocalStorage();
+          console.log('Sent successfully:', key);
+        } else {
+          console.warn('Send rejected:', res.error);
         }
-
-        items.forEach(function(item) {
-          if (item.retries > 5) {
-            console.warn('Skipping item with >5 retries:', item.id);
-            return;
-          }
-
-          fetch(EXEC_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-            body: JSON.stringify(item.payload),
-            redirect: 'follow'
-          }).then(function(r) { return r.json(); }).then(function(response) {
-            if (response.success) {
-              deletePendingSubmission(item.id).then(updatePendingBadge);
-            } else {
-              incrementRetry(item.id);
-            }
-          }).catch(function() {
-            incrementRetry(item.id);
-          });
-        });
       }).catch(function(err) {
-        console.warn('Pending queue check failed:', err);
+        console.warn('Send failed (will retry later):', err.message);
       });
     }
 
-    function updatePendingBadge() {
-      getPendingSubmissions().then(function(items) {
-        var badge = document.getElementById('pendingBadge');
-        if (!badge) return;
-        if (items.length === 0) {
-          badge.style.display = 'none';
-        } else {
-          badge.textContent = items.length;
-          badge.style.display = 'inline-block';
-        }
-      }).catch(function() {});
+    function updateBadgeFromLocalStorage() {
+      var count = 0;
+      for (var i = 0; i < localStorage.length; i++) {
+        var k = localStorage.key(i);
+        if (k && k.indexOf('hse_pending_') === 0) count++;
+      }
+      updateBadge(count);
+    }
+
+    function updateBadge(count) {
+      var badge = document.getElementById('pendingBadge');
+      if (!badge) return;
+      if (count === 0) {
+        badge.style.display = 'none';
+      } else {
+        badge.textContent = count;
+        badge.style.display = 'inline-block';
+      }
     }
 
     function doLogout() {
@@ -247,7 +280,6 @@
     }
   </script>
 
-  <script src="offline.js"></script>
   <script src="pwa.js" defer></script>
 </body>
 </html>
