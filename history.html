@@ -46,16 +46,25 @@
     .view-btn { width: 100%; padding: 10px; background: #1e3c72; color: #fff; border: none; border-radius: 8px; font-family: inherit; font-size: 13px; font-weight: bold; cursor: pointer; margin-top: 10px; }
     .empty-msg { text-align: center; color: #999; padding: 30px; font-size: 14px; }
     .loading-box { text-align: center; padding: 40px 20px; color: #666; font-size: 15px; }
-    .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); display: none; z-index: 1000; align-items: center; justify-content: center; padding: 20px; }
+    .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); display: none; z-index: 1000; align-items: center; justify-content: center; padding: 16px; }
     .modal-overlay.show { display: flex; }
     .modal { background: #fff; border-radius: 12px; padding: 20px; max-width: 500px; width: 100%; max-height: 90vh; overflow-y: auto; }
-    .modal img { width: 100%; border-radius: 8px; margin-bottom: 12px; display: block; }
+    .modal img { width: 100%; max-height: 30vh; object-fit: contain; border-radius: 8px; margin-bottom: 12px; display: block; background: #f0f0f0; }
     .modal h3 { font-size: 16px; color: #1e3c72; margin-bottom: 12px; }
+    .modal h4 { font-size: 14px; color: #1e3c72; margin: 16px 0 10px 0; padding-bottom: 6px; border-bottom: 2px solid #e0e0e0; }
     .modal .row { display: flex; justify-content: space-between; padding: 6px 0; font-size: 14px; border-bottom: 1px solid #eee; }
     .modal .row:last-child { border-bottom: none; }
     .modal .row .l { color: #666; }
     .modal .row .v { font-weight: bold; color: #222; }
     .modal-close { width: 100%; padding: 12px; background: #1e3c72; color: #fff; border: none; border-radius: 8px; font-family: inherit; font-size: 15px; font-weight: bold; cursor: pointer; margin-top: 16px; }
+    .items-list { display: flex; flex-direction: column; gap: 6px; }
+    .item-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; border-radius: 6px; font-size: 13px; }
+    .item-row.salem { background: #e8f5e9; color: #2e7d32; }
+    .item-row.defective { background: #ffebee; color: #c62828; }
+    .item-row.needsRepair { background: #fff3e0; color: #e65100; }
+    .item-row .item-name { flex: 1; font-weight: bold; }
+    .item-row .item-status { font-weight: bold; padding: 3px 10px; border-radius: 4px; background: rgba(255,255,255,0.7); font-size: 11px; }
+    .no-items { text-align: center; color: #999; padding: 15px; font-size: 13px; }
   </style>
 </head>
 <body>
@@ -109,6 +118,8 @@
       <h3>جزئیات بازرسی</h3>
       <img id="modalPhoto" src="" alt="عکس بازرسی" style="display:none;">
       <div id="modalDetails"></div>
+      <h4>موارد بررسی‌شده</h4>
+      <div id="modalItems"></div>
       <button class="modal-close" onclick="closeViewModal()">بستن</button>
     </div>
   </div>
@@ -120,6 +131,18 @@
     var currentUser = '';
     var allHistory = [];
     var activeFilter = 'all';
+
+    var FINAL_LABELS = {
+      'salem': 'سالم',
+      'defective': 'معیوب',
+      'needsRepair': 'نیاز به اصلاح'
+    };
+
+    var STATUS_LABELS = {
+      'pending': 'در انتظار تأیید',
+      'approved': 'تأیید شده',
+      'rejected': 'رد شده'
+    };
 
     function goToLogin() {
       window.location.href = EXEC_URL + '?page=Login';
@@ -276,11 +299,6 @@
       meta.textContent = formatDate(item.date);
       title.appendChild(meta);
 
-      var finalLabels = {
-        'salem': 'سالم',
-        'defective': 'معیوب',
-        'needsRepair': 'نیاز به اصلاح'
-      };
       var finalClasses = {
         'salem': 'salem',
         'defective': 'defective',
@@ -288,19 +306,14 @@
       };
       var fbadge = document.createElement('span');
       fbadge.className = 'final-badge ' + (finalClasses[item.finalStatus] || '');
-      fbadge.textContent = 'نتیجه: ' + (finalLabels[item.finalStatus] || item.finalStatus);
+      fbadge.textContent = 'نتیجه: ' + (FINAL_LABELS[item.finalStatus] || item.finalStatus || '-');
       title.appendChild(fbadge);
 
       header.appendChild(title);
 
-      var statusLabels = {
-        'pending': 'در انتظار',
-        'approved': 'تأیید شده',
-        'rejected': 'رد شده'
-      };
       var sbadge = document.createElement('span');
       sbadge.className = 'status-badge ' + item.status;
-      sbadge.textContent = statusLabels[item.status] || item.status;
+      sbadge.textContent = STATUS_LABELS[item.status] || item.status || '-';
       header.appendChild(sbadge);
 
       div.appendChild(header);
@@ -325,6 +338,7 @@
       if (!dateVal) return '-';
       try {
         var d = new Date(dateVal);
+        if (isNaN(d.getTime())) return String(dateVal);
         var y = d.getFullYear();
         var m = ('0' + (d.getMonth() + 1)).slice(-2);
         var day = ('0' + d.getDate()).slice(-2);
@@ -356,12 +370,11 @@
 
       var details = document.getElementById('modalDetails');
       details.innerHTML = '';
-      appendRow(details, 'کد تجهیز', item.barcode);
+      appendRow(details, 'کد تجهیز', item.barcode || '-');
       appendRow(details, 'نوع', item.source === 'firebox' ? 'فایر باکس' : 'سیلندر');
       appendRow(details, 'تاریخ', formatDate(item.date));
-      appendRow(details, 'نتیجه نهایی', item.finalStatus);
-      appendRow(details, 'وضعیت', item.status);
-
+      appendRow(details, 'نتیجه نهایی', FINAL_LABELS[item.finalStatus] || item.finalStatus || '-');
+      appendRow(details, 'وضعیت', STATUS_LABELS[item.status] || item.status || '-');
       if (item.status === 'approved' && item.approvedBy) {
         appendRow(details, 'تأییدکننده', item.approvedBy);
       }
@@ -372,7 +385,41 @@
         appendRow(details, 'یادداشت', item.notes);
       }
 
+      renderItems(item.items || []);
+
       document.getElementById('viewModal').classList.add('show');
+    }
+
+    function renderItems(items) {
+      var el = document.getElementById('modalItems');
+      el.innerHTML = '';
+
+      if (items.length === 0) {
+        el.innerHTML = '<div class="no-items">آیتمی برای این بازرسی ثبت نشده است.</div>';
+        return;
+      }
+
+      var list = document.createElement('div');
+      list.className = 'items-list';
+
+      items.forEach(function(item) {
+        var row = document.createElement('div');
+        row.className = 'item-row ' + (item.status || '');
+
+        var name = document.createElement('span');
+        name.className = 'item-name';
+        name.textContent = item.name;
+        row.appendChild(name);
+
+        var status = document.createElement('span');
+        status.className = 'item-status';
+        status.textContent = FINAL_LABELS[item.status] || item.status;
+        row.appendChild(status);
+
+        list.appendChild(row);
+      });
+
+      el.appendChild(list);
     }
 
     function appendRow(parent, label, value) {
