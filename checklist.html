@@ -325,7 +325,7 @@
     function capturePhoto() {
       var video = document.getElementById('cameraPreview');
       var canvas = document.createElement('canvas');
-      var MAX_WIDTH = 1024; // کاهش از 1280 به 1024
+      var MAX_WIDTH = 1024;
       var scale = Math.min(1, MAX_WIDTH / video.videoWidth);
       canvas.width = Math.round(video.videoWidth * scale);
       canvas.height = Math.round(video.videoHeight * scale);
@@ -333,7 +333,7 @@
       var ctx = canvas.getContext('2d');
       ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-      var dataUrl = canvas.toDataURL('image/jpeg', 0.5); // کیفیت ۰.۵ به جای ۰.۷
+      var dataUrl = canvas.toDataURL('image/jpeg', 0.5);
       photoBase64 = dataUrl.split(',')[1];
       photoMimeType = 'image/jpeg';
 
@@ -381,61 +381,48 @@
         }
       });
 
-      savePendingSubmission(payload).then(function(recordId) {
-        btn.textContent = 'ثبت شد ✓';
-        btn.style.background = '#4caf50';
-        sessionStorage.removeItem('currentBarcode');
+      // Try direct save with keepalive FIRST
+      // If it succeeds quickly, great. If not, we still save to IndexedDB and navigate.
+      var savedToServer = false;
 
-        sendSubmissionAsync(recordId, payload);
-
-        setTimeout(function() {
-          window.location.href = INDEX_URL;
-        }, 600);
-
-      }).catch(function(err) {
-        console.error('IndexedDB save failed:', err);
-        sendSubmissionDirect(payload);
-      });
-    }
-
-    function sendSubmissionAsync(recordId, payload) {
       fetch(EXEC_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'text/plain;charset=utf-8' },
         body: JSON.stringify(payload),
-        redirect: 'follow'
+        redirect: 'follow',
+        keepalive: true
       }).then(function(r) { return r.json(); }).then(function(response) {
         if (response.success) {
-          deletePendingSubmission(recordId);
-        } else {
-          incrementRetry(recordId);
-        }
-      }).catch(function() {
-        incrementRetry(recordId);
-      });
-    }
-
-    function sendSubmissionDirect(payload) {
-      fetch(EXEC_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        body: JSON.stringify(payload),
-        redirect: 'follow'
-      }).then(function(r) { return r.json(); }).then(function(response) {
-        if (response.success) {
+          savedToServer = true;
           sessionStorage.removeItem('currentBarcode');
-          window.location.href = INDEX_URL;
+          btn.textContent = 'ثبت شد ✓';
+          btn.style.background = '#4caf50';
+          setTimeout(function() {
+            window.location.href = INDEX_URL;
+          }, 500);
         } else {
-          alert('خطا: ' + response.error);
-          var btn = document.getElementById('submitBtn');
+          // Server rejected - save to queue for retry, show error
+          savePendingSubmission(payload).then(function() {
+            btn.disabled = false;
+            btn.textContent = 'ثبت بازرسی';
+            btn.style.background = '';
+            alert('خطا: ' + response.error);
+          });
+        }
+      }).catch(function(err) {
+        // Network error - save to queue
+        savePendingSubmission(payload).then(function(recordId) {
+          btn.textContent = 'ثبت شد ✓';
+          btn.style.background = '#4caf50';
+          sessionStorage.removeItem('currentBarcode');
+          setTimeout(function() {
+            window.location.href = INDEX_URL;
+          }, 500);
+        }).catch(function() {
+          alert('خطا: ' + err.message);
           btn.disabled = false;
           btn.textContent = 'ثبت بازرسی';
-        }
-      }).catch(function(err) {
-        alert('خطا: ' + err.message);
-        var btn = document.getElementById('submitBtn');
-        btn.disabled = false;
-        btn.textContent = 'ثبت بازرسی';
+        });
       });
     }
   </script>
