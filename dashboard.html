@@ -4,202 +4,395 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#1e3c72">
+  <meta name="theme-color" content="#C0611A">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="HSE CSP">
   <title>داشبورد مدیر</title>
+  
+  <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet" type="text/css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: Tahoma, Arial, sans-serif; background: #f0f2f5; min-height: 100vh; padding: 16px; padding-bottom: 100px; }
-    .header { background: #1e3c72; color: #fff; padding: 16px; border-radius: 12px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
-    .header h1 { font-size: 18px; }
-    .header .user { font-size: 13px; opacity: 0.9; }
-    .header-btns { display: flex; gap: 8px; flex-wrap: wrap; }
-    .header-btn { background: rgba(255,255,255,0.2); border: none; color: #fff; padding: 8px 14px; border-radius: 8px; cursor: pointer; font-family: inherit; font-size: 13px; }
-    .header-btn:hover { background: rgba(255,255,255,0.3); }
-    .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 16px; }
-    .stat-card { background: #fff; border-radius: 12px; padding: 16px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
-    .stat-card .num { font-size: 28px; font-weight: bold; margin-bottom: 6px; }
-    .stat-card .label { font-size: 13px; color: #666; }
-    .stat-card.pending .num { color: #ff9800; }
-    .stat-card.approved .num { color: #4caf50; }
-    .stat-card.rejected .num { color: #d32f2f; }
-    .card { background: #fff; border-radius: 12px; padding: 20px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
-    .card h2 { font-size: 16px; color: #1e3c72; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center; }
-    .card h2 .count { font-size: 14px; color: #999; font-weight: normal; }
-    .overdue-card { border-right: 5px solid #d32f2f; }
-    .overdue-card h2 { color: #d32f2f; }
-    .overdue-item { background: #ffebee; border: 1px solid #ffcdd2; border-radius: 8px; padding: 12px; margin-bottom: 10px; }
-    .overdue-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-bottom: 8px; }
-    .overdue-barcode { font-size: 15px; font-weight: bold; color: #c62828; }
-    .overdue-days { font-size: 12px; color: #d32f2f; font-weight: bold; background: #fff; padding: 3px 10px; border-radius: 6px; }
-    .overdue-row { font-size: 13px; color: #555; padding: 3px 0; }
-    .overdue-row .label { color: #888; }
-    .select-all-bar { display: flex; justify-content: space-between; align-items: center; padding: 12px; background: #f5f5f5; border-radius: 8px; margin-bottom: 12px; font-size: 14px; }
-    .select-all-bar label { display: flex; align-items: center; gap: 8px; cursor: pointer; }
-    .select-all-bar input { width: 18px; height: 18px; }
-    .batch-btn { padding: 10px 16px; background: #4caf50; color: #fff; border: none; border-radius: 8px; font-family: inherit; font-size: 14px; font-weight: bold; cursor: pointer; }
-    .batch-btn:disabled { background: #ccc; cursor: not-allowed; }
-    .inspection-item { background: #f9f9f9; border: 2px solid #e0e0e0; border-radius: 10px; padding: 14px; margin-bottom: 12px; }
-    .inspection-header { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 10px; }
-    .inspection-header input[type="checkbox"] { width: 20px; height: 20px; margin-top: 2px; flex-shrink: 0; }
-    .inspection-title { flex: 1; }
-    .inspection-title .barcode { font-size: 16px; font-weight: bold; color: #222; }
-    .inspection-title .meta { font-size: 12px; color: #777; margin-top: 4px; }
-    .final-badge { display: inline-block; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: bold; margin-top: 6px; }
-    .final-badge.salem { background: #e8f5e9; color: #2e7d32; }
-    .final-badge.defective { background: #ffebee; color: #c62828; }
-    .final-badge.repairs { background: #fff3e0; color: #e65100; }
-    .inspection-actions { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
-    .btn { flex: 1; padding: 10px; border: none; border-radius: 8px; font-family: inherit; font-size: 13px; font-weight: bold; cursor: pointer; min-width: 90px; }
-    .btn-approve { background: #4caf50; color: #fff; }
-    .btn-reject { background: #d32f2f; color: #fff; }
-    .btn-view { background: #1e3c72; color: #fff; }
-    .btn:disabled { background: #ccc; cursor: not-allowed; }
-    .empty-msg { text-align: center; color: #999; padding: 30px; font-size: 14px; }
-    .loading-box { text-align: center; padding: 40px 20px; color: #666; font-size: 15px; }
-    .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); display: none; z-index: 1000; align-items: center; justify-content: center; padding: 20px; }
+    :root {
+      --copper-main: #E67E22;      
+      --copper-dark: #C0611A;      
+      --copper-light: #FAD7A8;     
+      --copper-bg: #F5F7FA;        
+      --text-dark: #2C3E50;        
+      --text-muted: #7F8C8D;
+      
+      --status-green: #27ae60;
+      --status-red: #e74c3c;
+      --status-orange: #f39c12;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Vazirmatn', Tahoma, sans-serif; }
+    
+    body { 
+      background-color: var(--copper-bg); 
+      color: var(--text-dark);
+      padding: 0 0 120px 0; 
+      min-height: 100vh;
+    }
+
+    /* هدر */
+    .header {
+      background: linear-gradient(135deg, var(--copper-dark), var(--copper-main));
+      color: #fff;
+      padding: 16px 20px;
+      border-radius: 0 0 24px 24px;
+      box-shadow: 0 4px 15px rgba(230, 126, 34, 0.3);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .header h1 { font-size: 18px; font-weight: 700; }
+    
+    .avatar {
+      width: 40px; height: 40px;
+      background: rgba(255,255,255,0.2);
+      border-radius: 50%;
+      display: flex; justify-content: center; align-items: center;
+      font-size: 18px; backdrop-filter: blur(5px);
+      border: 1px solid rgba(255,255,255,0.4);
+    }
+
+    .container { padding: 0 16px; max-width: 700px; margin: 0 auto; }
+
+    /* کارت‌های آماری (کلیک‌پذیر) */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .stat-card {
+      background: #fff;
+      border-radius: 16px;
+      padding: 16px 10px;
+      text-align: center;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+      border: 2px solid transparent;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      position: relative;
+    }
+    .stat-card:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0,0,0,0.08); }
+    .stat-card.active { border-color: var(--copper-main); background: #FFF9F0; }
+    
+    .stat-card .num { font-size: 22px; font-weight: 800; margin-bottom: 4px; }
+    .stat-card .label { font-size: 11px; color: var(--text-muted); font-weight: 700; }
+    
+    .stat-pending .num { color: var(--status-orange); }
+    .stat-approved .num { color: var(--status-green); }
+    .stat-rejected .num { color: var(--status-red); }
+
+    /* کارت‌های اصلی */
+    .card {
+      background: #fff;
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 16px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+      border: 1px solid rgba(230, 126, 34, 0.1);
+    }
+
+    .card-title {
+      font-size: 15px; font-weight: 700; color: var(--copper-dark);
+      margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center;
+      border-bottom: 1px dashed var(--copper-light); padding-bottom: 10px;
+    }
+
+    .card-title .count { font-size: 12px; color: var(--text-muted); background: #f0f0f0; padding: 2px 8px; border-radius: 10px; }
+
+    /* بخش عقب‌افتاده‌ها (قرمز) */
+    .overdue-card {
+      border-right: 4px solid var(--status-red);
+      background: #FFF5F5;
+    }
+    .overdue-card .card-title { color: var(--status-red); border-bottom-color: #ffcdd2; }
+    
+    .overdue-item {
+      background: #fff; border: 1px solid #ffcdd2; border-radius: 10px;
+      padding: 12px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;
+    }
+    .overdue-item .barcode { font-weight: 800; color: var(--status-red); font-size: 14px; }
+    .overdue-item .meta { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+    .badge-days { background: var(--status-red); color: #fff; font-size: 10px; padding: 4px 8px; border-radius: 6px; font-weight: bold; }
+
+    /* نوار جستجو */
+    .search-container {
+      margin-bottom: 16px;
+      position: relative;
+    }
+    .search-container input {
+      width: 100%;
+      padding: 12px 40px 12px 16px;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      font-family: inherit;
+      font-size: 13px;
+      background: #F8FAFC;
+      transition: 0.3s;
+    }
+    .search-container input:focus { outline: none; border-color: var(--copper-main); background: #fff; }
+    .search-container i {
+      position: absolute;
+      right: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+    }
+
+    /* لیست بازرسی‌های در انتظار */
+    .inspection-item {
+      background: #fff; border: 1px solid #e2e8f0; border-radius: 12px;
+      padding: 14px; margin-bottom: 12px; transition: 0.2s;
+    }
+    .inspection-item.selected { border-color: var(--copper-main); box-shadow: 0 0 0 2px rgba(230, 126, 34, 0.2); }
+    
+    .insp-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+    .insp-title { display: flex; gap: 10px; align-items: flex-start; }
+    .insp-title input[type="checkbox"] { width: 20px; height: 20px; margin-top: 2px; accent-color: var(--copper-main); cursor: pointer;}
+    .insp-barcode { font-size: 15px; font-weight: 800; color: var(--text-dark); }
+    .insp-meta { font-size: 12px; color: var(--text-muted); margin-top: 4px; display: flex; gap: 12px;}
+    
+    .badge-status { padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; }
+    .badge-status.salem { background: #E8F8F5; color: var(--status-green); }
+    .badge-status.defective { background: #FDEDEC; color: var(--status-red); }
+    .badge-status.repair { background: #FEF5E7; color: var(--status-orange); }
+
+    .insp-actions { display: flex; gap: 8px; border-top: 1px solid #f0f0f0; padding-top: 12px; }
+    .btn-action {
+      flex: 1; padding: 10px; border-radius: 8px; border: none; font-family: inherit; font-size: 12px; font-weight: 700; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; gap: 6px; transition: 0.2s;
+    }
+    .btn-view { background: #F8FAFC; color: var(--text-dark); border: 1px solid #e2e8f0; }
+    .btn-approve { background: #E8F8F5; color: var(--status-green); border: 1px solid #A3E4D7; }
+    .btn-reject { background: #FDEDEC; color: var(--status-red); border: 1px solid #FADBD8; }
+
+    .empty-state { text-align: center; padding: 30px 10px; color: var(--text-muted); font-size: 14px; }
+    .empty-state i { font-size: 40px; color: #ccc; margin-bottom: 10px; display: block; }
+
+    /* دکمه شناور تایید گروهی (Sticky) */
+    .sticky-batch-bar {
+      position: fixed; bottom: 70px; left: 16px; right: 16px;
+      background: var(--status-green); color: #fff;
+      border-radius: 50px; padding: 12px 20px;
+      display: flex; justify-content: space-between; align-items: center;
+      box-shadow: 0 6px 20px rgba(39, 174, 96, 0.4);
+      z-index: 99; transform: translateY(150%); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      cursor: pointer;
+    }
+    .sticky-batch-bar.show { transform: translateY(0); }
+    .sticky-batch-bar span { font-size: 14px; font-weight: 700; }
+    .sticky-batch-bar .count-badge { background: #fff; color: var(--status-green); padding: 2px 8px; border-radius: 10px; font-size: 12px; margin-right: 8px;}
+    
+    /* منوی پایین */
+    .bottom-nav {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      background: #fff; display: flex; justify-content: space-around; align-items: center;
+      padding: 10px; box-shadow: 0 -2px 15px rgba(0,0,0,0.05);
+      border-radius: 24px 24px 0 0; z-index: 100;
+    }
+    .nav-item {
+      display: flex; flex-direction: column; align-items: center; gap: 4px;
+      color: var(--text-muted); font-size: 11px; font-weight: 700; text-decoration: none; cursor: pointer;
+    }
+    .nav-item i { font-size: 20px; margin-bottom: 2px; }
+    .nav-item.active { color: var(--copper-main); }
+
+    /* مدال‌ها (Modals) */
+    .modal-overlay {
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.5); z-index: 200; display: none; align-items: center; justify-content: center; padding: 16px;
+    }
     .modal-overlay.show { display: flex; }
-    .modal { background: #fff; border-radius: 12px; padding: 20px; max-width: 500px; width: 100%; max-height: 90vh; overflow-y: auto; }
-    .modal img { width: 100%; border-radius: 8px; margin-bottom: 12px; display: block; }
-    .modal h3 { font-size: 16px; color: #1e3c72; margin-bottom: 12px; }
-    .modal h4 { font-size: 14px; color: #1e3c72; margin: 16px 0 10px 0; padding-bottom: 6px; border-bottom: 2px solid #e0e0e0; }
-    .modal .row { display: flex; justify-content: space-between; padding: 6px 0; font-size: 14px; border-bottom: 1px solid #eee; }
-    .modal .row:last-child { border-bottom: none; }
-    .modal .row .l { color: #666; }
-    .modal .row .v { font-weight: bold; color: #222; }
-    .modal-close { width: 100%; padding: 12px; background: #1e3c72; color: #fff; border: none; border-radius: 8px; font-family: inherit; font-size: 15px; font-weight: bold; cursor: pointer; margin-top: 16px; }
-    .reject-modal textarea { width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-family: inherit; font-size: 14px; min-height: 80px; resize: vertical; margin-bottom: 12px; }
-    .reject-modal textarea:focus { outline: none; border-color: #d32f2f; }
-    .reject-modal .reject-confirm { background: #d32f2f; }
-    .overdue-filter { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
-    .overdue-filter input { flex: 1; min-width: 200px; padding: 10px 14px; border: 2px solid #e0e0e0; border-radius: 8px; font-family: inherit; font-size: 14px; }
-    .overdue-filter input:focus { outline: none; border-color: #d32f2f; }
-    .items-list { display: flex; flex-direction: column; gap: 6px; }
-    .item-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 10px; border-radius: 6px; font-size: 13px; }
-    .item-row.salem { background: #e8f5e9; color: #2e7d32; }
-    .item-row.defective { background: #ffebee; color: #c62828; }
-    .item-row.needsRepair { background: #fff3e0; color: #e65100; }
-    .item-row .item-name { flex: 1; }
-    .item-row .item-status { font-weight: bold; padding: 3px 8px; border-radius: 4px; background: rgba(255,255,255,0.6); font-size: 11px; }
-    .items-loading { text-align: center; color: #999; padding: 12px; font-size: 13px; }
+    
+    .modal-content {
+      background: #fff; border-radius: 16px; width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto;
+      padding: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); animation: slideUp 0.3s ease-out;
+    }
+    @keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    
+    .modal-title { font-size: 16px; font-weight: 800; color: var(--copper-dark); margin-bottom: 16px; border-bottom: 1px solid #eee; padding-bottom: 12px; display: flex; justify-content: space-between; align-items: center;}
+    .modal-close { background: none; border: none; font-size: 20px; color: #999; cursor: pointer; }
+
+    /* مشاهده جزئیات */
+    .modal-img { width: 100%; max-height: 200px; object-fit: contain; border-radius: 8px; background: #f0f0f0; margin-bottom: 16px; }
+    .detail-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px dashed #eee; font-size: 13px; }
+    .detail-row:last-child { border-bottom: none; }
+    .detail-row .l { color: var(--text-muted); }
+    .detail-row .v { font-weight: 700; color: var(--text-dark); }
+    
+    .items-list-title { margin: 16px 0 8px 0; font-size: 14px; font-weight: 700; color: var(--copper-dark); }
+    .item-row { display: flex; justify-content: space-between; padding: 8px 12px; border-radius: 6px; margin-bottom: 6px; font-size: 12px; font-weight: 700; }
+    .item-row.salem { background: #E8F8F5; color: var(--status-green); }
+    .item-row.defective { background: #FDEDEC; color: var(--status-red); }
+    .item-row.needsRepair { background: #FEF5E7; color: var(--status-orange); }
+
+    /* رد کردن */
+    .modal-textarea { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-family: inherit; min-height: 100px; resize: vertical; margin-bottom: 16px; }
+    .btn-submit-reject { width: 100%; padding: 14px; background: var(--status-red); color: #fff; border: none; border-radius: 8px; font-family: inherit; font-weight: 700; font-size: 14px; cursor: pointer; }
+
+    /* Toast */
+    #toast-container { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 999; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
+    .toast { background: #333; color: #fff; padding: 12px 24px; border-radius: 50px; font-size: 13px; font-weight: 700; box-shadow: 0 4px 12px rgba(0,0,0,0.15); display: flex; align-items: center; gap: 8px; animation: toastIn 0.3s ease-out, toastOut 0.3s ease-in 2.7s forwards; }
+    .toast.success { background: var(--status-green); }
+    .toast.error { background: var(--status-red); }
+    .toast.info { background: var(--copper-main); }
+    @keyframes toastIn { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    @keyframes toastOut { from { transform: translateY(0); opacity: 1; } to { transform: translateY(-20px); opacity: 0; } }
+
   </style>
 </head>
 <body>
 
-  <div class="header">
+  <header class="header">
+    <h1>داشبورد مدیر</h1>
+    <div class="avatar">
+      <i class="fa-solid fa-user-tie"></i>
+    </div>
+  </header>
+
+  <div class="container">
+    
+    <!-- کارت‌های آماری -->
+    <div class="stats-grid">
+      <div class="stat-card stat-pending active" id="stat-pending" onclick="filterByStatus('pending')">
+        <div class="num" id="count-pending">-</div>
+        <div class="label">در انتظار</div>
+      </div>
+      <div class="stat-card stat-approved" id="stat-approved" onclick="filterByStatus('approved')">
+        <div class="num" id="count-approved">-</div>
+        <div class="label">تایید شده</div>
+      </div>
+      <div class="stat-card stat-rejected" id="stat-rejected" onclick="filterByStatus('rejected')">
+        <div class="num" id="count-rejected">-</div>
+        <div class="label">رد شده</div>
+      </div>
+    </div>
+
+    <!-- بخش عقب‌افتاده‌ها -->
+    <div class="card overdue-card" id="overdueCard" style="display:none;">
+      <div class="card-title">
+        <span><i class="fa-solid fa-triangle-exclamation"></i> تجهیزات عقب‌افتاده</span>
+        <span class="count" id="overdue-count">۰</span>
+      </div>
+      <div id="overdueList"></div>
+    </div>
+
+    <!-- لیست بازرسی‌ها -->
+    <div class="card" style="padding: 16px;">
+      <div class="card-title" style="padding-right:4px;">
+        <span><i class="fa-solid fa-list-check"></i> لیست بازرسی‌ها</span>
+        <span class="count" id="list-count">۰</span>
+      </div>
+
+      <!-- نوار جستجو -->
+      <div class="search-container">
+        <input type="text" id="searchInput" placeholder="جستجوی بارکد یا نام بازرس..." oninput="handleSearch()">
+        <i class="fa-solid fa-magnifying-glass"></i>
+      </div>
+
+      <div id="pendingList">
+        <div class="empty-state"><i class="fa-solid fa-spinner fa-spin"></i> در حال بارگذاری...</div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- دکمه شناور تایید گروهی -->
+  <div class="sticky-batch-bar" id="batchBar" onclick="approveBatch()">
     <div>
-      <h1>داشبورد مدیر</h1>
-      <div class="user" id="userInfo"></div>
+      <i class="fa-solid fa-check-double"></i>
+      <span>تایید موارد انتخابی</span>
     </div>
-    <div class="header-btns">
-      <button class="header-btn" onclick="window.location.href='index.html'">اسکنر</button>
-      <button class="header-btn" onclick="window.location.href='equipment.html'">تجهیزات</button>
-      <button class="header-btn" onclick="window.location.href='users.html'">کاربران</button>
-      <button class="header-btn" onclick="window.location.href='logs.html'">لاگ‌ها</button>
-      <button class="header-btn" onclick="window.location.href='report.html'">گزارش</button>
-      <button class="header-btn" onclick="doLogout()">خروج</button>
-    </div>
+    <span class="count-badge" id="batchCount">0</span>
   </div>
 
-  <div class="stats">
-    <div class="stat-card pending">
-      <div class="num" id="countPending">-</div>
-      <div class="label">در انتظار تأیید</div>
-    </div>
-    <div class="stat-card approved">
-      <div class="num" id="countApproved">-</div>
-      <div class="label">تأیید شده</div>
-    </div>
-    <div class="stat-card rejected">
-      <div class="num" id="countRejected">-</div>
-      <div class="label">رد شده</div>
-    </div>
-  </div>
+  <!-- منوی پایین -->
+  <nav class="bottom-nav">
+    <a href="index.html" class="nav-item">
+      <i class="fa-solid fa-house"></i>
+      <span>خانه</span>
+    </a>
+    <a href="history.html" class="nav-item">
+      <i class="fa-solid fa-clock-rotate-left"></i>
+      <span>تاریخچه</span>
+    </a>
+    <a href="dashboard.html" class="nav-item active">
+      <i class="fa-solid fa-chart-pie"></i>
+      <span>داشبورد</span>
+    </a>
+    <a href="#" class="nav-item" onclick="doLogout()">
+      <i class="fa-solid fa-arrow-right-from-bracket"></i>
+      <span>خروج</span>
+    </a>
+  </nav>
 
-  <div class="card overdue-card" id="overdueCard" style="display:none;">
-    <h2>
-      <span>⚠️ تجهیزات عقب‌افتاده</span>
-      <span class="count" id="overdueCountLabel"></span>
-    </h2>
-    <div class="overdue-filter">
-      <input type="text" id="overdueSearch" placeholder="جستجو در کد یا موقعیت..." oninput="renderOverdue()">
-    </div>
-    <div id="overdueList"></div>
-    <div id="overdueEmpty" class="empty-msg" style="display:none;">هیچ تجهیز عقب‌افتاده‌ای وجود ندارد.</div>
-  </div>
+  <!-- Toast Container -->
+  <div id="toast-container"></div>
 
-  <div class="card">
-    <h2>
-      <span>بازرسی‌های در انتظار تأیید</span>
-      <span class="count" id="pendingCountLabel"></span>
-    </h2>
-
-    <div id="loadingBox" class="loading-box">در حال بارگذاری...</div>
-
-    <div id="pendingContainer" style="display:none;">
-      <div class="select-all-bar" id="selectAllBar">
-        <label>
-          <input type="checkbox" id="selectAllCheckbox" onchange="toggleSelectAll(this)">
-          <span>انتخاب همه</span>
-        </label>
-        <button class="batch-btn" id="batchApproveBtn" onclick="batchApprove()" disabled>تأیید موارد انتخابی</button>
-      </div>
-      <div id="inspectionsList"></div>
-    </div>
-
-    <div id="emptyBox" class="empty-msg" style="display:none;">هیچ بازرسی در انتظار تأیید وجود ندارد.</div>
-  </div>
-
+  <!-- مدال مشاهده جزئیات -->
   <div class="modal-overlay" id="viewModal">
-    <div class="modal">
-      <h3>جزئیات بازرسی</h3>
-      <img id="modalPhoto" src="" alt="عکس بازرسی" style="display:none;">
-      <div id="modalDetails"></div>
-      <h4>موارد بررسی‌شده</h4>
-      <div id="modalItems">
-        <div class="items-loading">در حال بارگذاری آیتم‌ها...</div>
+    <div class="modal-content">
+      <div class="modal-title">
+        <span>جزئیات بازرسی</span>
+        <button class="modal-close" onclick="closeModal('viewModal')">&times;</button>
       </div>
-      <button class="modal-close" onclick="closeViewModal()">بستن</button>
+      
+      <img id="modalPhoto" src="" class="modal-img" style="display:none;">
+      <div id="modalPhotoEmpty" style="text-align:center; padding:20px; background:#f9f9f9; border-radius:8px; margin-bottom:16px; color:#999; font-size:13px; display:none;">عکسی ثبت نشده است.</div>
+      
+      <div class="detail-row"><span class="l">کد تجهیز</span><span class="v" id="v-barcode">-</span></div>
+      <div class="detail-row"><span class="l">نوع</span><span class="v" id="v-type">-</span></div>
+      <div class="detail-row"><span class="l">بازرس</span><span class="v" id="v-inspector">-</span></div>
+      <div class="detail-row"><span class="l">تاریخ</span><span class="v" id="v-date">-</span></div>
+      <div class="detail-row"><span class="l">نتیجه نهایی</span><span class="v" id="v-final">-</span></div>
+      <div class="detail-row"><span class="l">وضعیت تایید</span><span class="v" id="v-status">-</span></div>
+      <div class="detail-row" id="v-notes-row" style="display:none;"><span class="l">یادداشت</span><span class="v" id="v-notes">-</span></div>
+
+      <div class="items-list-title">موارد بررسی‌شده</div>
+      <div id="v-items"><div style="text-align:center; color:#999; font-size:12px; padding:10px;">در حال بارگذاری...</div></div>
+      
+      <button class="btn-cancel" style="width:100%; margin-top:16px; padding:12px;" onclick="closeModal('viewModal')">بستن</button>
     </div>
   </div>
 
+  <!-- مدال رد کردن -->
   <div class="modal-overlay" id="rejectModal">
-    <div class="modal reject-modal">
-      <h3>دلیل رد بازرسی</h3>
-      <textarea id="rejectReason" placeholder="دلیل رد را وارد کنید (اختیاری)"></textarea>
-      <div style="display:flex; gap:8px;">
-        <button class="modal-close" style="flex:1; margin-top:0;" onclick="closeRejectModal()">لغو</button>
-        <button class="modal-close reject-confirm" style="flex:1; margin-top:0;" onclick="confirmReject()">تأیید رد</button>
+    <div class="modal-content">
+      <div class="modal-title">
+        <span>دلیل رد بازرسی</span>
+        <button class="modal-close" onclick="closeModal('rejectModal')">&times;</button>
       </div>
+      <textarea class="modal-textarea" id="rejectReason" placeholder="لطفاً دلیل رد را وارد کنید (اختیاری)..."></textarea>
+      <button class="btn-submit-reject" onclick="confirmReject()">ثبت و رد بازرسی</button>
+      <button class="btn-cancel" style="width:100%; margin-top:10px; padding:12px;" onclick="closeModal('rejectModal')">لغو</button>
     </div>
   </div>
 
   <script>
     var EXEC_URL = 'https://script.google.com/macros/s/AKfycbyh8ccieztX3ZkFF0IozE_beRcZja0BH8ieYbQ9qCL1tLDxkq2QB0Pz3JD4v0IRY6eo/exec';
-    var INDEX_URL = 'index.html';
     var currentToken = '';
-    var currentUser = '';
-    var currentRole = '';
-    var pendingList = [];
-    var overdueList = [];
-    var selectedIds = {};
+    
+    var allPendingData = [];
+    var overdueData = [];
+    
+    var currentFilter = 'pending';
+    var currentSearch = '';
+    var selectedIds = new Set();
     var rejectTargetId = null;
-
-    var STATUS_LABELS = {
-      'salem': 'سالم',
-      'defective': 'معیوب',
-      'needsRepair': 'نیاز به اصلاح'
-    };
 
     function goToLogin() {
       window.location.href = EXEC_URL + '?page=Login';
-    }
-
-    function handleSessionExpired() {
-      localStorage.clear();
-      sessionStorage.clear();
-      goToLogin();
     }
 
     function apiCall(request) {
@@ -213,427 +406,375 @@
 
     (function initPage() {
       currentToken = localStorage.getItem('token') || '';
-      currentUser = localStorage.getItem('fullName') || localStorage.getItem('username') || '';
 
       if (!currentToken) { goToLogin(); return; }
 
       apiCall({ action: 'auth.me', token: currentToken }).then(function(response) {
         if (!response.success) {
-          handleSessionExpired();
+          localStorage.clear();
+          goToLogin();
           return;
         }
-
-        currentRole = response.data.role;
-        if (currentRole !== 'manager' && currentRole !== 'admin') {
+        var role = response.data.role;
+        if (role !== 'manager' && role !== 'admin') {
           alert('شما به این بخش دسترسی ندارید.');
           window.location.href = 'index.html';
           return;
         }
 
-        document.getElementById('userInfo').textContent = currentUser;
         loadCounts();
         loadPending();
         loadOverdue();
       }).catch(function() {
-        handleSessionExpired();
+        localStorage.clear();
+        goToLogin();
       });
     })();
 
-    function doLogout() {
-      var token = currentToken;
-      localStorage.clear();
-      sessionStorage.clear();
-      fetch(EXEC_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        body: JSON.stringify({ action: 'auth.logout', token: token }),
-        redirect: 'follow'
-      }).finally(function() {
-        goToLogin();
-      });
+    function showToast(message, type = 'success') {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      let icon = type === 'error' ? 'fa-circle-exclamation' : (type === 'info' ? 'fa-info-circle' : 'fa-check-circle');
+      toast.innerHTML = `<i class="fa-solid ${icon}"></i> ${message}`;
+      container.appendChild(toast);
+      setTimeout(() => { toast.remove(); }, 3000);
     }
 
-    function toFa(n) {
-      return String(n).replace(/\d/g, function(d) {
-        return '۰۱۲۳۴۵۶۷۸۹'[d];
-      });
-    }
-
+    // ============================================
+    // Load Data
+    // ============================================
     function loadCounts() {
-      apiCall({
-        action: 'dashboard.counts',
-        token: currentToken
-      }).then(function(response) {
-        if (!response.success) {
-          if (response.error && (response.error.indexOf('نشست') !== -1 || response.error.indexOf('منقضی') !== -1)) {
-            handleSessionExpired();
-            return;
-          }
-          return;
+      apiCall({ action: 'dashboard.counts', token: currentToken }).then(function(response) {
+        if (response.success) {
+          document.getElementById('count-pending').textContent = toFa(response.data.pending);
+          document.getElementById('count-approved').textContent = toFa(response.data.approved);
+          document.getElementById('count-rejected').textContent = toFa(response.data.rejected);
         }
-        document.getElementById('countPending').textContent = toFa(response.data.pending);
-        document.getElementById('countApproved').textContent = toFa(response.data.approved);
-        document.getElementById('countRejected').textContent = toFa(response.data.rejected);
-      }).catch(function(err) {
-        console.error('loadCounts failed: ' + err.message);
-      });
-    }
-
-    function loadOverdue() {
-      apiCall({
-        action: 'dashboard.overdue',
-        token: currentToken
-      }).then(function(response) {
-        if (!response.success) return;
-        overdueList = response.data.items || [];
-        renderOverdue();
       }).catch(function() {});
     }
 
-    function renderOverdue() {
-      var card = document.getElementById('overdueCard');
-      var list = document.getElementById('overdueList');
-      var empty = document.getElementById('overdueEmpty');
-
-      if (overdueList.length === 0) {
-        card.style.display = 'none';
-        return;
-      }
-
-      card.style.display = 'block';
-      list.innerHTML = '';
-
-      var search = (document.getElementById('overdueSearch').value || '').trim().toLowerCase();
-      var filtered = overdueList;
-
-      if (search) {
-        filtered = overdueList.filter(function(item) {
-          return String(item.barcode).toLowerCase().indexOf(search) !== -1 ||
-                 String(item.location).toLowerCase().indexOf(search) !== -1 ||
-                 String(item.plant).toLowerCase().indexOf(search) !== -1;
-        });
-      }
-
-      document.getElementById('overdueCountLabel').textContent = toFa(filtered.length) + ' مورد';
-
-      if (filtered.length === 0) {
-        empty.style.display = 'block';
-        return;
-      }
-
-      empty.style.display = 'none';
-
-      filtered.forEach(function(item) {
-        list.appendChild(createOverdueCard(item));
-      });
-    }
-
-    function createOverdueCard(item) {
-      var div = document.createElement('div');
-      div.className = 'overdue-item';
-
-      var header = document.createElement('div');
-      header.className = 'overdue-header';
-
-      var barcode = document.createElement('span');
-      barcode.className = 'overdue-barcode';
-      barcode.textContent = item.barcode + (item.kind === 'firebox' ? ' (فایر باکس)' : '');
-      header.appendChild(barcode);
-
-      var days = document.createElement('span');
-      days.className = 'overdue-days';
-      var daysNum = parseInt(item.daysUntilOverdue, 10);
-      if (isNaN(daysNum)) {
-        days.textContent = 'بدون بازرسی';
-      } else if (daysNum < 0) {
-        days.textContent = toFa(Math.abs(daysNum)) + ' روز عقب';
-      } else if (daysNum === 0) {
-        days.textContent = 'امروز';
-      } else {
-        days.textContent = toFa(daysNum) + ' روز مانده';
-      }
-      header.appendChild(days);
-
-      div.appendChild(header);
-
-      appendOverdueRow(div, 'موقعیت', item.location || '-');
-      if (item.plant) appendOverdueRow(div, 'کارخانه', item.plant);
-      if (item.assignedTo) appendOverdueRow(div, 'بازرس', item.assignedTo);
-      appendOverdueRow(div, 'آخرین بازرسی', item.lastInspection || 'ندارد');
-      if (item.daysSince !== '' && item.daysSince !== null && item.daysSince !== undefined) {
-        appendOverdueRow(div, 'روز از آخرین بازرسی', toFa(item.daysSince) + ' روز');
-      }
-
-      return div;
-    }
-
-    function appendOverdueRow(parent, label, value) {
-      var row = document.createElement('div');
-      row.className = 'overdue-row';
-      var l = document.createElement('span'); l.className = 'label'; l.textContent = label + ': ';
-      var v = document.createElement('span'); v.textContent = String(value);
-      row.appendChild(l); row.appendChild(v); parent.appendChild(row);
+    function loadOverdue() {
+      apiCall({ action: 'dashboard.overdue', token: currentToken }).then(function(response) {
+        if (response.success && response.data.items.length > 0) {
+          overdueData = response.data.items;
+          renderOverdue();
+        }
+      }).catch(function() {});
     }
 
     function loadPending() {
-      apiCall({
-        action: 'dashboard.pending',
-        token: currentToken
-      }).then(function(response) {
-        document.getElementById('loadingBox').style.display = 'none';
-
-        if (!response.success) {
-          if (response.error && (response.error.indexOf('نشست') !== -1 || response.error.indexOf('منقضی') !== -1)) {
-            handleSessionExpired();
-            return;
-          }
-          alert('خطا: ' + response.error);
-          return;
+      apiCall({ action: 'dashboard.pending', token: currentToken }).then(function(response) {
+        if (response.success) {
+          // همه چیز را در دیتای "در انتظار" ذخیره می‌کنیم
+          // در واقعیت، این API باید همه موارد را برگرداند و ما در فرانت فیلتر می‌کنیم
+          // ولی چون در کد قبلی اینگونه بود، فعلا برای سادگی از همان استفاده می‌کنیم
+          // *نکته*: در کد نهایی بک‌اند، API های جداگانه برای pending/approved/rejected بهتر است
+          allPendingData = response.data.inspections || [];
+          renderList();
+        } else {
+          showToast('خطا در دریافت لیست: ' + response.error, 'error');
         }
-
-        pendingList = response.data.inspections || [];
-        renderPending();
       }).catch(function(err) {
-        document.getElementById('loadingBox').style.display = 'none';
-        alert('خطا در ارتباط با سرور: ' + err.message);
+        showToast('خطا در ارتباط با سرور: ' + err.message, 'error');
       });
     }
 
-    function renderPending() {
-      var container = document.getElementById('inspectionsList');
-      container.innerHTML = '';
-      selectedIds = {};
-      document.getElementById('selectAllCheckbox').checked = false;
+    // ============================================
+    // Rendering
+    // ============================================
+    function renderOverdue() {
+      const card = document.getElementById('overdueCard');
+      const list = document.getElementById('overdueList');
+      document.getElementById('overdue-count').textContent = toFa(overdueData.length) + ' مورد';
+      card.style.display = 'block';
+      list.innerHTML = '';
+      
+      overdueData.slice(0, 3).forEach(function(item) {
+        const div = document.createElement('div');
+        div.className = 'overdue-item';
+        
+        let daysText = parseInt(item.daysUntilOverdue, 10) < 0 
+          ? toFa(Math.abs(parseInt(item.daysUntilOverdue, 10))) + ' روز عقب' 
+          : toFa(item.daysUntilOverdue) + ' روز مانده';
+          
+        div.innerHTML = `
+          <div>
+            <div class="barcode">${item.barcode}</div>
+            <div class="meta">${item.location || '-'} | بازرس: ${item.assignedTo || '-'}</div>
+          </div>
+          <div class="badge-days">${daysText}</div>
+        `;
+        list.appendChild(div);
+      });
+      
+      if (overdueData.length > 3) {
+        const more = document.createElement('div');
+        more.style.cssText = 'text-align:center; font-size:12px; color:var(--status-red); font-weight:700; margin-top:8px;';
+        more.textContent = 'و ' + toFa(overdueData.length - 3) + ' مورد دیگر...';
+        list.appendChild(more);
+      }
+    }
 
-      if (pendingList.length === 0) {
-        document.getElementById('pendingContainer').style.display = 'none';
-        document.getElementById('emptyBox').style.display = 'block';
-        document.getElementById('pendingCountLabel').textContent = '';
+    function filterByStatus(status) {
+      if (currentFilter === status) {
+        currentFilter = 'all';
+        document.querySelectorAll('.stat-card').forEach(c => c.classList.remove('active'));
+      } else {
+        currentFilter = status;
+        document.querySelectorAll('.stat-card').forEach(c => c.classList.remove('active'));
+        document.getElementById('stat-' + status).classList.add('active');
+      }
+      renderList();
+    }
+
+    function handleSearch() {
+      currentSearch = document.getElementById('searchInput').value.trim().toLowerCase();
+      renderList();
+    }
+
+    function renderList() {
+      const listEl = document.getElementById('pendingList');
+      listEl.innerHTML = '';
+
+      // فیلتر کردن داده‌ها (چون API ما فقط pending را برمی‌گرداند، برای نمایش تایید شده و رد شده در واقعیت باید API جدا باشد)
+      // در این نسخه، ما فرض می‌کنیم allPendingData همه را دارد
+      let filtered = allPendingData;
+      
+      if (currentFilter !== 'all') {
+        filtered = filtered.filter(d => d.status === currentFilter || (currentFilter === 'pending' && !d.status));
+      }
+      
+      if (currentSearch) {
+        filtered = filtered.filter(d => 
+          (d.barcode && d.barcode.toLowerCase().includes(currentSearch)) || 
+          (d.inspector && d.inspector.toLowerCase().includes(currentSearch))
+        );
+      }
+
+      document.getElementById('list-count').textContent = toFa(filtered.length) + ' مورد';
+
+      if (filtered.length === 0) {
+        listEl.innerHTML = '<div class="empty-state"><i class="fa-solid fa-inbox"></i>موردی برای نمایش وجود ندارد.</div>';
         return;
       }
 
-      document.getElementById('pendingContainer').style.display = 'block';
-      document.getElementById('emptyBox').style.display = 'none';
-      document.getElementById('pendingCountLabel').textContent = toFa(pendingList.length) + ' مورد';
+      filtered.forEach(item => {
+        const div = document.createElement('div');
+        div.className = `inspection-item ${selectedIds.has(item.inspectionId) ? 'selected' : ''}`;
+        
+        let finalLabel = item.finalStatus === 'salem' ? 'سالم' : (item.finalStatus === 'defective' ? 'معیوب' : 'نیاز به اصلاح');
+        let badgeClass = item.finalStatus === 'salem' ? 'salem' : (item.finalStatus === 'defective' ? 'defective' : 'repair');
+        
+        let actionsHtml = '';
+        let checkboxHtml = '';
 
-      pendingList.forEach(function(item) {
-        container.appendChild(createInspectionCard(item));
+        if (item.status === 'pending' || !item.status) {
+          checkboxHtml = `<input type="checkbox" class="item-checkbox" data-id="${item.inspectionId}" onchange="toggleSelect('${item.inspectionId}', this.checked)" ${selectedIds.has(item.inspectionId) ? 'checked' : ''}>`;
+          actionsHtml = `
+            <div class="insp-actions">
+              <button class="btn-action btn-view" onclick="openViewModal('${item.inspectionId}')"><i class="fa-solid fa-eye"></i> مشاهده</button>
+              <button class="btn-action btn-approve" onclick="approveItem('${item.inspectionId}', this)"><i class="fa-solid fa-check"></i> تایید</button>
+              <button class="btn-action btn-reject" onclick="openRejectModal('${item.inspectionId}')"><i class="fa-solid fa-xmark"></i> رد</button>
+            </div>`;
+        } else {
+          actionsHtml = `
+            <div class="insp-actions">
+              <button class="btn-action btn-view" onclick="openViewModal('${item.inspectionId}')"><i class="fa-solid fa-eye"></i> مشاهده جزئیات</button>
+            </div>`;
+        }
+
+        div.innerHTML = `
+          <div class="insp-header">
+            <div class="insp-title">
+              ${checkboxHtml}
+              <div>
+                <div class="insp-barcode">${item.barcode}</div>
+                <div class="insp-meta">
+                  <span><i class="fa-solid fa-user"></i> ${item.inspector}</span>
+                  <span><i class="fa-solid fa-calendar"></i> ${formatDate(item.date)}</span>
+                </div>
+              </div>
+            </div>
+            <span class="badge-status ${badgeClass}">${finalLabel}</span>
+          </div>
+          ${actionsHtml}
+        `;
+        listEl.appendChild(div);
       });
-
-      updateBatchButton();
     }
 
-    function createInspectionCard(item) {
-      var div = document.createElement('div');
-      div.className = 'inspection-item';
-      div.dataset.id = item.inspectionId;
-
-      var header = document.createElement('div');
-      header.className = 'inspection-header';
-
-      var cb = document.createElement('input');
-      cb.type = 'checkbox';
-      cb.dataset.id = item.inspectionId;
-      cb.onchange = function() { toggleSelect(item.inspectionId, cb.checked); };
-      header.appendChild(cb);
-
-      var title = document.createElement('div');
-      title.className = 'inspection-title';
-
-      var bc = document.createElement('div');
-      bc.className = 'barcode';
-      bc.textContent = item.barcode + (item.source === 'firebox' ? ' (فایر باکس)' : '');
-      title.appendChild(bc);
-
-      var meta = document.createElement('div');
-      meta.className = 'meta';
-      meta.textContent = 'بازرس: ' + item.inspector + ' | ' + formatDate(item.date);
-      title.appendChild(meta);
-
-      var finalClasses = {
-        'salem': 'salem',
-        'defective': 'defective',
-        'needsRepair': 'repairs'
-      };
-      var badge = document.createElement('span');
-      badge.className = 'final-badge ' + (finalClasses[item.finalStatus] || '');
-      badge.textContent = 'نتیجه: ' + (STATUS_LABELS[item.finalStatus] || item.finalStatus);
-      title.appendChild(badge);
-
-      header.appendChild(title);
-      div.appendChild(header);
-
-      var actions = document.createElement('div');
-      actions.className = 'inspection-actions';
-
-      var viewBtn = document.createElement('button');
-      viewBtn.className = 'btn btn-view';
-      viewBtn.textContent = 'مشاهده';
-      viewBtn.onclick = function() { openViewModal(item); };
-      actions.appendChild(viewBtn);
-
-      var approveBtn = document.createElement('button');
-      approveBtn.className = 'btn btn-approve';
-      approveBtn.textContent = 'تأیید';
-      approveBtn.onclick = function() { singleApprove(item.inspectionId, approveBtn); };
-      actions.appendChild(approveBtn);
-
-      var rejectBtn = document.createElement('button');
-      rejectBtn.className = 'btn btn-reject';
-      rejectBtn.textContent = 'رد';
-      rejectBtn.onclick = function() { openRejectModal(item.inspectionId); };
-      actions.appendChild(rejectBtn);
-
-      div.appendChild(actions);
-      return div;
+    function toggleSelect(id, isChecked) {
+      if (isChecked) selectedIds.add(id);
+      else selectedIds.delete(id);
+      updateBatchBar();
     }
 
-    function formatDate(dateVal) {
-      if (!dateVal) return '-';
-      try {
-        var d = new Date(dateVal);
-        var y = d.getFullYear();
-        var m = ('0' + (d.getMonth() + 1)).slice(-2);
-        var day = ('0' + d.getDate()).slice(-2);
-        var hh = ('0' + d.getHours()).slice(-2);
-        var mm = ('0' + d.getMinutes()).slice(-2);
-        return y + '/' + m + '/' + day + ' - ' + hh + ':' + mm;
-      } catch (e) {
-        return String(dateVal);
-      }
-    }
+    function updateBatchBar() {
+      const bar = document.getElementById('batchBar');
+      const count = selectedIds.size;
+      document.getElementById('batchCount').textContent = toFa(count);
+      
+      if (count > 0) bar.classList.add('show');
+      else bar.classList.remove('show');
 
-    function toggleSelect(id, checked) {
-      if (checked) selectedIds[id] = true;
-      else delete selectedIds[id];
-      updateBatchButton();
-    }
-
-    function toggleSelectAll(checkbox) {
-      var checkboxes = document.querySelectorAll('#inspectionsList input[type="checkbox"]');
-      checkboxes.forEach(function(cb) {
-        cb.checked = checkbox.checked;
-        if (checkbox.checked) selectedIds[cb.dataset.id] = true;
-        else delete selectedIds[cb.dataset.id];
+      document.querySelectorAll('.item-checkbox').forEach(cb => {
+        const id = cb.getAttribute('data-id');
+        if (selectedIds.has(id)) cb.closest('.inspection-item').classList.add('selected');
+        else cb.closest('.inspection-item').classList.remove('selected');
       });
-      updateBatchButton();
     }
 
-    function updateBatchButton() {
-      var count = Object.keys(selectedIds).length;
-      var btn = document.getElementById('batchApproveBtn');
-      btn.disabled = count === 0;
-      btn.textContent = count > 0 ? 'تأیید موارد انتخابی (' + toFa(count) + ')' : 'تأیید موارد انتخابی';
-    }
-
-    function singleApprove(id, btn) {
-      if (!confirm('این بازرسی تأیید شود؟')) return;
-
+    // ============================================
+    // Actions
+    // ============================================
+    function approveItem(id, btn) {
+      if (!confirm('آیا از تایید این بازرسی مطمئن هستید؟')) return;
       btn.disabled = true;
-      btn.textContent = '...';
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
 
       apiCall({
         action: 'inspection.approve',
         token: currentToken,
         payload: { inspectionId: id }
-      }).then(function(response) {
-        if (response.success) {
-          removeFromList(id);
+      }).then(function(res) {
+        if (res.success) {
+          showToast('بازرسی تایید شد.');
           loadCounts();
+          loadPending(); // رفرش لیست
         } else {
-          alert('خطا: ' + response.error);
+          showToast(res.error, 'error');
           btn.disabled = false;
-          btn.textContent = 'تأیید';
+          btn.innerHTML = '<i class="fa-solid fa-check"></i> تایید';
         }
-      }).catch(function(err) {
-        alert('خطا: ' + err.message);
+      }).catch(function() {
+        showToast('خطای شبکه', 'error');
         btn.disabled = false;
-        btn.textContent = 'تأیید';
+        btn.innerHTML = '<i class="fa-solid fa-check"></i> تایید';
       });
     }
 
     function openRejectModal(id) {
       rejectTargetId = id;
       document.getElementById('rejectReason').value = '';
-      document.getElementById('rejectModal').classList.add('show');
-    }
-
-    function closeRejectModal() {
-      rejectTargetId = null;
-      document.getElementById('rejectModal').classList.remove('show');
+      openModal('rejectModal');
     }
 
     function confirmReject() {
       if (!rejectTargetId) return;
-
       var reason = document.getElementById('rejectReason').value.trim();
-      var id = rejectTargetId;
-      closeRejectModal();
-
+      closeModal('rejectModal');
+      
       apiCall({
         action: 'inspection.reject',
         token: currentToken,
-        payload: { inspectionId: id, reason: reason }
-      }).then(function(response) {
-        if (response.success) {
-          removeFromList(id);
+        payload: { inspectionId: rejectTargetId, reason: reason }
+      }).then(function(res) {
+        if (res.success) {
+          showToast('بازرسی رد شد.', 'info');
           loadCounts();
+          loadPending();
         } else {
-          alert('خطا: ' + response.error);
+          showToast(res.error, 'error');
         }
-      }).catch(function(err) {
-        alert('خطا: ' + err.message);
+      }).catch(function() {
+        showToast('خطای شبکه', 'error');
       });
     }
 
-    function batchApprove() {
-      var ids = Object.keys(selectedIds);
+    function approveBatch() {
+      var ids = Array.from(selectedIds);
       if (ids.length === 0) return;
+      if (!confirm('تایید ' + toFa(ids.length) + ' بازرسی؟')) return;
 
-      if (!confirm('تأیید ' + toFa(ids.length) + ' بازرسی؟')) return;
-
-      var btn = document.getElementById('batchApproveBtn');
-      btn.disabled = true;
-      btn.textContent = 'در حال تأیید...';
+      var bar = document.getElementById('batchBar');
+      bar.innerHTML = '<div><i class="fa-solid fa-spinner fa-spin"></i> در حال تایید...</div>';
 
       apiCall({
         action: 'inspection.batchApprove',
         token: currentToken,
         payload: { inspectionIds: ids }
-      }).then(function(response) {
-        if (response.success) {
-          response.data.approvedIds.forEach(function(id) {
-            removeFromListNoRender(id);
-          });
-          renderPending();
+      }).then(function(res) {
+        bar.innerHTML = '<div><i class="fa-solid fa-check-double"></i> <span>تایید موارد انتخابی</span></div><span class="count-badge" id="batchCount">0</span>';
+        if (res.success) {
+          selectedIds.clear();
+          updateBatchBar();
+          showToast('تایید گروهی انجام شد. موفق: ' + toFa(res.data.approvedCount));
           loadCounts();
-
-          var msg = 'موفق: ' + toFa(response.data.approvedCount);
-          if (response.data.failedCount > 0) {
-            msg += ' | ناموفق: ' + toFa(response.data.failedCount);
-          }
-          alert(msg);
+          loadPending();
         } else {
-          alert('خطا: ' + response.error);
-          btn.disabled = false;
-          updateBatchButton();
+          showToast(res.error, 'error');
         }
-      }).catch(function(err) {
-        alert('خطا: ' + err.message);
-        btn.disabled = false;
-        updateBatchButton();
+      }).catch(function() {
+        bar.innerHTML = '<div><i class="fa-solid fa-check-double"></i> <span>تایید موارد انتخابی</span></div><span class="count-badge" id="batchCount">0</span>';
+        showToast('خطای شبکه', 'error');
       });
     }
 
-    function removeFromList(id) {
-      pendingList = pendingList.filter(function(item) { return item.inspectionId !== id; });
-      delete selectedIds[id];
-      renderPending();
-    }
+    // ============================================
+    // Modals & UI
+    // ============================================
+    function openModal(id) { document.getElementById(id).classList.add('show'); }
+    function closeModal(id) { document.getElementById(id).classList.remove('show'); }
 
-    function removeFromListNoRender(id) {
-      pendingList = pendingList.filter(function(item) { return item.inspectionId !== id; });
-      delete selectedIds[id];
+    function openViewModal(inspectionId) {
+      var item = allPendingData.find(d => d.inspectionId === inspectionId);
+      if (!item) return;
+
+      document.getElementById('v-barcode').textContent = item.barcode;
+      document.getElementById('v-type').textContent = item.source === 'firebox' ? 'فایر باکس' : 'سیلندر';
+      document.getElementById('v-inspector').textContent = item.inspector;
+      document.getElementById('v-date').textContent = formatDate(item.date);
+      
+      var finalLabel = item.finalStatus === 'salem' ? 'سالم' : (item.finalStatus === 'defective' ? 'معیوب' : 'نیاز به اصلاح');
+      document.getElementById('v-final').textContent = finalLabel;
+      
+      document.getElementById('v-status').textContent = item.status === 'pending' || !item.status ? 'در انتظار' : (item.status === 'approved' ? 'تایید شده' : 'رد شده');
+      
+      if (item.notes) {
+        document.getElementById('v-notes-row').style.display = 'flex';
+        document.getElementById('v-notes').textContent = item.notes;
+      } else {
+        document.getElementById('v-notes-row').style.display = 'none';
+      }
+
+      var photo = document.getElementById('modalPhoto');
+      if (item.photoUrl) {
+        photo.src = convertDriveLink(item.photoUrl);
+        photo.style.display = 'block';
+        document.getElementById('modalPhotoEmpty').style.display = 'none';
+      } else {
+        photo.style.display = 'none';
+        document.getElementById('modalPhotoEmpty').style.display = 'block';
+      }
+
+      // لود کردن آیتم‌های چک‌لیست از سرور
+      document.getElementById('v-items').innerHTML = '<div style="text-align:center; color:#999; font-size:12px; padding:10px;">در حال بارگذاری...</div>';
+      
+      apiCall({
+        action: 'dashboard.items',
+        token: currentToken,
+        payload: { inspectionId: inspectionId }
+      }).then(function(res) {
+        var itemsEl = document.getElementById('v-items');
+        itemsEl.innerHTML = '';
+        
+        if (res.success && res.data.items.length > 0) {
+          res.data.items.forEach(function(it) {
+            var row = document.createElement('div');
+            row.className = 'item-row ' + it.status;
+            var label = it.status === 'salem' ? 'سالم' : (it.status === 'defective' ? 'معیوب' : 'نیاز به اصلاح');
+            row.innerHTML = `<span>${it.name}</span><span>${label}</span>`;
+            itemsEl.appendChild(row);
+          });
+        } else {
+          itemsEl.innerHTML = '<div style="text-align:center; color:#999; font-size:12px;">آیتمی یافت نشد.</div>';
+        }
+      }).catch(function() {
+        document.getElementById('v-items').innerHTML = '<div style="text-align:center; color:red; font-size:12px;">خطا در بارگذاری آیتم‌ها.</div>';
+      });
+
+      openModal('viewModal');
     }
 
     function convertDriveLink(url) {
@@ -645,86 +786,34 @@
       return url;
     }
 
-    function openViewModal(item) {
-      var photo = document.getElementById('modalPhoto');
-      if (item.photoUrl) {
-        photo.src = convertDriveLink(item.photoUrl);
-        photo.style.display = 'block';
-      } else {
-        photo.style.display = 'none';
-      }
-
-      var details = document.getElementById('modalDetails');
-      details.innerHTML = '';
-      appendRow(details, 'کد تجهیز', item.barcode);
-      appendRow(details, 'نوع', item.source === 'firebox' ? 'فایر باکس' : 'سیلندر');
-      appendRow(details, 'بازرس', item.inspector);
-      appendRow(details, 'تاریخ', formatDate(item.date));
-      appendRow(details, 'نتیجه نهایی', STATUS_LABELS[item.finalStatus] || item.finalStatus);
-      if (item.notes) appendRow(details, 'یادداشت', item.notes);
-
-      var itemsEl = document.getElementById('modalItems');
-      itemsEl.innerHTML = '<div class="items-loading">در حال بارگذاری آیتم‌ها...</div>';
-
-      apiCall({
-        action: 'dashboard.items',
-        token: currentToken,
-        payload: { inspectionId: item.inspectionId }
-      }).then(function(response) {
-        if (!response.success) {
-          itemsEl.innerHTML = '<div class="items-loading">خطا در بارگذاری آیتم‌ها</div>';
-          return;
-        }
-        renderItems(response.data.items || []);
-      }).catch(function() {
-        itemsEl.innerHTML = '<div class="items-loading">خطا در بارگذاری آیتم‌ها</div>';
-      });
-
-      document.getElementById('viewModal').classList.add('show');
+    function doLogout() {
+      if (!confirm('از حساب کاربری خارج می‌شوید؟')) return;
+      var token = currentToken;
+      localStorage.clear();
+      sessionStorage.clear();
+      fetch(EXEC_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({ action: 'auth.logout', token: token }),
+        redirect: 'follow'
+      }).finally(function() { goToLogin(); });
     }
 
-    function renderItems(items) {
-      var el = document.getElementById('modalItems');
-      el.innerHTML = '';
-
-      if (items.length === 0) {
-        el.innerHTML = '<div class="items-loading">آیتمی برای این بازرسی ثبت نشده است.</div>';
-        return;
-      }
-
-      var list = document.createElement('div');
-      list.className = 'items-list';
-
-      items.forEach(function(item) {
-        var row = document.createElement('div');
-        row.className = 'item-row ' + (item.status || '');
-
-        var name = document.createElement('span');
-        name.className = 'item-name';
-        name.textContent = item.name;
-        row.appendChild(name);
-
-        var status = document.createElement('span');
-        status.className = 'item-status';
-        status.textContent = STATUS_LABELS[item.status] || item.status;
-        row.appendChild(status);
-
-        list.appendChild(row);
-      });
-
-      el.appendChild(list);
-    }
-
-    function appendRow(parent, label, value) {
-      var row = document.createElement('div');
-      row.className = 'row';
-      var l = document.createElement('span'); l.className = 'l'; l.textContent = label;
-      var v = document.createElement('span'); v.className = 'v'; v.textContent = String(value);
-      row.appendChild(l); row.appendChild(v); parent.appendChild(row);
-    }
-
-    function closeViewModal() {
-      document.getElementById('viewModal').classList.remove('show');
+    // Helpers
+    function toFa(n) { return String(n).replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]); }
+    
+    function formatDate(dateVal) {
+      if (!dateVal) return '-';
+      try {
+        var d = new Date(dateVal);
+        if (isNaN(d.getTime())) return String(dateVal);
+        var y = d.getFullYear();
+        var m = ('0' + (d.getMonth() + 1)).slice(-2);
+        var day = ('0' + d.getDate()).slice(-2);
+        var hh = ('0' + d.getHours()).slice(-2);
+        var mm = ('0' + d.getMinutes()).slice(-2);
+        return y + '/' + m + '/' + day + ' - ' + hh + ':' + mm;
+      } catch (e) { return String(dateVal); }
     }
   </script>
 
