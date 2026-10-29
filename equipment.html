@@ -4,227 +4,388 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#1e3c72">
+  <meta name="theme-color" content="#C0611A">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="HSE CSP">
   <title>مدیریت تجهیزات</title>
+  
+  <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet" type="text/css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: Tahoma, Arial, sans-serif; background: #f0f2f5; min-height: 100vh; padding: 16px; }
-    .header { background: #1e3c72; color: #fff; padding: 16px; border-radius: 12px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
-    .header h1 { font-size: 18px; }
-    .header .user { font-size: 13px; opacity: 0.9; }
-    .header-btns { display: flex; gap: 8px; flex-wrap: wrap; }
-    .header-btn { background: rgba(255,255,255,0.2); border: none; color: #fff; padding: 8px 14px; border-radius: 8px; cursor: pointer; font-family: inherit; font-size: 13px; }
-    .header-btn:hover { background: rgba(255,255,255,0.3); }
-    .card { background: #fff; border-radius: 12px; padding: 20px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
-    .tabs { display: flex; gap: 8px; margin-bottom: 16px; background: #fff; padding: 8px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
-    .tab { flex: 1; padding: 12px; background: #f5f5f5; border: none; border-radius: 8px; font-family: inherit; font-size: 14px; font-weight: bold; color: #555; cursor: pointer; }
-    .tab.active { background: #1e3c72; color: #fff; }
-    .toolbar { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
-    .toolbar .search-input { flex: 1; min-width: 200px; padding: 10px 14px; border: 2px solid #e0e0e0; border-radius: 8px; font-family: inherit; font-size: 14px; }
-    .toolbar .search-input:focus { outline: none; border-color: #2a5298; }
-    .add-btn { background: #4caf50; color: #fff; border: none; padding: 10px 20px; border-radius: 8px; font-family: inherit; font-size: 14px; font-weight: bold; cursor: pointer; white-space: nowrap; }
-    .add-btn:hover { background: #388e3c; }
-    .checkbox-wrap { display: flex; align-items: center; gap: 6px; font-size: 13px; color: #555; }
-    .checkbox-wrap input { width: 16px; height: 16px; }
-    .bulk-panel { background: #e8f5e9; border: 2px solid #4caf50; border-radius: 10px; padding: 14px; margin-bottom: 16px; }
-    .bulk-panel h3 { font-size: 14px; color: #2e7d32; margin-bottom: 12px; }
-    .bulk-filters { display: flex; gap: 8px; flex-wrap: wrap; align-items: flex-end; }
-    .bulk-filters .filter-group { flex: 1; min-width: 180px; }
-    .bulk-filters label { display: block; font-size: 12px; color: #555; margin-bottom: 4px; font-weight: bold; }
-    .bulk-filters select, .bulk-filters input { width: 100%; padding: 10px 12px; border: 2px solid #c8e6c9; border-radius: 8px; font-family: inherit; font-size: 13px; background: #fff; }
-    .bulk-filters select:focus, .bulk-filters input:focus { outline: none; border-color: #4caf50; }
-    .bulk-filters button { padding: 10px 20px; background: #4caf50; color: #fff; border: none; border-radius: 8px; font-family: inherit; font-size: 13px; font-weight: bold; cursor: pointer; white-space: nowrap; height: 42px; }
-    .bulk-filters button:hover { background: #388e3c; }
-    .bulk-filters button:disabled { background: #ccc; cursor: not-allowed; }
-    .equipment-list { display: grid; grid-template-columns: 1fr; gap: 12px; }
-    @media (min-width: 600px) { .equipment-list { grid-template-columns: 1fr 1fr; } }
-    @media (min-width: 900px) { .equipment-list { grid-template-columns: 1fr 1fr 1fr; } }
-    .equip-card { background: #f9f9f9; border: 2px solid #e0e0e0; border-radius: 10px; padding: 14px; }
-    .equip-card.inactive { opacity: 0.6; background: #f0f0f0; }
-    .equip-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; gap: 8px; }
-    .equip-barcode { font-size: 16px; font-weight: bold; color: #222; }
-    .equip-row { font-size: 13px; color: #555; padding: 3px 0; }
-    .equip-row .label { color: #888; }
-    .badge { padding: 3px 10px; border-radius: 6px; font-size: 11px; font-weight: bold; display: inline-block; }
-    .badge.active { background: #e8f5e9; color: #2e7d32; }
-    .badge.maintenance { background: #fff3e0; color: #e65100; }
-    .badge.retired { background: #ffebee; color: #c62828; }
-    .badge.cyl-CO2 { background: #e3f2fd; color: #0d47a1; }
-    .badge.cyl-powder { background: #fff3e0; color: #e65100; }
-    .badge.cyl-water { background: #e3f2fd; color: #1565c0; }
-    .badge.firebox { background: #ffebee; color: #b71c1c; }
-    .equip-actions { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
-    .btn { padding: 8px 12px; border: none; border-radius: 6px; font-family: inherit; font-size: 12px; font-weight: bold; cursor: pointer; }
-    .btn-edit { background: #2a5298; color: #fff; }
-    .btn-status { background: #f57c00; color: #fff; }
-    .btn-delete { background: #d32f2f; color: #fff; }
-    .empty-msg { text-align: center; color: #999; padding: 30px; font-size: 14px; }
-    .loading-box { text-align: center; padding: 40px 20px; color: #666; font-size: 15px; }
-    .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); display: none; z-index: 1000; align-items: center; justify-content: center; padding: 20px; }
+    :root {
+      --copper-main: #E67E22;      
+      --copper-dark: #C0611A;      
+      --copper-light: #FAD7A8;     
+      --copper-bg: #F5F7FA;        
+      --text-dark: #2C3E50;        
+      --text-muted: #7F8C8D;
+      
+      --status-green: #27ae60;
+      --status-red: #e74c3c;
+      --status-orange: #f39c12;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Vazirmatn', Tahoma, sans-serif; }
+    
+    body { 
+      background-color: var(--copper-bg); 
+      color: var(--text-dark);
+      padding: 0 0 100px 0; 
+      min-height: 100vh;
+    }
+
+    /* هدر */
+    .header {
+      background: linear-gradient(135deg, var(--copper-dark), var(--copper-main));
+      color: #fff;
+      padding: 16px 20px;
+      border-radius: 0 0 24px 24px;
+      box-shadow: 0 4px 15px rgba(230, 126, 34, 0.3);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .header h1 { font-size: 18px; font-weight: 700; }
+    
+    .avatar {
+      width: 40px; height: 40px;
+      background: rgba(255,255,255,0.2);
+      border-radius: 50%;
+      display: flex; justify-content: center; align-items: center;
+      font-size: 18px; backdrop-filter: blur(5px);
+      border: 1px solid rgba(255,255,255,0.4);
+    }
+
+    .container { padding: 0 16px; max-width: 700px; margin: 0 auto; }
+
+    /* تب‌ها */
+    .tabs {
+      display: flex; gap: 8px; margin-bottom: 16px; background: #fff; padding: 6px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+    }
+    .tab {
+      flex: 1; padding: 10px; background: transparent; border: none; border-radius: 8px; font-family: inherit; font-size: 14px; font-weight: 700; color: var(--text-muted); cursor: pointer; transition: 0.2s;
+    }
+    .tab.active { background: var(--copper-main); color: #fff; box-shadow: 0 2px 6px rgba(230, 126, 34, 0.3); }
+
+    /* نوار ابزار */
+    .toolbar { display: flex; gap: 10px; margin-bottom: 12px; flex-wrap: wrap; }
+    .search-container { flex: 1; min-width: 200px; position: relative; }
+    .search-container input {
+      width: 100%; padding: 12px 40px 12px 16px; border: 1px solid #e2e8f0; border-radius: 12px; font-family: inherit; font-size: 13px; background: #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.02); transition: 0.3s;
+    }
+    .search-container input:focus { outline: none; border-color: var(--copper-main); }
+    .search-container i { position: absolute; right: 16px; top: 50%; transform: translateY(-50%); color: var(--text-muted); }
+    
+    .btn-tool {
+      padding: 12px 16px; border-radius: 12px; border: none; font-family: inherit; font-size: 13px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: 0.2s;
+    }
+    .btn-add { background: linear-gradient(135deg, var(--copper-main), var(--copper-dark)); color: #fff; box-shadow: 0 4px 10px rgba(230, 126, 34, 0.3); }
+    .btn-bulk { background: #FFF4E6; color: var(--copper-dark); border: 1px solid var(--copper-main); }
+
+    /* فیلتر وضعیت */
+    .filter-bar {
+      display: flex; gap: 8px; margin-bottom: 16px; overflow-x: auto; padding-bottom: 4px;
+    }
+    .filter-btn {
+      background: #fff; border: 1px solid #e2e8f0; border-radius: 50px;
+      padding: 6px 14px; font-family: inherit; font-size: 12px; font-weight: 700;
+      color: var(--text-muted); cursor: pointer; white-space: nowrap; transition: 0.2s;
+    }
+    .filter-btn.active { background: var(--copper-main); color: #fff; border-color: var(--copper-main); }
+
+    /* کارت‌های تجهیزات */
+    .equip-card {
+      background: #fff; border: 1px solid #e2e8f0; border-radius: 16px;
+      padding: 16px; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+    }
+    .equip-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+    .equip-barcode { font-size: 16px; font-weight: 800; color: var(--text-dark); display: flex; align-items: center; gap: 8px;}
+    .equip-meta { font-size: 12px; color: var(--text-muted); margin-top: 6px; display: grid; grid-template-columns: 1fr 1fr; gap: 6px;}
+    
+    .badge { padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; }
+    .badge.active { background: #E8F8F5; color: var(--status-green); }
+    .badge.maintenance { background: #FEF5E7; color: var(--status-orange); }
+    .badge.retired { background: #FDEDEC; color: var(--status-red); }
+    
+    .badge-CO2 { background: #E3F2FD; color: #0D47A1; }
+    .badge-powder { background: #FEF5E7; color: var(--status-orange); }
+    .badge-water { background: #E3F2FD; color: #1565C0; }
+    .badge-firebox { background: #FDEDEC; color: #B71C1C; }
+
+    .equip-actions { display: flex; gap: 8px; border-top: 1px solid #f0f0f0; padding-top: 12px; }
+    .btn-action {
+      flex: 1; padding: 10px; border-radius: 8px; border: 1px solid #e2e8f0; background: #F8FAFC; color: var(--text-dark); font-family: inherit; font-size: 13px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: 0.2s;
+    }
+    .btn-action:active { background: #e2e8f0; }
+    .btn-action.more-btn { flex: 0.2; background: #FFF4E6; color: var(--copper-dark); border-color: var(--copper-light); }
+
+    /* منوی پایین */
+    .bottom-nav {
+      position: fixed; bottom: 0; left: 0; right: 0; background: #fff; display: flex; justify-content: space-around; align-items: center;
+      padding: 10px; box-shadow: 0 -2px 15px rgba(0,0,0,0.05); border-radius: 24px 24px 0 0; z-index: 100;
+    }
+    .nav-item {
+      display: flex; flex-direction: column; align-items: center; gap: 4px; color: var(--text-muted); font-size: 11px; font-weight: 700; text-decoration: none; cursor: pointer;
+    }
+    .nav-item i { font-size: 20px; margin-bottom: 2px; }
+    .nav-item.active { color: var(--copper-main); }
+
+    /* مدال‌ها و Bottom Sheet */
+    .modal-overlay {
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 200; display: none; align-items: center; justify-content: center; padding: 16px;
+    }
     .modal-overlay.show { display: flex; }
-    .modal { background: #fff; border-radius: 12px; padding: 20px; max-width: 500px; width: 100%; max-height: 90vh; overflow-y: auto; }
-    .modal h3 { font-size: 16px; color: #1e3c72; margin-bottom: 16px; }
+    
+    .modal-content {
+      background: #fff; border-radius: 16px; width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto; padding: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); animation: slideUp 0.3s ease-out;
+    }
+    @keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+    .modal-title { font-size: 16px; font-weight: 800; color: var(--copper-dark); margin-bottom: 16px; border-bottom: 1px solid #eee; padding-bottom: 12px; display: flex; justify-content: space-between; align-items: center;}
+    .modal-close { background: none; border: none; font-size: 20px; color: #999; cursor: pointer; }
+
     .form-group { margin-bottom: 14px; }
-    .form-group label { display: block; margin-bottom: 6px; font-size: 14px; font-weight: bold; color: #333; }
-    .form-group input, .form-group select { width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-family: inherit; font-size: 14px; }
-    .form-group input:focus, .form-group select:focus { outline: none; border-color: #2a5298; }
-    .modal-btns { display: flex; gap: 8px; margin-top: 16px; }
-    .modal-btns button { flex: 1; padding: 12px; border: none; border-radius: 8px; font-family: inherit; font-size: 15px; font-weight: bold; cursor: pointer; }
-    .btn-cancel { background: #e0e0e0; color: #333; }
-    .btn-confirm { background: #1e3c72; color: #fff; }
-    .btn-danger { background: #d32f2f; color: #fff; }
-    .error-msg { color: #d32f2f; font-size: 13px; margin-top: 8px; display: none; background: #ffebee; padding: 8px 12px; border-radius: 6px; }
-    .warning-box { background: #fff3e0; border-right: 4px solid #ff9800; padding: 12px; border-radius: 6px; margin-bottom: 12px; font-size: 13px; color: #e65100; }
-    .info-box { background: #e3f2fd; border-right: 4px solid #1e3c72; padding: 12px; border-radius: 6px; margin-bottom: 12px; font-size: 13px; color: #0d47a1; }
+    .form-group label { display: block; margin-bottom: 6px; font-size: 13px; font-weight: 700; color: var(--text-dark); }
+    .form-group input, .form-group select { width: 100%; padding: 12px; border: 1px solid #e2e8f0; border-radius: 10px; font-family: inherit; font-size: 14px; background: #F8FAFC; }
+    .form-group input:focus, .form-group select:focus { outline: none; border-color: var(--copper-main); background: #fff; }
+    .form-group input:disabled { background: #eee; color: #999; cursor: not-allowed; }
+
+    .modal-btns { display: flex; gap: 10px; margin-top: 20px; }
+    .btn-cancel { flex: 1; padding: 12px; border-radius: 10px; border: none; background: #f0f0f0; font-family: inherit; font-weight: 700; cursor: pointer; }
+    .btn-confirm { flex: 1; padding: 12px; border-radius: 10px; border: none; background: var(--copper-main); color: #fff; font-family: inherit; font-weight: 700; cursor: pointer; }
+    .btn-danger { background: var(--status-red); }
+
+    /* Bottom Sheet */
+    .bottom-sheet-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 300; display: none; opacity: 0; transition: opacity 0.3s; }
+    .bottom-sheet-overlay.show { display: block; opacity: 1; }
+    .bottom-sheet { position: fixed; bottom: -100%; left: 0; right: 0; background: #fff; border-radius: 24px 24px 0 0; padding: 20px; z-index: 301; transition: bottom 0.3s ease-in-out; box-shadow: 0 -4px 20px rgba(0,0,0,0.1); }
+    .bottom-sheet.show { bottom: 0; }
+    .sheet-handle { width: 40px; height: 5px; background: #ddd; border-radius: 5px; margin: 0 auto 20px auto; }
+    .sheet-title { font-size: 16px; font-weight: 800; color: var(--copper-dark); margin-bottom: 16px; text-align: center; }
+    .sheet-action-btn { width: 100%; padding: 14px; border: none; background: #F8FAFC; border-radius: 10px; font-family: inherit; font-size: 14px; font-weight: 700; color: var(--text-dark); display: flex; align-items: center; gap: 12px; margin-bottom: 10px; cursor: pointer; transition: 0.2s; text-align: right; }
+    .sheet-action-btn:active { background: #e2e8f0; }
+    .sheet-action-btn.danger { color: var(--status-red); background: #FDEDEC; }
+
+    /* Toast */
+    #toast-container { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 999; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
+    .toast { background: #333; color: #fff; padding: 12px 24px; border-radius: 50px; font-size: 13px; font-weight: 700; box-shadow: 0 4px 12px rgba(0,0,0,0.15); display: flex; align-items: center; gap: 8px; animation: toastIn 0.3s ease-out, toastOut 0.3s ease-in 2.7s forwards; }
+    .toast.success { background: var(--status-green); }
+    .toast.error { background: var(--status-red); }
+    .toast.info { background: var(--copper-main); }
+    @keyframes toastIn { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    @keyframes toastOut { from { transform: translateY(0); opacity: 1; } to { transform: translateY(-20px); opacity: 0; } }
+
+    .info-box { background: #E3F2FD; border-right: 4px solid #1e3c72; padding: 12px; border-radius: 6px; margin-bottom: 16px; font-size: 13px; color: #0d47a1; }
+    .empty-state { text-align: center; padding: 40px 10px; color: var(--text-muted); font-size: 14px; }
+    .empty-state i { font-size: 48px; color: #ccc; margin-bottom: 12px; display: block; }
   </style>
 </head>
 <body>
 
-  <div class="header">
-    <div>
-      <h1>مدیریت تجهیزات</h1>
-      <div class="user" id="userInfo"></div>
+  <header class="header">
+    <h1>مدیریت تجهیزات</h1>
+    <div class="avatar">
+      <i class="fa-solid fa-fire-extinguisher"></i>
     </div>
-    <div class="header-btns">
-      <button class="header-btn" onclick="window.location.href='index.html'">اسکنر</button>
-      <button class="header-btn" onclick="window.location.href='dashboard.html'">داشبورد</button>
-      <button class="header-btn" onclick="window.location.href='users.html'">کاربران</button>
-      <button class="header-btn" onclick="window.location.href='logs.html'">لاگ‌ها</button>
-      <button class="header-btn" onclick="doLogout()">خروج</button>
+  </header>
+
+  <div class="container">
+    
+    <!-- تب‌ها -->
+    <div class="tabs">
+      <button class="tab active" id="tab-cylinder" onclick="switchTab('cylinder')">سیلندرها</button>
+      <button class="tab" id="tab-firebox" onclick="switchTab('firebox')">فایر باکس‌ها</button>
     </div>
-  </div>
 
-  <div class="tabs">
-    <button class="tab active" id="tabCylinders" onclick="switchTab('cylinder')">سیلندرها</button>
-    <button class="tab" id="tabFireboxes" onclick="switchTab('firebox')">فایر باکس‌ها</button>
-  </div>
-
-  <div class="bulk-panel">
-    <h3>تخصیص دسته‌ای</h3>
-    <div class="bulk-filters">
-      <div class="filter-group">
-        <label>کارخانه</label>
-        <select id="bulkPlant">
-          <option value="">همه کارخانه‌ها</option>
-        </select>
-      </div>
-      <div class="filter-group">
-        <label>بازرس فعلی</label>
-        <select id="bulkCurrentInspector">
-          <option value="">همه بازرس‌ها</option>
-        </select>
-      </div>
-      <div class="filter-group">
-        <label>بازرس جدید (شماره پرسنلی)</label>
-        <input type="text" id="bulkNewInspector" placeholder="مثال: 1002" inputmode="numeric">
-      </div>
-      <button onclick="openBulkAssignModal()">تخصیص دسته‌ای</button>
-    </div>
-  </div>
-
-  <div class="card">
+    <!-- نوار ابزار -->
     <div class="toolbar">
-      <input type="text" class="search-input" id="searchInput" placeholder="جستجو در کد یا موقعیت..." oninput="renderList()">
-      <label class="checkbox-wrap">
-        <input type="checkbox" id="showInactive" onchange="loadAll()">
-        <span>نمایش غیرفعال‌ها</span>
-      </label>
-      <button class="add-btn" onclick="openAddModal()">+ افزودن</button>
+      <div class="search-container">
+        <input type="text" id="searchInput" placeholder="جستجوی بارکد یا موقعیت..." oninput="handleSearch()">
+        <i class="fa-solid fa-magnifying-glass"></i>
+      </div>
+      <button class="btn-tool btn-bulk" onclick="openBulkAssignModal()"><i class="fa-solid fa-people-arrows"></i> تخصیص دسته‌ای</button>
+      <button class="btn-tool btn-add" onclick="openEquipModal('add')"><i class="fa-solid fa-plus"></i> افزودن</button>
     </div>
 
-    <div id="loadingBox" class="loading-box">در حال بارگذاری...</div>
-    <div id="equipmentList" class="equipment-list"></div>
-    <div id="emptyBox" class="empty-msg" style="display:none;">موردی یافت نشد.</div>
+    <!-- فیلتر وضعیت -->
+    <div class="filter-bar">
+      <button class="filter-btn active" id="filter-all" onclick="applyStatusFilter('all', this)">همه</button>
+      <button class="filter-btn" id="filter-active" onclick="applyStatusFilter('active', this)">فعال</button>
+      <button class="filter-btn" id="filter-maintenance" onclick="applyStatusFilter('maintenance', this)">تعمیر</button>
+      <button class="filter-btn" id="filter-retired" onclick="applyStatusFilter('retired', this)">اسقاط</button>
+    </div>
+
+    <div id="equipmentList">
+      <div class="empty-state"><i class="fa-solid fa-spinner fa-spin"></i> در حال بارگذاری...</div>
+    </div>
+
   </div>
 
-  <div class="modal-overlay" id="editModal">
-    <div class="modal">
-      <h3 id="modalTitle">افزودن تجهیز</h3>
-      <div class="form-group" id="barcodeGroup">
-        <label>بارکد *</label>
-        <input type="text" id="inputBarcode" placeholder="مثال: CO2-001">
+  <!-- منوی پایین -->
+  <nav class="bottom-nav">
+    <a href="index.html" class="nav-item">
+      <i class="fa-solid fa-house"></i>
+      <span>خانه</span>
+    </a>
+    <a href="history.html" class="nav-item">
+      <i class="fa-solid fa-clock-rotate-left"></i>
+      <span>تاریخچه</span>
+    </a>
+    <a href="equipment.html" class="nav-item active">
+      <i class="fa-solid fa-fire-extinguisher"></i>
+      <span>تجهیزات</span>
+    </a>
+    <a href="#" class="nav-item" onclick="doLogout()">
+      <i class="fa-solid fa-arrow-right-from-bracket"></i>
+      <span>خروج</span>
+    </a>
+  </nav>
+
+  <!-- Toast Container -->
+  <div id="toast-container"></div>
+
+  <!-- Bottom Sheet (منوی عملیات) -->
+  <div class="bottom-sheet-overlay" id="actionSheetOverlay" onclick="closeActionSheet()"></div>
+  <div class="bottom-sheet" id="actionSheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title" id="actionSheetTitle">عملیات تجهیز</div>
+    
+    <button class="sheet-action-btn" onclick="sheetChangeStatus()">
+      <i class="fa-solid fa-wrench" style="color:var(--copper-main);"></i> تغییر وضعیت
+    </button>
+    <button class="sheet-action-btn danger" onclick="sheetDelete()">
+      <i class="fa-solid fa-trash"></i> حذف تجهیز
+    </button>
+  </div>
+
+  <!-- مدال افزودن / ویرایش تجهیز -->
+  <div class="modal-overlay" id="equipModal">
+    <div class="modal-content">
+      <div class="modal-title">
+        <span id="equipModalTitle">افزودن تجهیز</span>
+        <button class="modal-close" onclick="closeModal('equipModal')">&times;</button>
       </div>
-      <div class="form-group" id="cylinderTypeGroup">
-        <label>نوع سیلندر *</label>
-        <select id="inputCylinderType">
+      
+      <div class="form-group">
+        <label>بارکد (کد QR)</label>
+        <input type="text" id="inp-barcode" placeholder="مثال: CO2-001">
+      </div>
+      
+      <div class="form-group" id="type-group">
+        <label>نوع سیلندر</label>
+        <select id="inp-cylinder-type">
           <option value="CO2">CO2</option>
           <option value="powder">پودری</option>
           <option value="water">آب</option>
         </select>
       </div>
+
       <div class="form-group">
-        <label>موقعیت *</label>
-        <input type="text" id="inputLocation" placeholder="مثال: سالن تولید A">
+        <label>موقعیت</label>
+        <input type="text" id="inp-location" placeholder="مثال: سالن تولید A">
       </div>
+
       <div class="form-group">
         <label>کارخانه</label>
-        <input type="text" id="inputPlant" placeholder="مثال: کارخانه مرکزی">
+        <input type="text" id="inp-plant" placeholder="مثال: کارخانه مرکزی">
       </div>
-      <div class="form-group" id="capacityGroup">
+
+      <div class="form-group" id="capacity-group">
         <label>ظرفیت (برای سیلندر)</label>
-        <input type="text" id="inputCapacity" placeholder="مثال: 5" inputmode="numeric">
+        <input type="text" id="inp-capacity" placeholder="مثال: 5" inputmode="numeric">
       </div>
+
       <div class="form-group">
         <label>بازرس مسئول (شماره پرسنلی)</label>
-        <input type="text" id="inputAssignedTo" placeholder="مثال: 1001" inputmode="numeric">
+        <input type="text" id="inp-assigned-to" placeholder="مثال: 1001" inputmode="numeric">
       </div>
-      <div class="error-msg" id="modalError"></div>
+
       <div class="modal-btns">
-        <button class="btn-cancel" onclick="closeModal('editModal')">لغو</button>
-        <button class="btn-confirm" id="modalConfirmBtn" onclick="submitForm()">ذخیره</button>
+        <button class="btn-cancel" onclick="closeModal('equipModal')">لغو</button>
+        <button class="btn-confirm" id="btn-save-equip" onclick="saveEquip()">ذخیره</button>
       </div>
     </div>
   </div>
 
+  <!-- مدال تغییر وضعیت -->
   <div class="modal-overlay" id="statusModal">
-    <div class="modal">
-      <h3>تغییر وضعیت تجهیز</h3>
+    <div class="modal-content">
+      <div class="modal-title">
+        <span>تغییر وضعیت</span>
+        <button class="modal-close" onclick="closeModal('statusModal')">&times;</button>
+      </div>
       <div class="form-group">
-        <label>وضعیت جدید *</label>
-        <select id="inputStatus">
+        <label>وضعیت جدید</label>
+        <select id="inp-new-status">
           <option value="active">فعال</option>
           <option value="maintenance">تعمیر</option>
           <option value="retired">اسقاط</option>
         </select>
       </div>
-      <div class="error-msg" id="statusError"></div>
       <div class="modal-btns">
         <button class="btn-cancel" onclick="closeModal('statusModal')">لغو</button>
-        <button class="btn-confirm" onclick="submitStatus()">ذخیره</button>
+        <button class="btn-confirm" id="btn-save-status" onclick="saveStatus()">تغییر</button>
       </div>
     </div>
   </div>
 
+  <!-- مدال حذف -->
   <div class="modal-overlay" id="deleteModal">
-    <div class="modal">
-      <h3>حذف تجهیز</h3>
-      <div class="warning-box">
-        ⚠️ آیا از حذف کامل این تجهیز مطمئن هستید؟<br>
-        این عملیات <b>قابل بازگشت نیست</b> و تاریخچه بازرسی‌های قبلی آن باقی می‌ماند.
+    <div class="modal-content">
+      <div class="modal-title">
+        <span>حذف تجهیز</span>
+        <button class="modal-close" onclick="closeModal('deleteModal')">&times;</button>
       </div>
-      <div id="deleteDetails" style="font-size:14px;color:#555;margin-bottom:12px;"></div>
-      <div class="error-msg" id="deleteError"></div>
+      <p style="font-size:14px; margin-bottom:20px; color:#555;">آیا از حذف کامل تجهیز <b id="del-barcode"></b> مطمئن هستید؟ این عملیات قابل بازگشت نیست.</p>
       <div class="modal-btns">
         <button class="btn-cancel" onclick="closeModal('deleteModal')">لغو</button>
-        <button class="btn-danger" onclick="confirmDelete()">حذف کامل</button>
+        <button class="btn-confirm btn-danger" id="btn-confirm-delete" onclick="confirmDelete()">حذف</button>
       </div>
     </div>
   </div>
 
+  <!-- مدال تخصیص دسته‌ای -->
   <div class="modal-overlay" id="bulkModal">
-    <div class="modal">
-      <h3>تأیید تخصیص دسته‌ای</h3>
-      <div class="info-box" id="bulkSummary"></div>
-      <div class="form-group">
-        <label>بازرس جدید (شماره پرسنلی) *</label>
-        <input type="text" id="confirmNewInspector" placeholder="مثال: 1002" inputmode="numeric">
+    <div class="modal-content">
+      <div class="modal-title">
+        <span>تخصیص دسته‌ای</span>
+        <button class="modal-close" onclick="closeModal('bulkModal')">&times;</button>
       </div>
-      <div class="error-msg" id="bulkError"></div>
+      
+      <div class="info-box">
+        با این فرم می‌توانید تمام تجهیزات یک کارخانه یا مربوط به یک بازرس را به صورت یکجا به بازرس دیگری منتقل کنید.
+      </div>
+
+      <div class="form-group">
+        <label>فیلتر کارخانه (اختیاری)</label>
+        <select id="bulk-plant">
+          <option value="">همه کارخانه‌ها</option>
+        </select>
+      </div>
+      
+      <div class="form-group">
+        <label>بازرس فعلی (اختیاری)</label>
+        <select id="bulk-current-insp">
+          <option value="">همه بازرس‌ها</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>بازرس جدید (اجباری)</label>
+        <select id="bulk-new-insp">
+          <option value="">انتخاب بازرس جدید...</option>
+        </select>
+      </div>
+
       <div class="modal-btns">
         <button class="btn-cancel" onclick="closeModal('bulkModal')">لغو</button>
-        <button class="btn-confirm" onclick="executeBulkAssign()">تأیید و اعمال</button>
+        <button class="btn-confirm" id="btn-execute-bulk" onclick="executeBulkAssign()">اعمال تخصیص</button>
       </div>
     </div>
   </div>
@@ -232,23 +393,24 @@
   <script>
     var EXEC_URL = 'https://script.google.com/macros/s/AKfycbyh8ccieztX3ZkFF0IozE_beRcZja0BH8ieYbQ9qCL1tLDxkq2QB0Pz3JD4v0IRY6eo/exec';
     var currentToken = '';
-    var currentUser = '';
-    var currentTab = 'cylinder';
+    
     var cylindersList = [];
     var fireboxesList = [];
-    var editingMode = 'add';
-    var editingItem = null;
-    var deleteTarget = null;
-    var statusTarget = null;
+    
+    var currentTab = 'cylinder';
+    var searchTerm = '';
+    var currentStatusFilter = 'all'; 
+    
+    var editingEquip = null;
+    var actionTargetEquip = null;
+    var statusTargetEquip = null;
+    var deleteTargetEquip = null;
+
+    var statusLabels = { active: 'فعال', maintenance: 'تعمیر', retired: 'اسقاط' };
+    var typeLabels = { 'CO2': 'CO2', 'powder': 'پودری', 'water': 'آب' };
 
     function goToLogin() {
       window.location.href = EXEC_URL + '?page=Login';
-    }
-
-    function handleSessionExpired() {
-      localStorage.clear();
-      sessionStorage.clear();
-      goToLogin();
     }
 
     function apiCall(request) {
@@ -262,30 +424,389 @@
 
     (function initPage() {
       currentToken = localStorage.getItem('token') || '';
-      currentUser = localStorage.getItem('fullName') || localStorage.getItem('username') || '';
-
       if (!currentToken) { goToLogin(); return; }
 
-      apiCall({ action: 'auth.me', token: currentToken }).then(function(response) {
-        if (!response.success) {
-          handleSessionExpired();
-          return;
-        }
-        var role = response.data.role;
-        if (role !== 'admin') {
-          alert('شما به این بخش دسترسی ندارید.');
-          window.location.href = 'index.html';
-          return;
-        }
-        document.getElementById('userInfo').textContent = currentUser;
-        loadAll();
-        loadFilters();
-      }).catch(function() {
-        handleSessionExpired();
-      });
+      loadAll();
+      loadFilters();
     })();
 
+    // ============================================
+    // Load Data
+    // ============================================
+    function loadAll() {
+      document.getElementById('equipmentList').innerHTML = '<div class="empty-state"><i class="fa-solid fa-spinner fa-spin"></i> در حال بارگذاری...</div>';
+      
+      apiCall({ action: 'equipment.getAll', token: currentToken, payload: {} }).then(function(response) {
+        if (!response.success) {
+          document.getElementById('equipmentList').innerHTML = '<div class="empty-state"><i class="fa-solid fa-circle-exclamation"></i>' + (response.error || 'خطا') + '</div>';
+          return;
+        }
+        cylindersList = response.data.cylinders || [];
+        fireboxesList = response.data.fireboxes || [];
+        renderList();
+      }).catch(function(err) {
+        document.getElementById('equipmentList').innerHTML = '<div class="empty-state"><i class="fa-solid fa-wifi"></i>خطا در ارتباط با سرور</div>';
+      });
+    }
+
+    function loadFilters() {
+      apiCall({ action: 'equipment.getFilters', token: currentToken, payload: {} }).then(function(response) {
+        if (!response.success) return;
+        
+        var plantSelect = document.getElementById('bulk-plant');
+        var inspSelect = document.getElementById('bulk-current-insp');
+        var newInspSelect = document.getElementById('bulk-new-insp');
+
+        plantSelect.innerHTML = '<option value="">همه کارخانه‌ها</option>';
+        inspSelect.innerHTML = '<option value="">همه بازرس‌ها</option>';
+        newInspSelect.innerHTML = '<option value="">انتخاب بازرس جدید...</option>';
+
+        (response.data.plants || []).forEach(function(p) {
+          plantSelect.innerHTML += `<option value="${p}">${p}</option>`;
+        });
+
+        (response.data.inspectors || []).forEach(function(i) {
+          inspSelect.innerHTML += `<option value="${i}">${i}</option>`;
+          newInspSelect.innerHTML += `<option value="${i}">${i}</option>`;
+        });
+      }).catch(function() {});
+    }
+
+    // ============================================
+    // Render
+    // ============================================
+    function switchTab(tab) {
+      currentTab = tab;
+      document.getElementById('tab-cylinder').classList.toggle('active', tab === 'cylinder');
+      document.getElementById('tab-firebox').classList.toggle('active', tab === 'firebox');
+      
+      document.getElementById('searchInput').value = '';
+      searchTerm = '';
+      currentStatusFilter = 'all';
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById('filter-all').classList.add('active');
+      
+      renderList();
+    }
+
+    function applyStatusFilter(status, btn) {
+      currentStatusFilter = status;
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      renderList();
+    }
+
+    function handleSearch() {
+      searchTerm = document.getElementById('searchInput').value.trim().toLowerCase();
+      renderList();
+    }
+
+    function renderList() {
+      const listEl = document.getElementById('equipmentList');
+      listEl.innerHTML = '';
+
+      let list = currentTab === 'cylinder' ? cylindersList : fireboxesList;
+
+      if (currentStatusFilter !== 'all') {
+        list = list.filter(e => e.status === currentStatusFilter);
+      }
+
+      if (searchTerm) {
+        list = list.filter(e => 
+          (e.barcode && e.barcode.toLowerCase().includes(searchTerm)) || 
+          (e.location && e.location.toLowerCase().includes(searchTerm))
+        );
+      }
+
+      if (list.length === 0) {
+        listEl.innerHTML = '<div class="empty-state"><i class="fa-solid fa-box-open"></i>تجهیزی یافت نشد.</div>';
+        return;
+      }
+
+      list.forEach(equip => {
+        const div = document.createElement('div');
+        div.className = 'equip-card';
+        
+        let typeBadge = currentTab === 'cylinder' 
+          ? `<span class="badge badge-${equip.type}">${typeLabels[equip.type] || equip.type}</span>` 
+          : `<span class="badge badge-firebox">فایر باکس</span>`;
+
+        let statusBadge = `<span class="badge ${equip.status}">${statusLabels[equip.status] || equip.status}</span>`;
+
+        div.innerHTML = `
+          <div class="equip-header">
+            <div>
+              <div class="equip-barcode"><i class="fa-solid fa-barcode" style="color:var(--copper-main);"></i> ${equip.barcode}</div>
+              <div class="equip-meta">
+                <span><i class="fa-solid fa-location-dot"></i> ${equip.location || '-'}</span>
+                ${equip.capacity ? `<span><i class="fa-solid fa-weight-hanging"></i> ${equip.capacity}</span>` : ''}
+                ${equip.plant ? `<span><i class="fa-solid fa-industry"></i> ${equip.plant}</span>` : ''}
+                ${equip.assignedTo ? `<span><i class="fa-solid fa-user-check"></i> بازرس: ${equip.assignedTo}</span>` : ''}
+              </div>
+            </div>
+            <div style="display:flex; flex-direction:column; align-items:flex-end; gap:6px;">
+              ${typeBadge}
+              ${statusBadge}
+            </div>
+          </div>
+          <div class="equip-actions">
+            <button class="btn-action" onclick="openEquipModal('edit', '${equip.barcode}')"><i class="fa-solid fa-pen"></i> ویرایش</button>
+            <button class="btn-action more-btn" onclick="openActionSheet('${equip.barcode}')"><i class="fa-solid fa-ellipsis-vertical"></i></button>
+          </div>
+        `;
+        listEl.appendChild(div);
+      });
+    }
+
+    // ============================================
+    // Toast
+    // ============================================
+    function showToast(message, type = 'success') {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      let icon = type === 'error' ? 'fa-circle-exclamation' : (type === 'info' ? 'fa-info-circle' : 'fa-check-circle');
+      toast.innerHTML = `<i class="fa-solid ${icon}"></i> ${message}`;
+      container.appendChild(toast);
+      setTimeout(() => { toast.remove(); }, 3000);
+    }
+
+    // ============================================
+    // Bottom Sheet
+    // ============================================
+    function openActionSheet(barcode) {
+      var list = currentTab === 'cylinder' ? cylindersList : fireboxesList;
+      actionTargetEquip = list.find(e => e.barcode === barcode);
+      if (!actionTargetEquip) return;
+
+      document.getElementById('actionSheetTitle').textContent = `عملیات برای: ${actionTargetEquip.barcode}`;
+      document.getElementById('actionSheetOverlay').classList.add('show');
+      document.getElementById('actionSheet').classList.add('show');
+    }
+
+    function closeActionSheet() {
+      document.getElementById('actionSheetOverlay').classList.remove('show');
+      document.getElementById('actionSheet').classList.remove('show');
+    }
+
+    function sheetChangeStatus() {
+      closeActionSheet();
+      statusTargetEquip = actionTargetEquip;
+      document.getElementById('inp-new-status').value = actionTargetEquip.status;
+      openModal('statusModal');
+    }
+
+    function sheetDelete() {
+      closeActionSheet();
+      deleteTargetEquip = actionTargetEquip;
+      document.getElementById('del-barcode').textContent = actionTargetEquip.barcode;
+      openModal('deleteModal');
+    }
+
+    // ============================================
+    // Modals & Save Actions
+    // ============================================
+    function openModal(id) { document.getElementById(id).classList.add('show'); }
+    function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+
+    function openEquipModal(mode, barcode = null) {
+      editingEquip = { mode, barcode };
+      const title = document.getElementById('equipModalTitle');
+      const barcodeInp = document.getElementById('inp-barcode');
+      const typeGroup = document.getElementById('type-group');
+      const capGroup = document.getElementById('capacity-group');
+      const saveBtn = document.getElementById('btn-save-equip');
+
+      if (mode === 'add') {
+        title.textContent = currentTab === 'cylinder' ? 'افزودن سیلندر جدید' : 'افزودن فایر باکس جدید';
+        barcodeInp.value = '';
+        barcodeInp.disabled = false;
+        document.getElementById('inp-location').value = '';
+        document.getElementById('inp-plant').value = '';
+        document.getElementById('inp-assigned-to').value = '';
+        
+        if (currentTab === 'cylinder') {
+          typeGroup.style.display = 'block';
+          capGroup.style.display = 'block';
+          document.getElementById('inp-cylinder-type').value = 'CO2';
+          document.getElementById('inp-capacity').value = '';
+        } else {
+          typeGroup.style.display = 'none';
+          capGroup.style.display = 'none';
+        }
+      } else {
+        var list = currentTab === 'cylinder' ? cylindersList : fireboxesList;
+        const equip = list.find(e => e.barcode === barcode);
+        title.textContent = 'ویرایش تجهیز';
+        barcodeInp.value = equip.barcode;
+        barcodeInp.disabled = true;
+        document.getElementById('inp-location').value = equip.location || '';
+        document.getElementById('inp-plant').value = equip.plant || '';
+        document.getElementById('inp-assigned-to').value = equip.assignedTo || '';
+        
+        if (currentTab === 'cylinder') {
+          typeGroup.style.display = 'block';
+          capGroup.style.display = 'block';
+          document.getElementById('inp-cylinder-type').value = equip.type || 'CO2';
+          document.getElementById('inp-capacity').value = equip.capacity || '';
+        } else {
+          typeGroup.style.display = 'none';
+          capGroup.style.display = 'none';
+        }
+      }
+      saveBtn.disabled = false;
+      saveBtn.textContent = 'ذخیره';
+      openModal('equipModal');
+    }
+
+    function saveEquip() {
+      const mode = editingEquip.mode;
+      const barcode = document.getElementById('inp-barcode').value.trim();
+      const location = document.getElementById('inp-location').value.trim();
+      const plant = document.getElementById('inp-plant').value.trim();
+      const assignedTo = document.getElementById('inp-assigned-to').value.trim();
+      const capacity = document.getElementById('inp-capacity').value.trim();
+      const cylinderType = document.getElementById('inp-cylinder-type').value;
+      const saveBtn = document.getElementById('btn-save-equip');
+
+      if (!barcode || !location) {
+        showToast('بارکد و موقعیت اجباری هستند.', 'error');
+        return;
+      }
+
+      saveBtn.disabled = true;
+      saveBtn.textContent = 'در حال ذخیره...';
+
+      var action = mode === 'add' ? 'equipment.create' : 'equipment.update';
+      var payload = { barcode, kind: currentTab, location, plant, assignedTo };
+      
+      if (currentTab === 'cylinder') {
+        payload.capacity = capacity;
+        payload.cylinderType = cylinderType;
+      }
+
+      apiCall({ action: action, token: currentToken, payload: payload }).then(function(res) {
+        saveBtn.disabled = false;
+        saveBtn.textContent = 'ذخیره';
+
+        if (res.success) {
+          showToast(mode === 'add' ? 'تجهیز جدید اضافه شد.' : 'تجهیز ویرایش شد.');
+          closeModal('equipModal');
+          loadAll();
+          loadFilters();
+        } else {
+          showToast(res.error, 'error');
+        }
+      }).catch(function() {
+        saveBtn.disabled = false;
+        saveBtn.textContent = 'ذخیره';
+        showToast('خطا در ارتباط با سرور', 'error');
+      });
+    }
+
+    function saveStatus() {
+      const newStatus = document.getElementById('inp-new-status').value;
+      const saveBtn = document.getElementById('btn-save-status');
+
+      saveBtn.disabled = true;
+      saveBtn.textContent = '...';
+
+      apiCall({
+        action: 'equipment.toggleStatus',
+        token: currentToken,
+        payload: { barcode: statusTargetEquip.barcode, kind: currentTab, status: newStatus }
+      }).then(function(res) {
+        saveBtn.disabled = false;
+        saveBtn.textContent = 'تغییر';
+        
+        if (res.success) {
+          showToast('وضعیت تجهیز تغییر یافت.', 'info');
+          closeModal('statusModal');
+          loadAll();
+        } else {
+          showToast(res.error, 'error');
+        }
+      }).catch(function() {
+        saveBtn.disabled = false;
+        saveBtn.textContent = 'تغییر';
+        showToast('خطا در ارتباط با سرور', 'error');
+      });
+    }
+
+    function confirmDelete() {
+      const delBtn = document.getElementById('btn-confirm-delete');
+      delBtn.disabled = true;
+      delBtn.textContent = 'در حال حذف...';
+
+      apiCall({
+        action: 'equipment.delete',
+        token: currentToken,
+        payload: { barcode: deleteTargetEquip.barcode, kind: currentTab }
+      }).then(function(res) {
+        delBtn.disabled = false;
+        delBtn.textContent = 'حذف';
+
+        if (res.success) {
+          showToast('تجهیز حذف شد.', 'error');
+          closeModal('deleteModal');
+          loadAll();
+          loadFilters();
+        } else {
+          showToast(res.error, 'error');
+        }
+      }).catch(function() {
+        delBtn.disabled = false;
+        delBtn.textContent = 'حذف';
+        showToast('خطا در ارتباط با سرور', 'error');
+      });
+    }
+
+    function openBulkAssignModal() {
+      loadFilters(); // لود مجدد فیلترها برای اطمینان
+      openModal('bulkModal');
+    }
+
+    function executeBulkAssign() {
+      const plant = document.getElementById('bulk-plant').value;
+      const currentInsp = document.getElementById('bulk-current-insp').value;
+      const newInsp = document.getElementById('bulk-new-insp').value;
+      const btn = document.getElementById('btn-execute-bulk');
+
+      if (!newInsp) {
+        showToast('لطفاً بازرس جدید را انتخاب کنید.', 'error');
+        return;
+      }
+
+      if (!confirm('آیا از تخصیص دسته‌ای مطمئن هستید؟')) return;
+
+      btn.disabled = true;
+      btn.textContent = 'در حال اعمال...';
+
+      apiCall({
+        action: 'equipment.bulkAssign',
+        token: currentToken,
+        payload: { kind: currentTab, plant, currentAssignedTo: currentInsp, newAssignedTo: newInsp }
+      }).then(function(res) {
+        btn.disabled = false;
+        btn.textContent = 'اعمال تخصیص';
+
+        if (res.success) {
+          showToast(`${toFa(res.data.updated)} تجهیز تخصیص یافت.`);
+          closeModal('bulkModal');
+          loadAll();
+          loadFilters();
+        } else {
+          showToast(res.error, 'error');
+        }
+      }).catch(function() {
+        btn.disabled = false;
+        btn.textContent = 'اعمال تخصیص';
+        showToast('خطا در ارتباط با سرور', 'error');
+      });
+    }
+
     function doLogout() {
+      if (!confirm('از حساب کاربری خارج می‌شوید؟')) return;
       var token = currentToken;
       localStorage.clear();
       sessionStorage.clear();
@@ -294,465 +815,12 @@
         headers: { 'Content-Type': 'text/plain;charset=utf-8' },
         body: JSON.stringify({ action: 'auth.logout', token: token }),
         redirect: 'follow'
-      }).finally(function() {
-        goToLogin();
-      });
+      }).finally(function() { goToLogin(); });
     }
 
-    function loadAll() {
-      document.getElementById('loadingBox').style.display = 'block';
-      document.getElementById('equipmentList').innerHTML = '';
-      document.getElementById('emptyBox').style.display = 'none';
-
-      var includeInactive = document.getElementById('showInactive').checked;
-
-      apiCall({
-        action: 'equipment.getAll',
-        token: currentToken,
-        payload: { includeInactive: includeInactive }
-      }).then(function(response) {
-        document.getElementById('loadingBox').style.display = 'none';
-
-        if (!response.success) {
-          if (response.error && (response.error.indexOf('نشست') !== -1 || response.error.indexOf('منقضی') !== -1)) {
-            handleSessionExpired();
-            return;
-          }
-          alert('خطا: ' + response.error);
-          return;
-        }
-
-        cylindersList = response.data.cylinders || [];
-        fireboxesList = response.data.fireboxes || [];
-        renderList();
-      }).catch(function(err) {
-        document.getElementById('loadingBox').style.display = 'none';
-        alert('خطا: ' + err.message);
-      });
-    }
-
-    function loadFilters() {
-      apiCall({
-        action: 'equipment.getFilters',
-        token: currentToken,
-        payload: { kind: currentTab }
-      }).then(function(response) {
-        if (!response.success) return;
-
-        var plantSelect = document.getElementById('bulkPlant');
-        var inspSelect = document.getElementById('bulkCurrentInspector');
-
-        plantSelect.innerHTML = '<option value="">همه کارخانه‌ها</option>';
-        inspSelect.innerHTML = '<option value="">همه بازرس‌ها</option>';
-
-        (response.data.plants || []).forEach(function(p) {
-          var opt = document.createElement('option');
-          opt.value = p;
-          opt.textContent = p;
-          plantSelect.appendChild(opt);
-        });
-
-        (response.data.inspectors || []).forEach(function(i) {
-          var opt = document.createElement('option');
-          opt.value = i;
-          opt.textContent = i;
-          inspSelect.appendChild(opt);
-        });
-      }).catch(function() {});
-    }
-
-    function switchTab(tab) {
-      currentTab = tab;
-      document.getElementById('tabCylinders').classList.toggle('active', tab === 'cylinder');
-      document.getElementById('tabFireboxes').classList.toggle('active', tab === 'firebox');
-
-      document.getElementById('bulkPlant').value = '';
-      document.getElementById('bulkCurrentInspector').value = '';
-      document.getElementById('bulkNewInspector').value = '';
-
-      renderList();
-      loadFilters();
-    }
-
-    function renderList() {
-      var container = document.getElementById('equipmentList');
-      container.innerHTML = '';
-
-      var list = currentTab === 'cylinder' ? cylindersList : fireboxesList;
-      var search = (document.getElementById('searchInput').value || '').trim().toLowerCase();
-
-      if (search) {
-        list = list.filter(function(item) {
-          var bc = String(item.Barcode || '').toLowerCase();
-          var loc = String(item.Location || '').toLowerCase();
-          var plant = String(item.Plant || '').toLowerCase();
-          return bc.indexOf(search) !== -1 || loc.indexOf(search) !== -1 || plant.indexOf(search) !== -1;
-        });
-      }
-
-      if (list.length === 0) {
-        document.getElementById('emptyBox').style.display = 'block';
-        return;
-      }
-
-      document.getElementById('emptyBox').style.display = 'none';
-
-      list.forEach(function(item) {
-        container.appendChild(createEquipmentCard(item));
-      });
-    }
-
-    function createEquipmentCard(item) {
-      var kind = currentTab;
-      var div = document.createElement('div');
-      div.className = 'equip-card';
-      if (item.Status && item.Status !== 'active') div.className += ' inactive';
-
-      var header = document.createElement('div');
-      header.className = 'equip-header';
-
-      var barcode = document.createElement('div');
-      barcode.className = 'equip-barcode';
-      barcode.textContent = item.Barcode || '-';
-      header.appendChild(barcode);
-
-      var badge = document.createElement('span');
-      var statusLabels = { active: 'فعال', maintenance: 'تعمیر', retired: 'اسقاط' };
-      badge.className = 'badge ' + (item.Status || 'active');
-      badge.textContent = statusLabels[item.Status] || item.Status || 'فعال';
-      header.appendChild(badge);
-
-      div.appendChild(header);
-
-      if (kind === 'cylinder' && item.CylinderType) {
-        var tb = document.createElement('span');
-        var typeLabels = { 'CO2': 'CO2', 'powder': 'پودری', 'water': 'آب' };
-        tb.className = 'badge cyl-' + item.CylinderType;
-        tb.textContent = typeLabels[item.CylinderType] || item.CylinderType;
-        div.appendChild(tb);
-      }
-      if (kind === 'firebox') {
-        var fbb = document.createElement('span');
-        fbb.className = 'badge firebox';
-        fbb.textContent = 'فایر باکس';
-        div.appendChild(fbb);
-      }
-
-      appendRow(div, 'موقعیت', item.Location || '-');
-      if (item.Plant) appendRow(div, 'کارخانه', item.Plant);
-      if (kind === 'cylinder' && item.Capacity) appendRow(div, 'ظرفیت', item.Capacity);
-      if (item.AssignedTo) appendRow(div, 'بازرس', item.AssignedTo);
-      if (item.LastInspection) appendRow(div, 'آخرین بازرسی', formatDate(item.LastInspection));
-
-      var actions = document.createElement('div');
-      actions.className = 'equip-actions';
-
-      var editBtn = document.createElement('button');
-      editBtn.className = 'btn btn-edit';
-      editBtn.textContent = 'ویرایش';
-      editBtn.onclick = function() { openEditModal(item); };
-      actions.appendChild(editBtn);
-
-      var statusBtn = document.createElement('button');
-      statusBtn.className = 'btn btn-status';
-      statusBtn.textContent = 'تغییر وضعیت';
-      statusBtn.onclick = function() { openStatusModal(item); };
-      actions.appendChild(statusBtn);
-
-      var deleteBtn = document.createElement('button');
-      deleteBtn.className = 'btn btn-delete';
-      deleteBtn.textContent = 'حذف';
-      deleteBtn.onclick = function() { openDeleteModal(item); };
-      actions.appendChild(deleteBtn);
-
-      div.appendChild(actions);
-      return div;
-    }
-
-    function appendRow(parent, label, value) {
-      var row = document.createElement('div');
-      row.className = 'equip-row';
-      var l = document.createElement('span'); l.className = 'label'; l.textContent = label + ': ';
-      var v = document.createElement('span'); v.textContent = String(value);
-      row.appendChild(l); row.appendChild(v); parent.appendChild(row);
-    }
-
-    function formatDate(dv) {
-      if (!dv) return '-';
-      try {
-        var d = new Date(dv);
-        var y = d.getFullYear();
-        var m = ('0' + (d.getMonth() + 1)).slice(-2);
-        var day = ('0' + d.getDate()).slice(-2);
-        return y + '/' + m + '/' + day;
-      } catch(e) { return String(dv); }
-    }
-
-    function openModal(id) { document.getElementById(id).classList.add('show'); }
-    function closeModal(id) { document.getElementById(id).classList.remove('show'); }
-
-    function openAddModal() {
-      editingMode = 'add';
-      editingItem = null;
-
-      document.getElementById('modalTitle').textContent =
-        currentTab === 'cylinder' ? 'افزودن سیلندر جدید' : 'افزودن فایر باکس جدید';
-      document.getElementById('modalConfirmBtn').textContent = 'افزودن';
-      document.getElementById('barcodeGroup').style.display = 'block';
-      document.getElementById('inputBarcode').value = '';
-      document.getElementById('inputBarcode').disabled = false;
-
-      if (currentTab === 'cylinder') {
-        document.getElementById('cylinderTypeGroup').style.display = 'block';
-        document.getElementById('inputCylinderType').value = 'CO2';
-        document.getElementById('capacityGroup').style.display = 'block';
-        document.getElementById('inputCapacity').value = '';
-      } else {
-        document.getElementById('cylinderTypeGroup').style.display = 'none';
-        document.getElementById('capacityGroup').style.display = 'none';
-      }
-
-      document.getElementById('inputLocation').value = '';
-      document.getElementById('inputPlant').value = '';
-      document.getElementById('inputAssignedTo').value = '';
-      document.getElementById('modalError').style.display = 'none';
-
-      openModal('editModal');
-    }
-
-    function openEditModal(item) {
-      editingMode = 'edit';
-      editingItem = item;
-
-      document.getElementById('modalTitle').textContent = 'ویرایش تجهیز';
-      document.getElementById('modalConfirmBtn').textContent = 'ذخیره';
-
-      document.getElementById('barcodeGroup').style.display = 'block';
-      document.getElementById('inputBarcode').value = item.Barcode || '';
-      document.getElementById('inputBarcode').disabled = true;
-
-      if (currentTab === 'cylinder') {
-        document.getElementById('cylinderTypeGroup').style.display = 'block';
-        document.getElementById('inputCylinderType').value = item.CylinderType || 'CO2';
-        document.getElementById('capacityGroup').style.display = 'block';
-        document.getElementById('inputCapacity').value = item.Capacity || '';
-      } else {
-        document.getElementById('cylinderTypeGroup').style.display = 'none';
-        document.getElementById('capacityGroup').style.display = 'none';
-      }
-
-      document.getElementById('inputLocation').value = item.Location || '';
-      document.getElementById('inputPlant').value = item.Plant || '';
-      document.getElementById('inputAssignedTo').value = item.AssignedTo || '';
-      document.getElementById('modalError').style.display = 'none';
-
-      openModal('editModal');
-    }
-
-    function openStatusModal(item) {
-      statusTarget = item;
-      document.getElementById('inputStatus').value = item.Status || 'active';
-      document.getElementById('statusError').style.display = 'none';
-      openModal('statusModal');
-    }
-
-    function openDeleteModal(item) {
-      deleteTarget = item;
-      document.getElementById('deleteDetails').textContent =
-        'کد: ' + item.Barcode + ' | موقعیت: ' + (item.Location || '-');
-      document.getElementById('deleteError').style.display = 'none';
-      openModal('deleteModal');
-    }
-
-    function openBulkAssignModal() {
-      var plant = document.getElementById('bulkPlant').value;
-      var current = document.getElementById('bulkCurrentInspector').value;
-      var newInsp = document.getElementById('bulkNewInspector').value.trim();
-
-      var errEl = document.getElementById('bulkError');
-      errEl.style.display = 'none';
-
-      if (!plant && !current) {
-        alert('حداقل یکی از فیلترها (کارخانه یا بازرس فعلی) را انتخاب کنید.');
-        return;
-      }
-      if (!newInsp) {
-        alert('شماره پرسنلی بازرس جدید را وارد کنید.');
-        return;
-      }
-
-      var list = currentTab === 'cylinder' ? cylindersList : fireboxesList;
-      var count = 0;
-      list.forEach(function(item) {
-        var itemPlant = String(item.Plant || '').trim();
-        var itemAssign = String(item.AssignedTo || '').trim();
-        var matchPlant = plant ? (itemPlant === plant) : true;
-        var matchAssigned = current ? (itemAssign === current) : true;
-        if (matchPlant && matchAssigned) count++;
-      });
-
-      var summary = '';
-      summary += 'تعداد تجهیزات مطابق فیلتر: <b>' + count + '</b><br>';
-      if (plant) summary += 'کارخانه: <b>' + plant + '</b><br>';
-      if (current) summary += 'بازرس فعلی: <b>' + current + '</b><br>';
-      summary += 'بازرس جدید: <b>' + newInsp + '</b>';
-
-      document.getElementById('bulkSummary').innerHTML = summary;
-      document.getElementById('confirmNewInspector').value = newInsp;
-
-      openModal('bulkModal');
-    }
-
-    function executeBulkAssign() {
-      var plant = document.getElementById('bulkPlant').value;
-      var current = document.getElementById('bulkCurrentInspector').value;
-      var newInsp = document.getElementById('confirmNewInspector').value.trim();
-      var errEl = document.getElementById('bulkError');
-      errEl.style.display = 'none';
-
-      if (!newInsp) {
-        errEl.textContent = 'شماره پرسنلی بازرس جدید اجباری است.';
-        errEl.style.display = 'block';
-        return;
-      }
-
-      if (!confirm('آیا از تخصیص دسته‌ای مطمئن هستید؟')) return;
-
-      apiCall({
-        action: 'equipment.bulkAssign',
-        token: currentToken,
-        payload: {
-          kind: currentTab,
-          plant: plant,
-          currentAssignedTo: current,
-          newAssignedTo: newInsp
-        }
-      }).then(function(response) {
-        if (response.success) {
-          closeModal('bulkModal');
-          alert('تخصیص انجام شد. تعداد: ' + response.data.updated);
-          document.getElementById('bulkNewInspector').value = '';
-          loadAll();
-          loadFilters();
-        } else {
-          errEl.textContent = response.error;
-          errEl.style.display = 'block';
-        }
-      }).catch(function(err) {
-        errEl.textContent = 'خطا: ' + err.message;
-        errEl.style.display = 'block';
-      });
-    }
-
-    function submitForm() {
-      var barcode = document.getElementById('inputBarcode').value.trim();
-      var location = document.getElementById('inputLocation').value.trim();
-      var plant = document.getElementById('inputPlant').value.trim();
-      var assignedTo = document.getElementById('inputAssignedTo').value.trim();
-      var capacity = document.getElementById('inputCapacity').value.trim();
-      var cylinderType = document.getElementById('inputCylinderType').value;
-      var errEl = document.getElementById('modalError');
-      errEl.style.display = 'none';
-
-      if (!barcode || !location) {
-        errEl.textContent = 'بارکد و موقعیت اجباری هستند.';
-        errEl.style.display = 'block';
-        return;
-      }
-
-      var payload = {
-        barcode: barcode,
-        kind: currentTab,
-        location: location,
-        plant: plant,
-        assignedTo: assignedTo
-      };
-
-      if (currentTab === 'cylinder') {
-        payload.capacity = capacity;
-        payload.cylinderType = cylinderType;
-      }
-
-      var action = editingMode === 'add' ? 'equipment.create' : 'equipment.update';
-
-      apiCall({
-        action: action,
-        token: currentToken,
-        payload: payload
-      }).then(function(response) {
-        if (response.success) {
-          closeModal('editModal');
-          loadAll();
-          loadFilters();
-        } else {
-          errEl.textContent = response.error;
-          errEl.style.display = 'block';
-        }
-      }).catch(function(err) {
-        errEl.textContent = 'خطا: ' + err.message;
-        errEl.style.display = 'block';
-      });
-    }
-
-    function submitStatus() {
-      var newStatus = document.getElementById('inputStatus').value;
-      var errEl = document.getElementById('statusError');
-      errEl.style.display = 'none';
-
-      if (!statusTarget) return;
-
-      apiCall({
-        action: 'equipment.toggleStatus',
-        token: currentToken,
-        payload: {
-          barcode: statusTarget.Barcode,
-          kind: currentTab,
-          status: newStatus
-        }
-      }).then(function(response) {
-        if (response.success) {
-          closeModal('statusModal');
-          statusTarget = null;
-          loadAll();
-        } else {
-          errEl.textContent = response.error;
-          errEl.style.display = 'block';
-        }
-      }).catch(function(err) {
-        errEl.textContent = 'خطا: ' + err.message;
-        errEl.style.display = 'block';
-      });
-    }
-
-    function confirmDelete() {
-      if (!deleteTarget) return;
-      var errEl = document.getElementById('deleteError');
-      errEl.style.display = 'none';
-
-      apiCall({
-        action: 'equipment.delete',
-        token: currentToken,
-        payload: {
-          barcode: deleteTarget.Barcode,
-          kind: currentTab
-        }
-      }).then(function(response) {
-        if (response.success) {
-          closeModal('deleteModal');
-          deleteTarget = null;
-          loadAll();
-          loadFilters();
-        } else {
-          errEl.textContent = response.error;
-          errEl.style.display = 'block';
-        }
-      }).catch(function(err) {
-        errEl.textContent = 'خطا: ' + err.message;
-        errEl.style.display = 'block';
-      });
-    }
+    function toFa(n) { return String(n).replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]); }
   </script>
 
   <script src="pwa.js" defer></script>
 </body>
-  </html>
+</html>
