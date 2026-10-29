@@ -4,158 +4,342 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#1e3c72">
+  <meta name="theme-color" content="#C0611A">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="HSE CSP">
   <title>تاریخچه بازرسی‌ها</title>
+  
+  <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet" type="text/css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: Tahoma, Arial, sans-serif; background: #f0f2f5; min-height: 100vh; padding: 16px; }
-    .header { background: #1e3c72; color: #fff; padding: 16px; border-radius: 12px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; }
-    .header h1 { font-size: 18px; }
-    .header .user { font-size: 13px; opacity: 0.9; }
-    .header-btns { display: flex; gap: 8px; }
-    .header-btn { background: rgba(255,255,255,0.2); border: none; color: #fff; padding: 8px 14px; border-radius: 8px; cursor: pointer; font-family: inherit; font-size: 13px; }
-    .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 16px; }
-    .stat-card { background: #fff; border-radius: 12px; padding: 14px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
-    .stat-card .num { font-size: 24px; font-weight: bold; margin-bottom: 4px; }
-    .stat-card .label { font-size: 12px; color: #666; }
-    .stat-card.total .num { color: #1e3c72; }
-    .stat-card.approved .num { color: #4caf50; }
-    .stat-card.rejected .num { color: #d32f2f; }
-    .card { background: #fff; border-radius: 12px; padding: 20px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
-    .card h2 { font-size: 16px; color: #1e3c72; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center; }
-    .card h2 .count { font-size: 14px; color: #999; font-weight: normal; }
-    .filter-bar { display: flex; gap: 8px; margin-bottom: 14px; overflow-x: auto; padding-bottom: 4px; }
-    .filter-btn { padding: 8px 16px; background: #f5f5f5; border: 2px solid #e0e0e0; border-radius: 20px; font-family: inherit; font-size: 13px; font-weight: bold; color: #555; cursor: pointer; white-space: nowrap; }
-    .filter-btn.active { background: #1e3c72; color: #fff; border-color: #1e3c72; }
-    .history-item { background: #f9f9f9; border: 2px solid #e0e0e0; border-radius: 10px; padding: 14px; margin-bottom: 12px; }
-    .history-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; gap: 8px; }
-    .history-title { flex: 1; }
-    .history-title .barcode { font-size: 15px; font-weight: bold; color: #222; }
-    .history-title .meta { font-size: 12px; color: #777; margin-top: 4px; }
-    .status-badge { padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: bold; white-space: nowrap; }
-    .status-badge.pending { background: #fff3e0; color: #e65100; }
-    .status-badge.approved { background: #e8f5e9; color: #2e7d32; }
-    .status-badge.rejected { background: #ffebee; color: #c62828; }
-    .final-badge { display: inline-block; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: bold; margin-top: 6px; }
-    .final-badge.salem { background: #e8f5e9; color: #2e7d32; }
-    .final-badge.defective { background: #ffebee; color: #c62828; }
-    .final-badge.repairs { background: #fff3e0; color: #e65100; }
-    .rejection-note { background: #ffebee; border-right: 3px solid #d32f2f; padding: 8px 12px; border-radius: 6px; font-size: 12px; color: #c62828; margin-top: 8px; }
-    .view-btn { width: 100%; padding: 10px; background: #1e3c72; color: #fff; border: none; border-radius: 8px; font-family: inherit; font-size: 13px; font-weight: bold; cursor: pointer; margin-top: 10px; }
-    .empty-msg { text-align: center; color: #999; padding: 30px; font-size: 14px; }
-    .loading-box { text-align: center; padding: 40px 20px; color: #666; font-size: 15px; }
-    .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); display: none; z-index: 1000; align-items: center; justify-content: center; padding: 16px; }
+    :root {
+      --copper-main: #E67E22;      
+      --copper-dark: #C0611A;      
+      --copper-light: #FAD7A8;     
+      --copper-bg: #F5F7FA;        
+      --text-dark: #2C3E50;        
+      --text-muted: #7F8C8D;
+      
+      --status-green: #27ae60;
+      --status-red: #e74c3c;
+      --status-orange: #f39c12;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Vazirmatn', Tahoma, sans-serif; }
+    
+    body { 
+      background-color: var(--copper-bg); 
+      color: var(--text-dark);
+      padding: 0 0 100px 0; 
+      min-height: 100vh;
+    }
+
+    /* هدر */
+    .header {
+      background: linear-gradient(135deg, var(--copper-dark), var(--copper-main));
+      color: #fff;
+      padding: 16px 20px;
+      border-radius: 0 0 24px 24px;
+      box-shadow: 0 4px 15px rgba(230, 126, 34, 0.3);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .header h1 { font-size: 18px; font-weight: 700; }
+    
+    .avatar {
+      width: 40px; height: 40px;
+      background: rgba(255,255,255,0.2);
+      border-radius: 50%;
+      display: flex; justify-content: center; align-items: center;
+      font-size: 18px; backdrop-filter: blur(5px);
+      border: 1px solid rgba(255,255,255,0.4);
+    }
+
+    .container { padding: 0 16px; max-width: 700px; margin: 0 auto; }
+
+    /* کارت‌های آمار */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+    @media (min-width: 500px) {
+      .stats-grid { grid-template-columns: repeat(4, 1fr); }
+    }
+    
+    .stat-card {
+      background: #fff;
+      border-radius: 16px;
+      padding: 14px 8px;
+      text-align: center;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+      border: 2px solid transparent;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      position: relative;
+    }
+    .stat-card:active { transform: scale(0.97); }
+    .stat-card.active { border-color: var(--copper-main); background: #FFF9F0; }
+    
+    .stat-card .num { font-size: 22px; font-weight: 800; margin-bottom: 4px; }
+    .stat-card .label { font-size: 11px; color: var(--text-muted); font-weight: 700; }
+    
+    .stat-total .num { color: var(--copper-main); }
+    .stat-pending .num { color: var(--status-orange); }
+    .stat-approved .num { color: var(--status-green); }
+    .stat-rejected .num { color: var(--status-red); }
+
+    /* نوار جستجو */
+    .search-container {
+      margin-bottom: 16px;
+      position: relative;
+    }
+    .search-container input {
+      width: 100%;
+      padding: 12px 40px 12px 16px;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      font-family: inherit;
+      font-size: 13px;
+      background: #fff;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+      transition: 0.3s;
+    }
+    .search-container input:focus { outline: none; border-color: var(--copper-main); }
+    .search-container i {
+      position: absolute;
+      right: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+    }
+
+    /* فیلترها */
+    .filter-bar {
+      display: flex; gap: 8px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 4px;
+    }
+    .filter-btn {
+      background: #fff; border: 1px solid #e2e8f0; border-radius: 50px;
+      padding: 8px 16px; font-family: inherit; font-size: 12px; font-weight: 700;
+      color: var(--text-muted); cursor: pointer; white-space: nowrap; transition: 0.2s;
+    }
+    .filter-btn.active { background: var(--copper-main); color: #fff; border-color: var(--copper-main); }
+
+    /* گروه‌بندی تاریخ */
+    .date-group-title {
+      font-size: 13px; font-weight: 800; color: var(--copper-dark);
+      margin: 24px 0 12px 0; display: flex; align-items: center; gap: 8px;
+    }
+    .date-group-title::after {
+      content: ''; flex: 1; height: 1px; background: #e2e8f0;
+    }
+
+    /* کارت‌های بازرسی */
+    .history-item {
+      background: #fff; border: 1px solid #e2e8f0; border-radius: 16px;
+      padding: 16px; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+    }
+
+    .hist-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+    .hist-barcode { font-size: 16px; font-weight: 800; color: var(--text-dark); }
+    .hist-meta { font-size: 12px; color: var(--text-muted); margin-top: 4px; display: flex; gap: 12px;}
+    
+    .badge-status { padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; }
+    .badge-status.salem { background: #E8F8F5; color: var(--status-green); }
+    .badge-status.defective { background: #FDEDEC; color: var(--status-red); }
+    .badge-status.repair { background: #FEF5E7; color: var(--status-orange); }
+
+    .badge-pending { background: #FFF4E6; color: var(--copper-dark); }
+    .badge-approved { background: #E8F8F5; color: var(--status-green); }
+    .badge-rejected { background: #FDEDEC; color: var(--status-red); }
+
+    .rejection-note {
+      background: #FDEDEC; border-right: 3px solid var(--status-red);
+      padding: 8px 12px; border-radius: 6px; font-size: 12px; color: var(--status-red);
+      margin-top: 10px; font-weight: 500;
+    }
+
+    /* دکمه مشاهده جزئیات (تم مسی) */
+    .hist-actions { margin-top: 12px; }
+    .btn-view {
+      width: 100%; padding: 12px; border-radius: 10px; 
+      border: 1px solid var(--copper-main);
+      background: #FFF4E6; 
+      color: var(--copper-dark); 
+      font-family: inherit; font-weight: 700;
+      font-size: 13px; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 8px;
+      transition: 0.2s;
+    }
+    .btn-view:active { background: #FCE3CC; }
+
+    .empty-state { text-align: center; padding: 40px 10px; color: var(--text-muted); font-size: 14px; }
+    .empty-state i { font-size: 48px; color: #ccc; margin-bottom: 12px; display: block; }
+
+    /* منوی پایین */
+    .bottom-nav {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      background: #fff; display: flex; justify-content: space-around; align-items: center;
+      padding: 10px; box-shadow: 0 -2px 15px rgba(0,0,0,0.05);
+      border-radius: 24px 24px 0 0; z-index: 100;
+    }
+    .nav-item {
+      display: flex; flex-direction: column; align-items: center; gap: 4px;
+      color: var(--text-muted); font-size: 11px; font-weight: 700; text-decoration: none; cursor: pointer;
+    }
+    .nav-item i { font-size: 20px; margin-bottom: 2px; }
+    .nav-item.active { color: var(--copper-main); }
+
+    /* مدال‌ها */
+    .modal-overlay {
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.5); z-index: 200; display: none; align-items: center; justify-content: center; padding: 16px;
+    }
     .modal-overlay.show { display: flex; }
-    .modal { background: #fff; border-radius: 12px; padding: 20px; max-width: 500px; width: 100%; max-height: 90vh; overflow-y: auto; }
-    .modal img { width: 100%; max-height: 30vh; object-fit: contain; border-radius: 8px; margin-bottom: 12px; display: block; background: #f0f0f0; }
-    .modal h3 { font-size: 16px; color: #1e3c72; margin-bottom: 12px; }
-    .modal h4 { font-size: 14px; color: #1e3c72; margin: 16px 0 10px 0; padding-bottom: 6px; border-bottom: 2px solid #e0e0e0; }
-    .modal .row { display: flex; justify-content: space-between; padding: 6px 0; font-size: 14px; border-bottom: 1px solid #eee; }
-    .modal .row:last-child { border-bottom: none; }
-    .modal .row .l { color: #666; }
-    .modal .row .v { font-weight: bold; color: #222; }
-    .modal-close { width: 100%; padding: 12px; background: #1e3c72; color: #fff; border: none; border-radius: 8px; font-family: inherit; font-size: 15px; font-weight: bold; cursor: pointer; margin-top: 16px; }
-    .items-list { display: flex; flex-direction: column; gap: 6px; }
-    .item-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; border-radius: 6px; font-size: 13px; }
-    .item-row.salem { background: #e8f5e9; color: #2e7d32; }
-    .item-row.defective { background: #ffebee; color: #c62828; }
-    .item-row.needsRepair { background: #fff3e0; color: #e65100; }
-    .item-row .item-name { flex: 1; font-weight: bold; }
-    .item-row .item-status { font-weight: bold; padding: 3px 10px; border-radius: 4px; background: rgba(255,255,255,0.7); font-size: 11px; }
-    .no-items { text-align: center; color: #999; padding: 15px; font-size: 13px; }
+    
+    .modal-content {
+      background: #fff; border-radius: 16px; width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto;
+      padding: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); animation: slideUp 0.3s ease-out;
+    }
+    @keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    
+    .modal-title { font-size: 16px; font-weight: 800; color: var(--copper-dark); margin-bottom: 16px; border-bottom: 1px solid #eee; padding-bottom: 12px; display: flex; justify-content: space-between; align-items: center;}
+    .modal-close { background: none; border: none; font-size: 20px; color: #999; cursor: pointer; }
+
+    .modal-img { width: 100%; max-height: 200px; object-fit: contain; border-radius: 8px; background: #f0f0f0; margin-bottom: 16px; }
+    .detail-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px dashed #eee; font-size: 13px; }
+    .detail-row:last-child { border-bottom: none; }
+    .detail-row .l { color: var(--text-muted); }
+    .detail-row .v { font-weight: 700; color: var(--text-dark); }
+    
+    .items-list-title { margin: 16px 0 8px 0; font-size: 14px; font-weight: 700; color: var(--copper-dark); }
+    .item-row { display: flex; justify-content: space-between; padding: 8px 12px; border-radius: 6px; margin-bottom: 6px; font-size: 12px; font-weight: 700; }
+    .item-row.salem { background: #E8F8F5; color: var(--status-green); }
+    .item-row.defective { background: #FDEDEC; color: var(--status-red); }
+    .item-row.needsRepair { background: #FEF5E7; color: var(--status-orange); }
+
   </style>
 </head>
 <body>
 
-  <div class="header">
-    <div>
-      <h1>تاریخچه بازرسی‌ها</h1>
-      <div class="user" id="userInfo"></div>
+  <header class="header">
+    <h1>تاریخچه بازرسی‌ها</h1>
+    <div class="avatar">
+      <i class="fa-solid fa-clock-rotate-left"></i>
     </div>
-    <div class="header-btns">
-      <button class="header-btn" onclick="goToScanner()">اسکنر</button>
-      <button class="header-btn" onclick="doLogout()">خروج</button>
+  </header>
+
+  <div class="container">
+    
+    <!-- آمار کلی -->
+    <div class="stats-grid">
+      <div class="stat-card stat-total active" id="stat-all" onclick="filterByStat('all')">
+        <div class="num" id="stat-total">۰</div>
+        <div class="label">کل بازرسی‌ها</div>
+      </div>
+      <div class="stat-card stat-pending" id="stat-pending" onclick="filterByStat('pending')">
+        <div class="num" id="stat-pending-count">۰</div>
+        <div class="label">در انتظار</div>
+      </div>
+      <div class="stat-card stat-approved" id="stat-approved" onclick="filterByStat('approved')">
+        <div class="num" id="stat-approved-count">۰</div>
+        <div class="label">تایید شده</div>
+      </div>
+      <div class="stat-card stat-rejected" id="stat-rejected" onclick="filterByStat('rejected')">
+        <div class="num" id="stat-rejected-count">۰</div>
+        <div class="label">رد شده</div>
+      </div>
     </div>
+
+    <!-- نوار جستجو -->
+    <div class="search-container">
+      <input type="text" id="searchInput" placeholder="جستجوی بارکد یا نام بازرس..." oninput="handleSearch()">
+      <i class="fa-solid fa-magnifying-glass"></i>
+    </div>
+
+    <!-- فیلترها -->
+    <div class="filter-bar">
+      <button class="filter-btn active" id="btn-all" onclick="applyFilter('all', this)">همه</button>
+      <button class="filter-btn" id="btn-pending" onclick="applyFilter('pending', this)">در انتظار</button>
+      <button class="filter-btn" id="btn-approved" onclick="applyFilter('approved', this)">تایید شده</button>
+      <button class="filter-btn" id="btn-rejected" onclick="applyFilter('rejected', this)">رد شده</button>
+    </div>
+
+    <!-- لیست تاریخچه -->
+    <div id="historyList">
+      <div class="empty-state"><i class="fa-solid fa-spinner fa-spin"></i> در حال بارگذاری...</div>
+    </div>
+
   </div>
 
-  <div class="stats">
-    <div class="stat-card total">
-      <div class="num" id="countTotal">۰</div>
-      <div class="label">کل بازرسی‌ها</div>
-    </div>
-    <div class="stat-card approved">
-      <div class="num" id="countApproved">۰</div>
-      <div class="label">تأیید شده</div>
-    </div>
-    <div class="stat-card rejected">
-      <div class="num" id="countRejected">۰</div>
-      <div class="label">رد شده</div>
-    </div>
-  </div>
+  <!-- منوی پایین -->
+  <nav class="bottom-nav">
+    <a href="index.html" class="nav-item">
+      <i class="fa-solid fa-house"></i>
+      <span>خانه</span>
+    </a>
+    <a href="history.html" class="nav-item active">
+      <i class="fa-solid fa-clock-rotate-left"></i>
+      <span>تاریخچه</span>
+    </a>
+    <a href="dashboard.html" class="nav-item" id="nav-dashboard" style="display:none;">
+      <i class="fa-solid fa-chart-pie"></i>
+      <span>داشبورد</span>
+    </a>
+    <a href="#" class="nav-item" onclick="doLogout()">
+      <i class="fa-solid fa-arrow-right-from-bracket"></i>
+      <span>خروج</span>
+    </a>
+  </nav>
 
-  <div class="card">
-    <h2>
-      <span>۳ ماه گذشته</span>
-      <span class="count" id="historyCountLabel"></span>
-    </h2>
-
-    <div class="filter-bar" id="filterBar">
-      <button class="filter-btn active" data-filter="all" onclick="applyFilter('all', this)">همه</button>
-      <button class="filter-btn" data-filter="pending" onclick="applyFilter('pending', this)">در انتظار</button>
-      <button class="filter-btn" data-filter="approved" onclick="applyFilter('approved', this)">تأیید شده</button>
-      <button class="filter-btn" data-filter="rejected" onclick="applyFilter('rejected', this)">رد شده</button>
-    </div>
-
-    <div id="loadingBox" class="loading-box">در حال بارگذاری...</div>
-    <div id="historyList"></div>
-    <div id="emptyBox" class="empty-msg" style="display:none;">هیچ بازرسی‌ای در ۳ ماه گذشته ثبت نشده است.</div>
-  </div>
-
+  <!-- مدال مشاهده جزئیات -->
   <div class="modal-overlay" id="viewModal">
-    <div class="modal">
-      <h3>جزئیات بازرسی</h3>
-      <img id="modalPhoto" src="" alt="عکس بازرسی" style="display:none;">
-      <div id="modalDetails"></div>
-      <h4>موارد بررسی‌شده</h4>
-      <div id="modalItems"></div>
-      <button class="modal-close" onclick="closeViewModal()">بستن</button>
+    <div class="modal-content">
+      <div class="modal-title">
+        <span>جزئیات بازرسی</span>
+        <button class="modal-close" onclick="closeModal('viewModal')">&times;</button>
+      </div>
+      
+      <img id="modalPhoto" src="" class="modal-img" style="display:none;">
+      <div id="modalPhotoEmpty" style="text-align:center; padding:20px; background:#f9f9f9; border-radius:8px; margin-bottom:16px; color:#999; font-size:13px; display:none;">عکسی ثبت نشده است.</div>
+      
+      <div class="detail-row"><span class="l">کد تجهیز</span><span class="v" id="v-barcode">-</span></div>
+      <div class="detail-row"><span class="l">نوع</span><span class="v" id="v-type">-</span></div>
+      <div class="detail-row"><span class="l">بازرس</span><span class="v" id="v-inspector">-</span></div>
+      <div class="detail-row"><span class="l">تاریخ</span><span class="v" id="v-date">-</span></div>
+      <div class="detail-row"><span class="l">نتیجه نهایی</span><span class="v" id="v-final">-</span></div>
+      <div class="detail-row"><span class="l">وضعیت</span><span class="v" id="v-status">-</span></div>
+      <div class="detail-row" id="v-reject-reason-row" style="display:none;"><span class="l">دلیل رد</span><span class="v" id="v-reject-reason" style="color:var(--status-red);">-</span></div>
+      <div class="detail-row" id="v-notes-row" style="display:none;"><span class="l">یادداشت</span><span class="v" id="v-notes">-</span></div>
+
+      <div class="items-list-title">موارد بررسی‌شده</div>
+      <div id="v-items"></div>
+      
+      <button class="btn-view" style="margin-top:16px;" onclick="closeModal('viewModal')">بستن</button>
     </div>
   </div>
 
   <script>
     var EXEC_URL = 'https://script.google.com/macros/s/AKfycbyh8ccieztX3ZkFF0IozE_beRcZja0BH8ieYbQ9qCL1tLDxkq2QB0Pz3JD4v0IRY6eo/exec';
-    var INDEX_URL = 'index.html';
     var currentToken = '';
-    var currentUser = '';
+    
     var allHistory = [];
-    var activeFilter = 'all';
+    var currentFilter = 'all';
+    var currentSearch = '';
 
-    var FINAL_LABELS = {
-      'salem': 'سالم',
-      'defective': 'معیوب',
-      'needsRepair': 'نیاز به اصلاح'
-    };
-
-    var STATUS_LABELS = {
-      'pending': 'در انتظار تأیید',
-      'approved': 'تأیید شده',
-      'rejected': 'رد شده'
-    };
+    var FINAL_LABELS = { 'salem': 'سالم', 'defective': 'معیوب', 'needsRepair': 'نیاز به اصلاح' };
+    var STATUS_LABELS = { 'pending': 'در انتظار', 'approved': 'تایید شده', 'rejected': 'رد شده' };
+    var DATE_GROUP_LABELS = { 'today': 'امروز', 'yesterday': 'دیروز', 'lastWeek': 'هفته گذشته', 'older': 'قدیمی‌تر' };
 
     function goToLogin() {
       window.location.href = EXEC_URL + '?page=Login';
-    }
-
-    function goToScanner() {
-      window.location.href = INDEX_URL;
-    }
-
-    function handleSessionExpired() {
-      localStorage.clear();
-      sessionStorage.clear();
-      goToLogin();
     }
 
     function apiCall(request) {
@@ -169,23 +353,252 @@
 
     (function initPage() {
       currentToken = localStorage.getItem('token') || '';
-      currentUser = localStorage.getItem('fullName') || localStorage.getItem('username') || '';
+      var role = localStorage.getItem('role') || '';
 
       if (!currentToken) { goToLogin(); return; }
 
+      // نمایش داشبورد در منوی پایین برای مدیر
+      if (role === 'manager' || role === 'admin') {
+        document.getElementById('nav-dashboard').style.display = 'flex';
+      }
+
       apiCall({ action: 'auth.me', token: currentToken }).then(function(response) {
         if (!response.success) {
-          handleSessionExpired();
+          localStorage.clear();
+          goToLogin();
           return;
         }
-        document.getElementById('userInfo').textContent = currentUser;
         loadHistory();
       }).catch(function() {
-        handleSessionExpired();
+        localStorage.clear();
+        goToLogin();
       });
     })();
 
+    function loadHistory() {
+      apiCall({
+        action: 'inspection.history',
+        token: currentToken,
+        payload: {}
+      }).then(function(response) {
+        if (!response.success) {
+          if (response.error && (response.error.indexOf('نشست') !== -1 || response.error.indexOf('منقضی') !== -1)) {
+            localStorage.clear();
+            goToLogin();
+            return;
+          }
+          document.getElementById('historyList').innerHTML = '<div class="empty-state"><i class="fa-solid fa-circle-exclamation"></i>' + response.error + '</div>';
+          return;
+        }
+
+        allHistory = response.data.inspections || [];
+        updateStats();
+        renderHistory();
+      }).catch(function(err) {
+        document.getElementById('historyList').innerHTML = '<div class="empty-state"><i class="fa-solid fa-wifi"></i>خطا در ارتباط با سرور</div>';
+      });
+    }
+
+    function updateStats() {
+      document.getElementById('stat-total').textContent = toFa(allHistory.length);
+      document.getElementById('stat-pending-count').textContent = toFa(allHistory.filter(d => d.status === 'pending').length);
+      document.getElementById('stat-approved-count').textContent = toFa(allHistory.filter(d => d.status === 'approved').length);
+      document.getElementById('stat-rejected-count').textContent = toFa(allHistory.filter(d => d.status === 'rejected').length);
+    }
+
+    function filterByStat(status) {
+      currentFilter = status;
+      document.querySelectorAll('.stat-card').forEach(c => c.classList.remove('active'));
+      document.getElementById('stat-' + (status === 'all' ? 'all' : status)).classList.add('active');
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById('btn-' + status).classList.add('active');
+      renderHistory();
+    }
+
+    function applyFilter(status, btn) {
+      currentFilter = status;
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      document.querySelectorAll('.stat-card').forEach(c => c.classList.remove('active'));
+      document.getElementById('stat-' + status).classList.add('active');
+      renderHistory();
+    }
+
+    function handleSearch() {
+      currentSearch = document.getElementById('searchInput').value.trim().toLowerCase();
+      renderHistory();
+    }
+
+    function getDateGroup(dateString) {
+      if (!dateString) return 'older';
+      var d = new Date(dateString);
+      if (isNaN(d.getTime())) return 'older';
+      
+      var today = new Date();
+      today.setHours(0,0,0,0);
+      
+      var yesterday = new Date(today);
+      yesterday.setDate(yesterday.getDate() - 1);
+      
+      var lastWeek = new Date(today);
+      lastWeek.setDate(lastWeek.getDate() - 7);
+      
+      if (d >= today) return 'today';
+      if (d >= yesterday) return 'yesterday';
+      if (d >= lastWeek) return 'lastWeek';
+      return 'older';
+    }
+
+    function renderHistory() {
+      const listEl = document.getElementById('historyList');
+      listEl.innerHTML = '';
+
+      let filtered = allHistory;
+      
+      if (currentFilter !== 'all') {
+        filtered = filtered.filter(d => d.status === currentFilter);
+      }
+      
+      if (currentSearch) {
+        filtered = filtered.filter(d => 
+          (d.barcode && d.barcode.toLowerCase().includes(currentSearch)) || 
+          (d.inspector && d.inspector.toLowerCase().includes(currentSearch))
+        );
+      }
+
+      if (filtered.length === 0) {
+        listEl.innerHTML = '<div class="empty-state"><i class="fa-solid fa-inbox"></i>موردی یافت نشد.</div>';
+        return;
+      }
+
+      const grouped = {};
+      filtered.forEach(item => {
+        const group = getDateGroup(item.date);
+        if (!grouped[group]) grouped[group] = [];
+        grouped[group].push(item);
+      });
+
+      const groupOrder = ['today', 'yesterday', 'lastWeek', 'older'];
+      
+      groupOrder.forEach(groupKey => {
+        if (!grouped[groupKey]) return;
+
+        const title = document.createElement('div');
+        title.className = 'date-group-title';
+        title.innerHTML = `<i class="fa-solid fa-calendar-day"></i> ${DATE_GROUP_LABELS[groupKey]}`;
+        listEl.appendChild(title);
+
+        grouped[groupKey].forEach(item => {
+          listEl.appendChild(createHistoryCard(item));
+        });
+      });
+    }
+
+    function createHistoryCard(item) {
+      const div = document.createElement('div');
+      div.className = 'history-item';
+      
+      let finalLabel = FINAL_LABELS[item.finalStatus] || item.finalStatus || '-';
+      let finalClass = item.finalStatus === 'salem' ? 'salem' : (item.finalStatus === 'defective' ? 'defective' : 'repair');
+      
+      let statusLabel = STATUS_LABELS[item.status] || item.status || '-';
+      let statusClass = item.status === 'pending' ? 'badge-pending' : (item.status === 'approved' ? 'badge-approved' : 'badge-rejected');
+
+      let rejectNote = '';
+      if (item.status === 'rejected' && item.rejectionReason) {
+        rejectNote = `<div class="rejection-note"><i class="fa-solid fa-circle-exclamation"></i> دلیل رد: ${item.rejectionReason}</div>`;
+      }
+
+      let typeLabel = item.source === 'firebox' ? 'فایر باکس' : (item.cylinderType || 'سیلندر');
+
+      div.innerHTML = `
+        <div class="hist-header">
+          <div>
+            <div class="hist-barcode">${item.barcode} <span style="font-size:11px; color:#999; font-weight:normal;">(${typeLabel})</span></div>
+            <div class="hist-meta">
+              <span><i class="fa-solid fa-user"></i> ${item.inspector || '-'}</span>
+              <span><i class="fa-solid fa-calendar"></i> ${formatDate(item.date)}</span>
+            </div>
+          </div>
+          <div style="display:flex; flex-direction:column; align-items:flex-end; gap:6px;">
+            <span class="badge-status ${finalClass}">${finalLabel}</span>
+            <span class="badge-status ${statusClass}">${statusLabel}</span>
+          </div>
+        </div>
+        ${rejectNote}
+        <div class="hist-actions">
+          <button class="btn-view" onclick="openViewModal('${item.inspectionId}')"><i class="fa-solid fa-eye"></i> مشاهده جزئیات</button>
+        </div>
+      `;
+      return div;
+    }
+
+    function openViewModal(inspectionId) {
+      var item = allHistory.find(d => d.inspectionId === inspectionId);
+      if (!item) return;
+
+      document.getElementById('v-barcode').textContent = item.barcode;
+      document.getElementById('v-type').textContent = item.source === 'firebox' ? 'فایر باکس' : (item.cylinderType || 'سیلندر');
+      document.getElementById('v-inspector').textContent = item.inspector || '-';
+      document.getElementById('v-date').textContent = formatDate(item.date);
+      
+      document.getElementById('v-final').textContent = FINAL_LABELS[item.finalStatus] || item.finalStatus || '-';
+      document.getElementById('v-status').textContent = STATUS_LABELS[item.status] || item.status || '-';
+      
+      if (item.rejectionReason) {
+        document.getElementById('v-reject-reason').textContent = item.rejectionReason;
+        document.getElementById('v-reject-reason-row').style.display = 'flex';
+      } else {
+        document.getElementById('v-reject-reason-row').style.display = 'none';
+      }
+
+      if (item.notes) {
+        document.getElementById('v-notes').textContent = item.notes;
+        document.getElementById('v-notes-row').style.display = 'flex';
+      } else {
+        document.getElementById('v-notes-row').style.display = 'none';
+      }
+
+      var photo = document.getElementById('modalPhoto');
+      if (item.photoUrl) {
+        photo.src = convertDriveLink(item.photoUrl);
+        photo.style.display = 'block';
+        document.getElementById('modalPhotoEmpty').style.display = 'none';
+      } else {
+        photo.style.display = 'none';
+        document.getElementById('modalPhotoEmpty').style.display = 'block';
+      }
+
+      // آیتم‌های چک‌لیست (که در پاسخ history برگردانده شده‌اند)
+      var itemsEl = document.getElementById('v-items');
+      itemsEl.innerHTML = '';
+      
+      if (item.items && item.items.length > 0) {
+        item.items.forEach(function(it) {
+          var row = document.createElement('div');
+          row.className = 'item-row ' + (it.status || '');
+          var label = FINAL_LABELS[it.status] || it.status;
+          row.innerHTML = `<span>${it.name}</span><span>${label}</span>`;
+          itemsEl.appendChild(row);
+        });
+      } else {
+        itemsEl.innerHTML = '<div style="text-align:center; color:#999; font-size:12px; padding:10px;">آیتمی یافت نشد.</div>';
+      }
+
+      document.getElementById('viewModal').classList.add('show');
+    }
+
+    function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+
+    function convertDriveLink(url) {
+      if (!url) return '';
+      var match = url.match(/[?&]id=([^&]+)/);
+      if (match) return 'https://lh3.googleusercontent.com/d/' + match[1];
+      return url;
+    }
+
     function doLogout() {
+      if (!confirm('از حساب کاربری خارج می‌شوید؟')) return;
       var token = currentToken;
       localStorage.clear();
       sessionStorage.clear();
@@ -194,146 +607,12 @@
         headers: { 'Content-Type': 'text/plain;charset=utf-8' },
         body: JSON.stringify({ action: 'auth.logout', token: token }),
         redirect: 'follow'
-      }).finally(function() {
-        goToLogin();
-      });
+      }).finally(function() { goToLogin(); });
     }
 
-    function toFa(n) {
-      return String(n).replace(/\d/g, function(d) {
-        return '۰۱۲۳۴۵۶۷۸۹'[d];
-      });
-    }
-
-    function loadHistory() {
-      apiCall({
-        action: 'inspection.history',
-        token: currentToken,
-        payload: {}
-      }).then(function(response) {
-        document.getElementById('loadingBox').style.display = 'none';
-
-        if (!response.success) {
-          if (response.error && (response.error.indexOf('نشست') !== -1 || response.error.indexOf('منقضی') !== -1)) {
-            handleSessionExpired();
-            return;
-          }
-          alert('خطا: ' + response.error);
-          return;
-        }
-
-        allHistory = response.data.inspections || [];
-        updateStats();
-        renderHistory();
-      }).catch(function(err) {
-        document.getElementById('loadingBox').style.display = 'none';
-        alert('خطا در ارتباط با سرور: ' + err.message);
-      });
-    }
-
-    function updateStats() {
-      var total = allHistory.length;
-      var approved = 0;
-      var rejected = 0;
-
-      allHistory.forEach(function(item) {
-        if (item.status === 'approved') approved++;
-        else if (item.status === 'rejected') rejected++;
-      });
-
-      document.getElementById('countTotal').textContent = toFa(total);
-      document.getElementById('countApproved').textContent = toFa(approved);
-      document.getElementById('countRejected').textContent = toFa(rejected);
-    }
-
-    function applyFilter(filter, btn) {
-      activeFilter = filter;
-      var buttons = document.querySelectorAll('.filter-btn');
-      buttons.forEach(function(b) { b.classList.remove('active'); });
-      btn.classList.add('active');
-      renderHistory();
-    }
-
-    function renderHistory() {
-      var container = document.getElementById('historyList');
-      container.innerHTML = '';
-
-      var filtered = allHistory;
-      if (activeFilter !== 'all') {
-        filtered = allHistory.filter(function(item) {
-          return item.status === activeFilter;
-        });
-      }
-
-      if (filtered.length === 0) {
-        document.getElementById('emptyBox').style.display = 'block';
-        document.getElementById('historyCountLabel').textContent = '';
-        return;
-      }
-
-      document.getElementById('emptyBox').style.display = 'none';
-      document.getElementById('historyCountLabel').textContent = toFa(filtered.length) + ' مورد';
-
-      filtered.forEach(function(item) {
-        container.appendChild(createHistoryCard(item));
-      });
-    }
-
-    function createHistoryCard(item) {
-      var div = document.createElement('div');
-      div.className = 'history-item';
-
-      var header = document.createElement('div');
-      header.className = 'history-header';
-
-      var title = document.createElement('div');
-      title.className = 'history-title';
-
-      var bc = document.createElement('div');
-      bc.className = 'barcode';
-      bc.textContent = item.barcode + (item.source === 'firebox' ? ' (فایر باکس)' : '');
-      title.appendChild(bc);
-
-      var meta = document.createElement('div');
-      meta.className = 'meta';
-      meta.textContent = formatDate(item.date);
-      title.appendChild(meta);
-
-      var finalClasses = {
-        'salem': 'salem',
-        'defective': 'defective',
-        'needsRepair': 'repairs'
-      };
-      var fbadge = document.createElement('span');
-      fbadge.className = 'final-badge ' + (finalClasses[item.finalStatus] || '');
-      fbadge.textContent = 'نتیجه: ' + (FINAL_LABELS[item.finalStatus] || item.finalStatus || '-');
-      title.appendChild(fbadge);
-
-      header.appendChild(title);
-
-      var sbadge = document.createElement('span');
-      sbadge.className = 'status-badge ' + item.status;
-      sbadge.textContent = STATUS_LABELS[item.status] || item.status || '-';
-      header.appendChild(sbadge);
-
-      div.appendChild(header);
-
-      if (item.status === 'rejected' && item.rejectionReason) {
-        var note = document.createElement('div');
-        note.className = 'rejection-note';
-        note.textContent = 'دلیل رد: ' + item.rejectionReason;
-        div.appendChild(note);
-      }
-
-      var viewBtn = document.createElement('button');
-      viewBtn.className = 'view-btn';
-      viewBtn.textContent = 'مشاهده جزئیات';
-      viewBtn.onclick = function() { openViewModal(item); };
-      div.appendChild(viewBtn);
-
-      return div;
-    }
-
+    // Helpers
+    function toFa(n) { return String(n).replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]); }
+    
     function formatDate(dateVal) {
       if (!dateVal) return '-';
       try {
@@ -345,93 +624,7 @@
         var hh = ('0' + d.getHours()).slice(-2);
         var mm = ('0' + d.getMinutes()).slice(-2);
         return y + '/' + m + '/' + day + ' - ' + hh + ':' + mm;
-      } catch (e) {
-        return String(dateVal);
-      }
-    }
-
-    function convertDriveLink(url) {
-      if (!url) return '';
-      var match = url.match(/[?&]id=([^&]+)/);
-      if (match) {
-        return 'https://lh3.googleusercontent.com/d/' + match[1];
-      }
-      return url;
-    }
-
-    function openViewModal(item) {
-      var photo = document.getElementById('modalPhoto');
-      if (item.photoUrl) {
-        photo.src = convertDriveLink(item.photoUrl);
-        photo.style.display = 'block';
-      } else {
-        photo.style.display = 'none';
-      }
-
-      var details = document.getElementById('modalDetails');
-      details.innerHTML = '';
-      appendRow(details, 'کد تجهیز', item.barcode || '-');
-      appendRow(details, 'نوع', item.source === 'firebox' ? 'فایر باکس' : 'سیلندر');
-      appendRow(details, 'تاریخ', formatDate(item.date));
-      appendRow(details, 'نتیجه نهایی', FINAL_LABELS[item.finalStatus] || item.finalStatus || '-');
-      appendRow(details, 'وضعیت', STATUS_LABELS[item.status] || item.status || '-');
-      if (item.status === 'approved' && item.approvedBy) {
-        appendRow(details, 'تأییدکننده', item.approvedBy);
-      }
-      if (item.status === 'rejected' && item.rejectionReason) {
-        appendRow(details, 'دلیل رد', item.rejectionReason);
-      }
-      if (item.notes) {
-        appendRow(details, 'یادداشت', item.notes);
-      }
-
-      renderItems(item.items || []);
-
-      document.getElementById('viewModal').classList.add('show');
-    }
-
-    function renderItems(items) {
-      var el = document.getElementById('modalItems');
-      el.innerHTML = '';
-
-      if (items.length === 0) {
-        el.innerHTML = '<div class="no-items">آیتمی برای این بازرسی ثبت نشده است.</div>';
-        return;
-      }
-
-      var list = document.createElement('div');
-      list.className = 'items-list';
-
-      items.forEach(function(item) {
-        var row = document.createElement('div');
-        row.className = 'item-row ' + (item.status || '');
-
-        var name = document.createElement('span');
-        name.className = 'item-name';
-        name.textContent = item.name;
-        row.appendChild(name);
-
-        var status = document.createElement('span');
-        status.className = 'item-status';
-        status.textContent = FINAL_LABELS[item.status] || item.status;
-        row.appendChild(status);
-
-        list.appendChild(row);
-      });
-
-      el.appendChild(list);
-    }
-
-    function appendRow(parent, label, value) {
-      var row = document.createElement('div');
-      row.className = 'row';
-      var l = document.createElement('span'); l.className = 'l'; l.textContent = label;
-      var v = document.createElement('span'); v.className = 'v'; v.textContent = String(value);
-      row.appendChild(l); row.appendChild(v); parent.appendChild(row);
-    }
-
-    function closeViewModal() {
-      document.getElementById('viewModal').classList.remove('show');
+      } catch (e) { return String(dateVal); }
     }
   </script>
 
