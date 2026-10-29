@@ -136,24 +136,16 @@
     .final-section { background: #FFF9F0; border: 2px dashed var(--copper-main); }
     .final-section .card-title { color: var(--copper-main); border-bottom: none; margin-bottom: 8px; padding-bottom: 0; }
 
-    /* کادر مدرن آپلود عکس */
-    .photo-upload-box {
-      border: 2px dashed #bdc3c7;
-      border-radius: 12px;
-      padding: 30px 20px;
-      text-align: center;
-      cursor: pointer;
-      background: #FAFAFA;
-      transition: all 0.2s;
-      color: var(--text-muted);
-      position: relative;
-    }
-    .photo-upload-box:hover { border-color: var(--copper-main); background: #FFF4E6; color: var(--copper-dark); }
-    .photo-upload-box i { font-size: 32px; margin-bottom: 10px; color: var(--copper-main); }
-    .photo-upload-box span { display: block; font-size: 13px; font-weight: 700; }
-    .photo-preview { width: 100%; max-height: 200px; object-fit: contain; border-radius: 8px; display: none; margin-bottom: 10px; background: #000;}
+    /* دوربین و عکس */
+    .photo-box { text-align: center; }
+    #cameraPreview { width: 100%; border-radius: 12px; display: none; background: #000; margin-bottom: 12px; }
+    #capturedPhoto { max-width: 100%; max-height: 200px; object-fit: contain; border-radius: 12px; display: none; margin-bottom: 12px; }
     
-    .photo-input { display: none; }
+    .photo-btn { width: 100%; padding: 14px; border-radius: 10px; border: none; font-family: inherit; font-size: 14px; font-weight: 700; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 8px; }
+    .btn-take { background: #34495e; color: #fff; }
+    .btn-capture { background: var(--status-red); color: #fff; }
+    .btn-cancel { background: #999; color: #fff; margin-top: 8px; }
+    .btn-change { background: var(--status-green); color: #fff; }
 
     /* یادداشت */
     .notes-box textarea {
@@ -178,7 +170,7 @@
     }
     .submit-btn:disabled { background: #ccc; box-shadow: none; cursor: not-allowed; }
 
-    /* Bottom Sheet (خلاصه قبل از ثبت) */
+    /* Bottom Sheet */
     .bottom-sheet-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 200; display: none; opacity: 0; transition: opacity 0.3s; }
     .bottom-sheet-overlay.show { display: block; opacity: 1; }
     .bottom-sheet { position: fixed; bottom: -100%; left: 0; right: 0; background: #fff; border-radius: 24px 24px 0 0; padding: 24px 20px; z-index: 201; transition: bottom 0.3s ease-in-out; box-shadow: 0 -4px 20px rgba(0,0,0,0.1); }
@@ -258,17 +250,25 @@
         </div>
       </div>
 
+      <!-- بخش عکس با دوربین زنده -->
       <div class="card">
         <div class="card-title">
           <i class="fa-solid fa-camera"></i> عکس تجهیز (اجباری)
         </div>
         
-        <input type="file" id="photoInput" class="photo-input" accept="image/*" capture="environment" onchange="onPhotoSelected(event)">
-        <img id="capturedPhoto" class="photo-preview">
-        
-        <div class="photo-upload-box" id="photoBox" onclick="document.getElementById('photoInput').click()">
-          <i class="fa-solid fa-camera-retro"></i>
-          <span>برای گرفتن عکس اینجا کلیک کنید</span>
+        <div class="photo-box">
+          <video id="cameraPreview" playsinline autoplay muted></video>
+          <img id="capturedPhoto" alt="پیش‌نمایش عکس">
+          
+          <button class="photo-btn btn-take" id="photoBtn" onclick="openCamera()">
+            <i class="fa-solid fa-camera-retro"></i> باز کردن دوربین
+          </button>
+          <button class="photo-btn btn-capture" id="captureBtn" style="display:none" onclick="capturePhoto()">
+            <i class="fa-solid fa-circle-dot"></i> گرفتن عکس
+          </button>
+          <button class="photo-btn btn-cancel" id="cancelBtn" style="display:none" onclick="cancelCamera()">
+            لغو
+          </button>
         </div>
         <div id="photoStatus" style="font-size:12px; color:#777; text-align:center; margin-top:8px;"></div>
       </div>
@@ -333,12 +333,15 @@
     var finalStatus = null;
     var photoBase64 = null;
     var photoMimeType = 'image/jpeg';
+    
+    var videoStream = null;
 
     function goToLogin() {
       window.location.href = EXEC_URL + '?page=Login';
     }
 
     function goBack() {
+      stopCamera();
       window.location.href = INDEX_URL;
     }
 
@@ -483,46 +486,75 @@
     }
 
     // ============================================
-    // Photo Processing
+    // Live Camera Logic
     // ============================================
-    function onPhotoSelected(event) {
-      var file = event.target.files[0];
-      if (!file) return;
+    function openCamera() {
+      document.getElementById('photoStatus').textContent = 'در حال باز کردن دوربین...';
 
-      document.getElementById('photoStatus').textContent = 'در حال فشرده‌سازی...';
+      navigator.mediaDevices.getUserMedia({
+        video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } }
+      }).then(function(stream) {
+        videoStream = stream;
+        var video = document.getElementById('cameraPreview');
+        video.srcObject = stream;
+        video.style.display = 'block';
+        
+        document.getElementById('capturedPhoto').style.display = 'none';
+        document.getElementById('photoBtn').style.display = 'none';
+        document.getElementById('captureBtn').style.display = 'block';
+        document.getElementById('cancelBtn').style.display = 'block';
+        document.getElementById('photoStatus').textContent = 'دوربین فعال است.';
+      }).catch(function(err) {
+        document.getElementById('photoStatus').textContent = 'خطا در دسترسی به دوربین: ' + err.message;
+      });
+    }
 
-      var reader = new FileReader();
-      reader.onload = function(e) {
-        var img = new Image();
-        img.onload = function() {
-          var canvas = document.createElement('canvas');
-          var MAX_WIDTH = 1024;
-          var scale = Math.min(1, MAX_WIDTH / img.width);
-          canvas.width = Math.round(img.width * scale);
-          canvas.height = Math.round(img.height * scale);
+    function stopCamera() {
+      if (videoStream) {
+        videoStream.getTracks().forEach(function(t) { t.stop(); });
+        videoStream = null;
+      }
+      document.getElementById('cameraPreview').style.display = 'none';
+      document.getElementById('captureBtn').style.display = 'none';
+      document.getElementById('cancelBtn').style.display = 'none';
+    }
 
-          var ctx = canvas.getContext('2d');
-          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+    function cancelCamera() {
+      stopCamera();
+      document.getElementById('photoBtn').style.display = 'block';
+      document.getElementById('photoStatus').textContent = '';
+    }
 
-          var dataUrl = canvas.toDataURL('image/jpeg', 0.5);
-          photoBase64 = dataUrl.split(',')[1];
-          photoMimeType = 'image/jpeg';
+    function capturePhoto() {
+      var video = document.getElementById('cameraPreview');
+      var canvas = document.createElement('canvas');
+      var MAX_WIDTH = 1024;
+      var scale = Math.min(1, MAX_WIDTH / video.videoWidth);
+      canvas.width = Math.round(video.videoWidth * scale);
+      canvas.height = Math.round(video.videoHeight * scale);
 
-          var preview = document.getElementById('capturedPhoto');
-          preview.src = 'data:image/jpeg;base64,' + photoBase64;
-          preview.style.display = 'block';
-          
-          document.getElementById('photoBox').style.display = 'none';
+      var ctx = canvas.getContext('2d');
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-          var sizeKB = Math.round(photoBase64.length * 0.75 / 1024);
-          document.getElementById('photoStatus').textContent = 'حجم عکس: ' + sizeKB + ' کیلوبایت (برای تغییر کلیک کنید)';
-          document.getElementById('photoBox').style.display = 'block'; // Show box again to allow changing
+      var dataUrl = canvas.toDataURL('image/jpeg', 0.5); // فشرده‌سازی
+      photoBase64 = dataUrl.split(',')[1];
+      photoMimeType = 'image/jpeg';
 
-          updateProgress();
-        };
-        img.src = e.target.result;
-      };
-      reader.readAsDataURL(file);
+      stopCamera();
+
+      var preview = document.getElementById('capturedPhoto');
+      preview.src = 'data:image/jpeg;base64,' + photoBase64;
+      preview.style.display = 'block';
+
+      var sizeKB = Math.round(photoBase64.length * 0.75 / 1024);
+      document.getElementById('photoStatus').textContent = 'حجم نهایی: ' + sizeKB + ' کیلوبایت';
+
+      var btn = document.getElementById('photoBtn');
+      btn.textContent = 'تغییر عکس';
+      btn.className = 'photo-btn btn-change';
+      btn.style.display = 'block';
+
+      updateProgress();
     }
 
     // ============================================
@@ -586,7 +618,6 @@
       var key = 'hse_pending_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
       try {
         localStorage.setItem(key, JSON.stringify(payload));
-        console.log('Saved to localStorage:', key);
       } catch (e) {
         console.error('localStorage failed:', e);
       }
@@ -595,7 +626,7 @@
       btn.style.background = 'var(--status-green)';
       sessionStorage.removeItem('currentBarcode');
 
-      // ارسال در پس‌زمینه (اگر تلاش اول شکست خورد، در اسکنر بعدی دوباره ارسال می‌شود)
+      // ارسال در پس‌زمینه
       fetch(EXEC_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'text/plain;charset=utf-8' },
