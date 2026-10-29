@@ -121,7 +121,7 @@
     .badge-active { background: #E8F8F5; color: var(--status-green); padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; }
     .badge-inactive { background: #FDEDEC; color: var(--status-red); padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; }
 
-    /* دکمه‌های عملیات */
+    /* دکمه‌های عملیات فشرده */
     .user-actions {
       display: flex; gap: 8px; border-top: 1px solid #f0f0f0; padding-top: 12px;
     }
@@ -148,7 +148,7 @@
     .nav-item i { font-size: 20px; margin-bottom: 2px; }
     .nav-item.active { color: var(--copper-main); }
 
-    /* مدال‌ها و Bottom Sheet */
+    /* مدال‌ها */
     .modal-overlay {
       position: fixed; top: 0; left: 0; right: 0; bottom: 0;
       background: rgba(0,0,0,0.5); z-index: 200; display: none; align-items: center; justify-content: center; padding: 16px;
@@ -160,7 +160,10 @@
       padding: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); animation: slideUp 0.3s ease-out;
     }
     
-    @keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    @keyframes slideUp {
+      from { transform: translateY(30px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
 
     .modal-title { font-size: 16px; font-weight: 800; color: var(--copper-dark); margin-bottom: 16px; border-bottom: 1px solid #eee; padding-bottom: 12px; display: flex; justify-content: space-between; align-items: center;}
     .modal-close { background: none; border: none; font-size: 20px; color: #999; cursor: pointer; }
@@ -181,27 +184,61 @@
     .modal-btns { display: flex; gap: 10px; margin-top: 20px; }
     .btn-cancel { flex: 1; padding: 12px; border-radius: 10px; border: none; background: #f0f0f0; font-family: inherit; font-weight: 700; cursor: pointer; }
     .btn-confirm { flex: 1; padding: 12px; border-radius: 10px; border: none; background: var(--copper-main); color: #fff; font-family: inherit; font-weight: 700; cursor: pointer; }
+    .btn-confirm:disabled { background: #ccc; cursor: not-allowed; }
 
-    /* Bottom Sheet */
-    .bottom-sheet-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 300; display: none; opacity: 0; transition: opacity 0.3s; }
+    /* Bottom Sheet (منوی عملیات) */
+    .bottom-sheet-overlay {
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.5); z-index: 300; display: none; opacity: 0; transition: opacity 0.3s;
+    }
     .bottom-sheet-overlay.show { display: block; opacity: 1; }
-    .bottom-sheet { position: fixed; bottom: -100%; left: 0; right: 0; background: #fff; border-radius: 24px 24px 0 0; padding: 20px; z-index: 301; transition: bottom 0.3s ease-in-out; box-shadow: 0 -4px 20px rgba(0,0,0,0.1); }
+    
+    .bottom-sheet {
+      position: fixed; bottom: -100%; left: 0; right: 0;
+      background: #fff; border-radius: 24px 24px 0 0;
+      padding: 20px; z-index: 301; transition: bottom 0.3s ease-in-out;
+      box-shadow: 0 -4px 20px rgba(0,0,0,0.1);
+    }
     .bottom-sheet.show { bottom: 0; }
+    
     .sheet-handle { width: 40px; height: 5px; background: #ddd; border-radius: 5px; margin: 0 auto 20px auto; }
     .sheet-title { font-size: 16px; font-weight: 800; color: var(--copper-dark); margin-bottom: 16px; text-align: center; }
-    .sheet-action-btn { width: 100%; padding: 14px; border: none; background: #F8FAFC; border-radius: 10px; font-family: inherit; font-size: 14px; font-weight: 700; color: var(--text-dark); display: flex; align-items: center; gap: 12px; margin-bottom: 10px; cursor: pointer; transition: 0.2s; text-align: right; }
+    
+    .sheet-action-btn {
+      width: 100%; padding: 14px; border: none; background: #F8FAFC; border-radius: 10px;
+      font-family: inherit; font-size: 14px; font-weight: 700; color: var(--text-dark);
+      display: flex; align-items: center; gap: 12px; margin-bottom: 10px; cursor: pointer;
+      transition: 0.2s; text-align: right;
+    }
     .sheet-action-btn:active { background: #e2e8f0; }
     .sheet-action-btn.danger { color: var(--status-red); background: #FDEDEC; }
     .sheet-action-btn.success { color: var(--status-green); background: #E8F8F5; }
 
-    /* Toast */
-    #toast-container { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 999; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
-    .toast { background: #333; color: #fff; padding: 12px 24px; border-radius: 50px; font-size: 13px; font-weight: 700; box-shadow: 0 4px 12px rgba(0,0,0,0.15); display: flex; align-items: center; gap: 8px; animation: toastIn 0.3s ease-out, toastOut 0.3s ease-in 2.7s forwards; }
+    /* Toast Notification */
+    #toast-container {
+      position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+      z-index: 999; display: flex; flex-direction: column; gap: 10px; pointer-events: none;
+    }
+    .toast {
+      background: #333; color: #fff; padding: 12px 24px; border-radius: 50px;
+      font-size: 13px; font-weight: 700; box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      display: flex; align-items: center; gap: 8px; animation: toastIn 0.3s ease-out, toastOut 0.3s ease-in 2.7s forwards;
+    }
     .toast.success { background: var(--status-green); }
     .toast.error { background: var(--status-red); }
     .toast.info { background: var(--copper-main); }
-    @keyframes toastIn { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-    @keyframes toastOut { from { transform: translateY(0); opacity: 1; } to { transform: translateY(-20px); opacity: 0; } }
+
+    @keyframes toastIn {
+      from { transform: translateY(-20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+    @keyframes toastOut {
+      from { transform: translateY(0); opacity: 1; }
+      to { transform: translateY(-20px); opacity: 0; }
+    }
+
+    .empty-state { text-align: center; padding: 40px 10px; color: var(--text-muted); font-size: 14px; }
+    .empty-state i { font-size: 48px; color: #ccc; margin-bottom: 12px; display: block; }
 
   </style>
 </head>
@@ -368,9 +405,9 @@
   <script>
     var EXEC_URL = 'https://script.google.com/macros/s/AKfycbyh8ccieztX3ZkFF0IozE_beRcZja0BH8ieYbQ9qCL1tLDxkq2QB0Pz3JD4v0IRY6eo/exec';
     var currentToken = '';
-    
-    var usersData = [];
+    var usersList = [];
     var searchTerm = '';
+    
     var editingUser = null; 
     var actionTargetUser = null; 
     var changingPassUser = null;
@@ -403,37 +440,44 @@
         return;
       }
 
-      apiCall({ action: 'auth.me', token: currentToken }).then(function(res) {
-        if (!res.success) { goToLogin(); return; }
-        loadUsers();
-      }).catch(function() { goToLogin(); });
+      loadUsers();
     })();
 
+    // ============================================
+    // Load & Render
+    // ============================================
     function loadUsers() {
-      document.getElementById('userList').innerHTML = '<div class="empty-state"><i class="fa-solid fa-spinner fa-spin"></i> در حال بارگذاری...</div>';
-      
-      apiCall({ action: 'user.getAll', token: currentToken }).then(function(res) {
-        if (!res.success) {
-          if (res.error.indexOf('نشست') !== -1) { goToLogin(); return; }
-          showToast(res.error, 'error');
+      apiCall({ action: 'user.getAll', token: currentToken, payload: {} }).then(function(response) {
+        if (!response.success) {
+          if (response.error && (response.error.indexOf('نشست') !== -1 || response.error.indexOf('منقضی') !== -1)) {
+            localStorage.clear();
+            goToLogin();
+            return;
+          }
+          document.getElementById('userList').innerHTML = '<div class="empty-state"><i class="fa-solid fa-circle-exclamation"></i>' + response.error + '</div>';
           return;
         }
-        usersData = res.data.users || [];
+        usersList = response.data.users || [];
         renderUsers();
-      }).catch(function() {
-        showToast('خطا در ارتباط با سرور.', 'error');
+      }).catch(function(err) {
+        document.getElementById('userList').innerHTML = '<div class="empty-state"><i class="fa-solid fa-wifi"></i>خطا در ارتباط با سرور</div>';
       });
+    }
+
+    function handleSearch() {
+      searchTerm = document.getElementById('searchInput').value.trim().toLowerCase();
+      renderUsers();
     }
 
     function renderUsers() {
       const listEl = document.getElementById('userList');
       listEl.innerHTML = '';
 
-      let filtered = usersData;
+      let filtered = usersList;
       if (searchTerm) {
-        filtered = usersData.filter(u => 
-          u.fullName.toLowerCase().includes(searchTerm) || 
-          u.username.includes(searchTerm)
+        filtered = usersList.filter(u => 
+          (u.fullName && u.fullName.toLowerCase().includes(searchTerm)) || 
+          (u.username && u.username.includes(searchTerm))
         );
       }
 
@@ -476,18 +520,21 @@
       });
     }
 
-    function handleSearch() {
-      searchTerm = document.getElementById('searchInput').value.trim().toLowerCase();
-      renderUsers();
-    }
-
+    // ============================================
+    // Toast Notification
+    // ============================================
     function showToast(message, type = 'success') {
       const container = document.getElementById('toast-container');
       const toast = document.createElement('div');
       toast.className = `toast ${type}`;
-      let icon = type === 'error' ? 'fa-circle-exclamation' : (type === 'info' ? 'fa-info-circle' : 'fa-check-circle');
+      
+      let icon = 'fa-check-circle';
+      if (type === 'error') icon = 'fa-circle-exclamation';
+      if (type === 'info') icon = 'fa-info-circle';
+      
       toast.innerHTML = `<i class="fa-solid ${icon}"></i> ${message}`;
       container.appendChild(toast);
+      
       setTimeout(() => { toast.remove(); }, 3000);
     }
 
@@ -495,7 +542,7 @@
     // Bottom Sheet
     // ============================================
     function openActionSheet(username) {
-      actionTargetUser = usersData.find(u => u.username === username);
+      actionTargetUser = usersList.find(u => u.username === username);
       if (!actionTargetUser) return;
 
       document.getElementById('actionSheetTitle').textContent = `عملیات برای: ${actionTargetUser.fullName}`;
@@ -532,7 +579,7 @@
     }
 
     // ============================================
-    // Modals
+    // Modals & Actions
     // ============================================
     function openModal(id) { document.getElementById(id).classList.add('show'); }
     function closeModal(id) { document.getElementById(id).classList.remove('show'); }
@@ -541,6 +588,7 @@
       editingUser = { mode, username };
       const modalTitle = document.getElementById('userModalTitle');
       const passGroup = document.getElementById('password-group');
+      const saveBtn = document.getElementById('btn-save-user');
 
       if (mode === 'add') {
         modalTitle.textContent = 'افزودن کاربر جدید';
@@ -552,11 +600,10 @@
         document.getElementById('inp-role').value = 'inspector';
         passGroup.style.display = 'block';
       } else {
-        const user = usersData.find(u => u.username === username);
+        const user = usersList.find(u => u.username === username);
         modalTitle.textContent = 'ویرایش اطلاعات کاربر';
         document.getElementById('inp-username').value = user.username;
         document.getElementById('inp-username').disabled = true;
-        document.getElementById('inp-password').value = '';
         document.getElementById('inp-fullname').value = user.fullName;
         document.getElementById('inp-department').value = user.department || '';
         document.getElementById('inp-role').value = user.role;
@@ -573,65 +620,42 @@
       const department = document.getElementById('inp-department').value.trim();
       const role = document.getElementById('inp-role').value;
       const password = document.getElementById('inp-password').value.trim();
-      const btn = document.getElementById('btn-save-user');
+      
+      const saveBtn = document.getElementById('btn-save-user');
 
       if (!username || !fullName) {
         showToast('شماره پرسنلی و نام کامل اجباری هستند.', 'error');
         return;
       }
 
-      btn.disabled = true;
-      btn.textContent = 'در حال ذخیره...';
-
-      if (mode === 'add') {
-        if (!password || password.length < 4) {
-          showToast('رمز عبور باید حداقل ۴ کاراکتر باشد.', 'error');
-          btn.disabled = false;
-          btn.textContent = 'ذخیره';
-          return;
-        }
-        
-        apiCall({
-          action: 'user.create',
-          token: currentToken,
-          payload: { username, password, fullName, department, role }
-        }).then(function(res) {
-          btn.disabled = false;
-          btn.textContent = 'ذخیره';
-          if (res.success) {
-            showToast('کاربر جدید اضافه شد.');
-            closeModal('userModal');
-            loadUsers();
-          } else {
-            showToast(res.error, 'error');
-          }
-        }).catch(function() {
-          btn.disabled = false;
-          btn.textContent = 'ذخیره';
-          showToast('خطای شبکه', 'error');
-        });
-
-      } else {
-        apiCall({
-          action: 'user.update',
-          token: currentToken,
-          payload: { username: editingUser.username, fullName, department, role }
-        }).then(function(res) {
-          btn.disabled = false;
-          btn.textContent = 'ذخیره';
-          if (res.success) {
-            showToast('اطلاعات کاربر ویرایش شد.');
-            closeModal('userModal');
-            loadUsers();
-          } else {
-            showToast(res.error, 'error');
-          }
-        }).catch(function() {
-          btn.disabled = false;
-          btn.textContent = 'ذخیره';
-          showToast('خطای شبکه', 'error');
-        });
+      if (mode === 'add' && (!password || password.length < 4)) {
+        showToast('رمز عبور باید حداقل ۴ کاراکتر باشد.', 'error');
+        return;
       }
+
+      saveBtn.disabled = true;
+      saveBtn.textContent = 'در حال ذخیره...';
+
+      var action = mode === 'add' ? 'user.create' : 'user.update';
+      var payload = { username, fullName, department, role };
+      if (mode === 'add') payload.password = password;
+
+      apiCall({ action: action, token: currentToken, payload: payload }).then(function(res) {
+        saveBtn.disabled = false;
+        saveBtn.textContent = 'ذخیره';
+
+        if (res.success) {
+          showToast(mode === 'add' ? 'کاربر جدید اضافه شد.' : 'اطلاعات کاربر ویرایش شد.');
+          closeModal('userModal');
+          loadUsers();
+        } else {
+          showToast(res.error, 'error');
+        }
+      }).catch(function(err) {
+        saveBtn.disabled = false;
+        saveBtn.textContent = 'ذخیره';
+        showToast('خطا در ارتباط با سرور', 'error');
+      });
     }
 
     function openPasswordModal(username) {
@@ -661,7 +685,7 @@
         showToast('رمز عبور باید حداقل ۴ کاراکتر باشد.', 'error');
         return;
       }
-      
+
       apiCall({
         action: 'user.changePassword',
         token: currentToken,
@@ -673,12 +697,14 @@
         } else {
           showToast(res.error, 'error');
         }
-      }).catch(function() { showToast('خطای شبکه', 'error'); });
+      }).catch(function() {
+        showToast('خطا در ارتباط با سرور', 'error');
+      });
     }
 
     function openRoleModal(username) {
       changingRoleUser = username;
-      const user = usersData.find(u => u.username === username);
+      const user = usersList.find(u => u.username === username);
       document.getElementById('role-username').value = username;
       document.getElementById('inp-new-role').value = user.role;
       openModal('roleModal');
@@ -686,7 +712,7 @@
 
     function changeRole() {
       const newRole = document.getElementById('inp-new-role').value;
-      const user = usersData.find(u => u.username === changingRoleUser);
+      const user = usersList.find(u => u.username === changingRoleUser);
 
       if (user.role === newRole) {
         closeModal('roleModal');
@@ -699,25 +725,29 @@
         payload: { username: changingRoleUser, role: newRole }
       }).then(function(res) {
         if (res.success) {
-          showToast(`نقش کاربر ${changingRoleUser} تغییر یافت.`);
+          showToast(`نقش کاربر ${changingRoleUser} به ${roleLabels[newRole]} تغییر یافت.`);
           closeModal('roleModal');
           loadUsers();
         } else {
           showToast(res.error, 'error');
         }
-      }).catch(function() { showToast('خطای شبکه', 'error'); });
+      }).catch(function() {
+        showToast('خطا در ارتباط با سرور', 'error');
+      });
     }
 
     function toggleUserActive(username) {
-      const user = usersData.find(u => u.username === username);
-      const targetStatus = !user.isActive;
+      const user = usersList.find(u => u.username === username);
+      if (!user) return;
       
-      if (!confirm(`آیا کاربر ${user.fullName} ${targetStatus ? 'فعال' : 'غیرفعال'} شود؟`)) return;
+      if (!confirm(`آیا کاربر ${user.fullName} ${user.isActive ? 'غیرفعال' : 'فعال'} شود؟`)) return;
+
+      var willActivate = !user.isActive;
 
       apiCall({
         action: 'user.toggleActive',
         token: currentToken,
-        payload: { username: username, isActive: targetStatus }
+        payload: { username: username, isActive: willActivate }
       }).then(function(res) {
         if (res.success) {
           showToast(`وضعیت کاربر ${user.fullName} تغییر یافت.`, 'info');
@@ -725,7 +755,9 @@
         } else {
           showToast(res.error, 'error');
         }
-      }).catch(function() { showToast('خطای شبکه', 'error'); });
+      }).catch(function() {
+        showToast('خطا در ارتباط با سرور', 'error');
+      });
     }
 
     function doLogout() {
@@ -740,6 +772,7 @@
         redirect: 'follow'
       }).finally(function() { goToLogin(); });
     }
+
   </script>
 
   <script src="pwa.js" defer></script>
