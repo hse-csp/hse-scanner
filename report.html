@@ -4,186 +4,414 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#1e3c72">
+  <meta name="theme-color" content="#C0611A">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="HSE CSP">
   <title>گزارش ماهانه</title>
+  
+  <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet" type="text/css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: Tahoma, Arial, sans-serif; background: #f0f2f5; min-height: 100vh; padding: 16px; }
-    .header { background: #1e3c72; color: #fff; padding: 16px; border-radius: 12px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
-    .header h1 { font-size: 18px; }
-    .header .user { font-size: 13px; opacity: 0.9; }
-    .header-btns { display: flex; gap: 8px; flex-wrap: wrap; }
-    .header-btn { background: rgba(255,255,255,0.2); border: none; color: #fff; padding: 8px 14px; border-radius: 8px; cursor: pointer; font-family: inherit; font-size: 13px; }
-    .header-btn:hover { background: rgba(255,255,255,0.3); }
-    .card { background: #fff; border-radius: 12px; padding: 20px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
-    .card h2 { font-size: 16px; color: #1e3c72; margin-bottom: 14px; }
-    .month-selector { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 16px; }
-    .month-selector label { font-size: 14px; font-weight: bold; color: #333; }
-    .month-selector select { padding: 10px 14px; border: 2px solid #e0e0e0; border-radius: 8px; font-family: inherit; font-size: 14px; min-width: 200px; }
-    .month-selector select:focus { outline: none; border-color: #2a5298; }
-    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 16px; }
-    .stat-card { background: #f9f9f9; border-radius: 10px; padding: 16px; text-align: center; border: 2px solid #e0e0e0; }
-    .stat-card .num { font-size: 26px; font-weight: bold; margin-bottom: 6px; }
-    .stat-card .label { font-size: 12px; color: #666; }
-    .stat-card.total .num { color: #1e3c72; }
-    .stat-card.salem .num { color: #2e7d32; }
-    .stat-card.defective .num { color: #c62828; }
-    .stat-card.repair .num { color: #e65100; }
-    .stat-card.pending .num { color: #ff9800; }
-    .stat-card.approved .num { color: #4caf50; }
-    .stat-card.rejected .num { color: #d32f2f; }
-    .stat-card.overdue .num { color: #d32f2f; }
-    .breakdown-section { margin-bottom: 20px; }
-    .breakdown-section h3 { font-size: 14px; color: #555; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 2px solid #e0e0e0; }
-    .breakdown-list { display: flex; flex-direction: column; gap: 8px; }
-    .breakdown-row { display: flex; align-items: center; gap: 12px; }
-    .breakdown-row .name { min-width: 120px; font-size: 13px; color: #333; }
-    .breakdown-bar { flex: 1; height: 24px; background: #e0e0e0; border-radius: 6px; overflow: hidden; position: relative; }
-    .breakdown-bar-fill { height: 100%; background: #1e3c72; border-radius: 6px; transition: width 0.5s; }
-    .breakdown-bar-fill.co2 { background: #0d47a1; }
-    .breakdown-bar-fill.powder { background: #e65100; }
-    .breakdown-bar-fill.water { background: #1565c0; }
-    .breakdown-bar-fill.firebox { background: #b71c1c; }
-    .breakdown-bar-fill.salem { background: #4caf50; }
-    .breakdown-bar-fill.defective { background: #d32f2f; }
-    .breakdown-bar-fill.needsRepair { background: #f57c00; }
-    .breakdown-row .val { min-width: 60px; text-align: left; font-size: 14px; font-weight: bold; color: #222; }
+    :root {
+      --copper-main: #E67E22;      
+      --copper-dark: #C0611A;      
+      --copper-light: #FAD7A8;     
+      --copper-bg: #F5F7FA;        
+      --text-dark: #2C3E50;        
+      --text-muted: #7F8C8D;
+      
+      --status-green: #27ae60;
+      --status-red: #e74c3c;
+      --status-orange: #f39c12;
+      --status-blue: #2980b9;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Vazirmatn', Tahoma, sans-serif; }
+    
+    body { 
+      background-color: var(--copper-bg); 
+      color: var(--text-dark);
+      padding: 0 0 100px 0; 
+      min-height: 100vh;
+    }
+
+    /* هدر */
+    .header {
+      background: linear-gradient(135deg, var(--copper-dark), var(--copper-main));
+      color: #fff;
+      padding: 16px 20px;
+      border-radius: 0 0 24px 24px;
+      box-shadow: 0 4px 15px rgba(230, 126, 34, 0.3);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .header h1 { font-size: 18px; font-weight: 700; }
+    
+    .avatar {
+      width: 40px; height: 40px;
+      background: rgba(255,255,255,0.2);
+      border-radius: 50%;
+      display: flex; justify-content: center; align-items: center;
+      font-size: 18px; backdrop-filter: blur(5px);
+      border: 1px solid rgba(255,255,255,0.4);
+    }
+
+    .container { padding: 0 16px; max-width: 700px; margin: 0 auto; }
+
+    /* نوار بالا (انتخاب ماه و خروجی) */
+    .top-bar {
+      display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 16px; align-items: center;
+    }
+    .month-selector {
+      flex: 1; display: flex; align-items: center; gap: 8px; background: #fff; padding: 8px 12px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+    }
+    .month-selector label { font-size: 13px; font-weight: 700; color: var(--text-dark); white-space: nowrap;}
+    .month-selector select {
+      flex: 1; padding: 8px; border: 1px solid #e2e8f0; border-radius: 8px;
+      font-family: inherit; font-size: 14px; font-weight: 700; color: var(--copper-dark);
+      background: #F8FAFC; cursor: pointer;
+    }
+    .month-selector select:focus { outline: none; border-color: var(--copper-main); }
+    
+    .export-btns { display: flex; gap: 8px; }
+    .btn-export {
+      padding: 10px 14px; border-radius: 10px; border: 1px solid #e2e8f0; background: #fff;
+      font-family: inherit; font-size: 13px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: 0.2s;
+    }
+    .btn-export.pdf { color: var(--status-red); border-color: #FADBD8; background: #FDEDEC; }
+    .btn-export.excel { color: var(--status-green); border-color: #A3E4D7; background: #E8F8F5; }
+    .btn-export:active { transform: scale(0.95); }
+
+    /* هشدار عقب‌افتادگی */
+    .overdue-note {
+      background: #FFF5F5; border-right: 4px solid var(--status-red);
+      padding: 12px 16px; border-radius: 10px; margin-bottom: 16px;
+      font-size: 13px; color: var(--status-red); font-weight: 700;
+      display: flex; justify-content: space-between; align-items: center; gap: 8px;
+    }
+    .btn-view-overdue {
+      background: var(--status-red); color: #fff; border: none; padding: 6px 12px; border-radius: 6px;
+      font-family: inherit; font-size: 11px; font-weight: 700; cursor: pointer; transition: 0.2s;
+    }
+    .btn-view-overdue:active { opacity: 0.8; }
+
+    /* کارت‌های آمار */
+    .stats-grid {
+      display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 16px;
+    }
+    @media (min-width: 500px) { .stats-grid { grid-template-columns: repeat(4, 1fr); } }
+    
+    .stat-card {
+      background: #fff; border-radius: 16px; padding: 16px 10px; text-align: center;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.04); border: 1px solid #e2e8f0;
+      cursor: pointer; transition: transform 0.2s;
+    }
+    .stat-card:active { transform: scale(0.96); }
+    .stat-card .num { font-size: 22px; font-weight: 800; margin-bottom: 4px; }
+    .stat-card .label { font-size: 11px; color: var(--text-muted); font-weight: 700; margin-bottom: 6px;}
+    
+    .stat-change { font-size: 10px; font-weight: 800; display: inline-flex; align-items: center; gap: 2px; padding: 2px 6px; border-radius: 4px; }
+    .stat-change.up { background: #E8F8F5; color: var(--status-green); }
+    .stat-change.down { background: #FDEDEC; color: var(--status-red); }
+    
+    .stat-total .num { color: var(--copper-main); }
+    .stat-approved .num { color: var(--status-green); }
+    .stat-pending .num { color: var(--status-orange); }
+    .stat-rejected .num { color: var(--status-red); }
+
+    /* بخش تفکیک‌ها */
+    .breakdown-card {
+      background: #fff; border-radius: 16px; padding: 20px; margin-bottom: 16px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.04); border: 1px solid #e2e8f0;
+    }
+    .breakdown-title {
+      font-size: 15px; font-weight: 800; color: var(--copper-dark);
+      margin-bottom: 16px; border-bottom: 1px dashed var(--copper-light); padding-bottom: 10px;
+      display: flex; align-items: center; gap: 8px;
+    }
+
+    /* نمودار دایره‌ای */
+    .donut-wrapper { display: flex; justify-content: center; align-items: center; padding: 10px 0; }
+    .donut-chart {
+      width: 160px; height: 160px; border-radius: 50%;
+      background: #e2e8f0; /* Default empty */
+      position: relative; display: flex; justify-content: center; align-items: center;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      transition: background 0.5s;
+    }
+    .donut-inner {
+      width: 110px; height: 110px; background: #fff; border-radius: 50%;
+      display: flex; flex-direction: column; justify-content: center; align-items: center;
+      box-shadow: inset 0 2px 5px rgba(0,0,0,0.05);
+    }
+    .donut-inner .total { font-size: 24px; font-weight: 800; color: var(--copper-dark); }
+    .donut-inner .label { font-size: 11px; color: var(--text-muted); font-weight: 700; }
+    
+    .donut-legend { display: flex; justify-content: center; gap: 16px; margin-top: 16px; font-size: 12px; font-weight: 700; flex-wrap: wrap;}
+    .legend-item { display: flex; align-items: center; gap: 6px; }
+    .legend-color { width: 12px; height: 12px; border-radius: 3px; }
+
+    /* نوارهای تفکیک نوع */
+    .bar-row { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+    .bar-label { min-width: 100px; font-size: 13px; font-weight: 700; color: var(--text-dark); }
+    .bar-container { flex: 1; height: 24px; background: #F0F2F5; border-radius: 6px; overflow: hidden; }
+    .bar-fill { height: 100%; border-radius: 6px; transition: width 0.5s; }
+    .bar-fill.co2 { background: #0D47A1; }
+    .bar-fill.powder { background: var(--status-orange); }
+    .bar-fill.water { background: #1565C0; }
+    .bar-fill.firebox { background: #B71C1C; }
+    .bar-value { min-width: 50px; text-align: left; font-size: 13px; font-weight: 800; color: var(--text-dark); }
+
+    /* جدول بازرسان */
     .inspectors-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-    .inspectors-table th { background: #f5f5f5; color: #333; padding: 10px; text-align: right; border-bottom: 2px solid #ddd; font-size: 12px; }
-    .inspectors-table td { padding: 10px; border-bottom: 1px solid #eee; text-align: right; }
-    .inspectors-table tr:hover { background: #f9f9f9; }
-    .inspectors-table .rank { font-weight: bold; color: #1e3c72; }
-    .empty-msg { text-align: center; color: #999; padding: 30px; font-size: 14px; }
-    .loading-box { text-align: center; padding: 40px 20px; color: #666; font-size: 15px; }
-    .badge-overdue { display: inline-block; background: #ffebee; color: #c62828; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: bold; }
-    .info-note { background: #e3f2fd; border-right: 4px solid #1e3c72; padding: 10px 14px; border-radius: 6px; font-size: 12px; color: #0d47a1; margin-bottom: 12px; }
-    .two-columns { display: grid; grid-template-columns: 1fr; gap: 20px; }
-    @media (min-width: 768px) { .two-columns { grid-template-columns: 1fr 1fr; } }
+    .inspectors-table th { background: #F8FAFC; color: var(--text-muted); padding: 10px; text-align: right; border-bottom: 2px solid #e2e8f0; font-size: 12px; font-weight: 700; }
+    .inspectors-table td { padding: 10px; border-bottom: 1px solid #f0f0f0; text-align: right; }
+    .inspectors-table tr:last-child td { border-bottom: none; }
+    .inspectors-table .rank { font-weight: 800; color: var(--copper-main); }
+
+    /* منوی پایین */
+    .bottom-nav {
+      position: fixed; bottom: 0; left: 0; right: 0; background: #fff; display: flex; justify-content: space-around; align-items: center;
+      padding: 10px; box-shadow: 0 -2px 15px rgba(0,0,0,0.05); border-radius: 24px 24px 0 0; z-index: 100;
+    }
+    .nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; color: var(--text-muted); font-size: 11px; font-weight: 700; text-decoration: none; cursor: pointer; }
+    .nav-item i { font-size: 20px; margin-bottom: 2px; }
+    .nav-item.active { color: var(--copper-main); }
+
+    /* Toast */
+    #toast-container { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 999; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
+    .toast { background: #333; color: #fff; padding: 12px 24px; border-radius: 50px; font-size: 13px; font-weight: 700; box-shadow: 0 4px 12px rgba(0,0,0,0.15); display: flex; align-items: center; gap: 8px; animation: toastIn 0.3s ease-out, toastOut 0.3s ease-in 2.7s forwards; }
+    .toast.success { background: var(--status-green); }
+    .toast.error { background: var(--status-red); }
+    .toast.info { background: var(--copper-main); }
+    @keyframes toastIn { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    @keyframes toastOut { from { transform: translateY(0); opacity: 1; } to { transform: translateY(-20px); opacity: 0; } }
+
+    /* مدال لیست عقب‌افتاده‌ها */
+    .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 200; display: none; align-items: center; justify-content: center; padding: 16px; }
+    .modal-overlay.show { display: flex; }
+    .modal-content { background: #fff; border-radius: 16px; width: 100%; max-width: 400px; max-height: 80vh; overflow-y: auto; padding: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); animation: slideUp 0.3s ease-out;}
+    @keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    
+    .modal-title { font-size: 16px; font-weight: 800; color: var(--status-red); margin-bottom: 16px; border-bottom: 1px solid #eee; padding-bottom: 12px; display: flex; justify-content: space-between; align-items: center;}
+    .modal-close { background: none; border: none; font-size: 20px; color: #999; cursor: pointer; }
+    .modal-back-btn { background: none; border: none; color: var(--copper-main); font-family: inherit; font-size: 13px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px; }
+
+    /* لیست بازرسان در مدال */
+    .inspector-overdue-item {
+      display: flex; justify-content: space-between; align-items: center;
+      background: #FFF5F5; border: 1px solid #ffcdd2; border-radius: 10px;
+      padding: 12px 14px; margin-bottom: 8px; cursor: pointer; transition: 0.2s;
+    }
+    .inspector-overdue-item:active { transform: scale(0.98); }
+    .inspector-overdue-item .name { font-weight: 800; color: var(--text-dark); font-size: 14px; }
+    .inspector-overdue-item .count-badge { background: var(--status-red); color: #fff; font-size: 12px; padding: 3px 10px; border-radius: 10px; font-weight: 700;}
+    .inspector-overdue-item .arrow { color: var(--copper-main); font-size: 14px; }
+
+    /* لیست تجهیزات در مدال */
+    .equip-overdue-item {
+      background: #FFF5F5; border: 1px solid #ffcdd2; border-radius: 10px;
+      padding: 12px 14px; margin-bottom: 8px;
+    }
+    .equip-overdue-item .barcode { font-weight: 800; color: var(--status-red); font-size: 14px; }
+    .equip-overdue-item .meta { font-size: 11px; color: var(--text-muted); margin-top: 4px; display: flex; justify-content: space-between;}
+    .equip-overdue-item .days { color: var(--status-red); font-weight: 800; font-size: 11px; background: #fff; padding: 2px 8px; border-radius: 6px;}
+    
+    .empty-msg { text-align: center; padding: 20px; color: var(--text-muted); font-size: 13px; }
+
   </style>
 </head>
 <body>
 
-  <div class="header">
-    <div>
-      <h1>گزارش ماهانه</h1>
-      <div class="user" id="userInfo"></div>
+  <header class="header">
+    <h1>گزارش ماهانه</h1>
+    <div class="avatar">
+      <i class="fa-solid fa-chart-pie"></i>
     </div>
-    <div class="header-btns">
-      <button class="header-btn" onclick="window.location.href='index.html'">اسکنر</button>
-      <button class="header-btn" onclick="window.location.href='dashboard.html'">داشبورد</button>
-      <button class="header-btn" onclick="doLogout()">خروج</button>
+  </header>
+
+  <div class="container">
+    
+    <!-- نوار بالا -->
+    <div class="top-bar">
+      <div class="month-selector">
+        <label><i class="fa-solid fa-calendar"></i></label>
+        <select id="monthSelect" onchange="loadReportData()">
+          <option value="">در حال بارگذاری...</option>
+        </select>
+      </div>
+      <div class="export-btns">
+        <button class="btn-export pdf" onclick="showToast('خروجی PDF در فاز بعدی فعال می‌شود.', 'info')"><i class="fa-solid fa-file-pdf"></i> PDF</button>
+        <button class="btn-export excel" onclick="showToast('خروجی Excel در فاز بعدی فعال می‌شود.', 'info')"><i class="fa-solid fa-file-excel"></i> Excel</button>
+      </div>
+    </div>
+
+    <!-- هشدار عقب‌افتادگی -->
+    <div class="overdue-note" id="overdueNote" style="display:none;">
+      <span><i class="fa-solid fa-triangle-exclamation"></i> <span id="overdue-text">۰</span> تجهیز عقب‌افتاده در پایان این ماه.</span>
+      <button class="btn-view-overdue" onclick="openOverdueModal()">مشاهده لیست</button>
+    </div>
+
+    <!-- آمار کلی -->
+    <div class="stats-grid">
+      <div class="stat-card stat-total" onclick="window.location.href='history.html'">
+        <div class="num" id="stat-total">۰</div>
+        <div class="label">کل بازرسی‌ها</div>
+        <!-- درصد تغییر برای فاز بعدی -->
+        <div class="stat-change up" id="change-total"><i class="fa-solid fa-arrow-up"></i> -</div>
+      </div>
+      <div class="stat-card stat-approved" onclick="window.location.href='history.html'">
+        <div class="num" id="stat-approved">۰</div>
+        <div class="label">تایید شده</div>
+        <div class="stat-change up" id="change-approved"><i class="fa-solid fa-arrow-up"></i> -</div>
+      </div>
+      <div class="stat-card stat-pending" onclick="window.location.href='history.html'">
+        <div class="num" id="stat-pending">۰</div>
+        <div class="label">در انتظار</div>
+        <div class="stat-change down" id="change-pending"><i class="fa-solid fa-arrow-down"></i> -</div>
+      </div>
+      <div class="stat-card stat-rejected" onclick="window.location.href='history.html'">
+        <div class="num" id="stat-rejected">۰</div>
+        <div class="label">رد شده</div>
+        <div class="stat-change down" id="change-rejected"><i class="fa-solid fa-arrow-down"></i> -</div>
+      </div>
+    </div>
+
+    <!-- وضعیت نهایی -->
+    <div class="breakdown-card">
+      <div class="breakdown-title"><i class="fa-solid fa-flag-checkered"></i> وضعیت نهایی تجهیزات</div>
+      
+      <div class="donut-wrapper">
+        <div class="donut-chart" id="donutChart">
+          <div class="donut-inner">
+            <span class="total" id="val-final-total">۰</span>
+            <span class="label">بازرسی</span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="donut-legend">
+        <div class="legend-item"><span class="legend-color" style="background: var(--status-green);"></span> سالم (<span id="val-salem">۰</span>)</div>
+        <div class="legend-item"><span class="legend-color" style="background: var(--status-orange);"></span> اصلاح (<span id="val-repair">۰</span>)</div>
+        <div class="legend-item"><span class="legend-color" style="background: var(--status-red);"></span> معیوب (<span id="val-defective">۰</span>)</div>
+      </div>
+    </div>
+
+    <!-- تفکیک نوع -->
+    <div class="breakdown-card">
+      <div class="breakdown-title"><i class="fa-solid fa-layer-group"></i> تفکیک بر اساس نوع تجهیز</div>
+      
+      <div class="bar-row">
+        <span class="bar-label">سیلندر CO2</span>
+        <div class="bar-container"><div class="bar-fill co2" id="bar-co2" style="width: 0%;"></div></div>
+        <span class="bar-value" id="val-co2">۰</span>
+      </div>
+      <div class="bar-row">
+        <span class="bar-label">سیلندر پودری</span>
+        <div class="bar-container"><div class="bar-fill powder" id="bar-powder" style="width: 0%;"></div></div>
+        <span class="bar-value" id="val-powder">۰</span>
+      </div>
+      <div class="bar-row">
+        <span class="bar-label">سیلندر آب</span>
+        <div class="bar-container"><div class="bar-fill water" id="bar-water" style="width: 0%;"></div></div>
+        <span class="bar-value" id="val-water">۰</span>
+      </div>
+      <div class="bar-row">
+        <span class="bar-label">فایر باکس</span>
+        <div class="bar-container"><div class="bar-fill firebox" id="bar-firebox" style="width: 0%;"></div></div>
+        <span class="bar-value" id="val-firebox">۰</span>
+      </div>
+    </div>
+
+    <!-- عملکرد بازرسان -->
+    <div class="breakdown-card">
+      <div class="breakdown-title"><i class="fa-solid fa-users"></i> عملکرد بازرسان</div>
+      <table class="inspectors-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>شماره پرسنلی</th>
+            <th>تعداد</th>
+            <th>معیوب</th>
+            <th>اصلاح</th>
+          </tr>
+        </thead>
+        <tbody id="inspectors-body">
+          <tr><td colspan="5" style="text-align:center; color:#999;">در حال بارگذاری...</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+
+  <!-- مدال لیست عقب‌افتاده‌ها (دو مرحله‌ای) -->
+  <div class="modal-overlay" id="overdueModal">
+    <div class="modal-content">
+      
+      <!-- مرحله ۱: لیست بازرسان -->
+      <div id="overdue-view-inspectors">
+        <div class="modal-title">
+          <span>بازرسان دارای تجهیز عقب‌افتاده</span>
+          <button class="modal-close" onclick="closeModal('overdueModal')">&times;</button>
+        </div>
+        <div id="overdue-inspectors-list"></div>
+      </div>
+
+      <!-- مرحله ۲: لیست تجهیزات یک بازرس -->
+      <div id="overdue-view-equipment" style="display:none;">
+        <div class="modal-title">
+          <button class="modal-back-btn" onclick="backToInspectors()"><i class="fa-solid fa-arrow-right"></i> بازگشت</button>
+          <button class="modal-close" onclick="closeModal('overdueModal')">&times;</button>
+        </div>
+        <div style="font-size:13px; font-weight:700; color: var(--copper-dark); margin-bottom: 12px;">
+          تجهیزات عقب‌افتاده بازرس: <span id="current-inspector-name" style="color: var(--status-red);"></span>
+        </div>
+        <div id="overdue-equipment-list"></div>
+      </div>
+
     </div>
   </div>
 
-  <div class="card">
-    <h2>انتخاب ماه</h2>
-    <div class="month-selector">
-      <label>ماه شمسی:</label>
-      <select id="monthSelect" onchange="loadReport()">
-        <option value="">در حال بارگذاری...</option>
-      </select>
-    </div>
-  </div>
+  <!-- منوی پایین -->
+  <nav class="bottom-nav">
+    <a href="index.html" class="nav-item">
+      <i class="fa-solid fa-house"></i>
+      <span>خانه</span>
+    </a>
+    <a href="history.html" class="nav-item">
+      <i class="fa-solid fa-clock-rotate-left"></i>
+      <span>تاریخچه</span>
+    </a>
+    <a href="report.html" class="nav-item active">
+      <i class="fa-solid fa-chart-pie"></i>
+      <span>گزارش</span>
+    </a>
+    <a href="#" class="nav-item" onclick="doLogout()">
+      <i class="fa-solid fa-arrow-right-from-bracket"></i>
+      <span>خروج</span>
+    </a>
+  </nav>
 
-  <div id="loadingBox" class="loading-box">در حال بارگذاری...</div>
-
-  <div id="reportContent" style="display:none;">
-
-    <div class="card">
-      <h2 id="reportTitle">گزارش</h2>
-      <div class="info-note" id="overdueNote" style="display:none;"></div>
-
-      <div class="stats-grid">
-        <div class="stat-card total">
-          <div class="num" id="statTotal">-</div>
-          <div class="label">کل بازرسی‌ها</div>
-        </div>
-        <div class="stat-card approved">
-          <div class="num" id="statApproved">-</div>
-          <div class="label">تأیید شده</div>
-        </div>
-        <div class="stat-card pending">
-          <div class="num" id="statPending">-</div>
-          <div class="label">در انتظار</div>
-        </div>
-        <div class="stat-card rejected">
-          <div class="num" id="statRejected">-</div>
-          <div class="label">رد شده</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="card">
-      <h2>وضعیت نهایی تجهیزات</h2>
-      <div class="stats-grid">
-        <div class="stat-card salem">
-          <div class="num" id="statSalem">-</div>
-          <div class="label">سالم</div>
-        </div>
-        <div class="stat-card repair">
-          <div class="num" id="statNeedsRepair">-</div>
-          <div class="label">نیاز به اصلاح</div>
-        </div>
-        <div class="stat-card defective">
-          <div class="num" id="statDefective">-</div>
-          <div class="label">معیوب</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="two-columns">
-      <div class="card">
-        <h2>تفکیک بر اساس نوع تجهیز</h2>
-        <div class="breakdown-section">
-          <div class="breakdown-list" id="typeBreakdown"></div>
-        </div>
-      </div>
-
-      <div class="card">
-        <h2>وضعیت کلی</h2>
-        <div class="breakdown-section">
-          <div class="breakdown-list" id="statusBreakdown"></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="card">
-      <h2>عملکرد بازرسان</h2>
-      <div id="inspectorsTableWrap">
-        <table class="inspectors-table">
-          <thead>
-            <tr>
-              <th style="width:50px;">#</th>
-              <th>شماره پرسنلی</th>
-              <th>تعداد بازرسی</th>
-              <th>معیوب</th>
-              <th>نیاز به اصلاح</th>
-            </tr>
-          </thead>
-          <tbody id="inspectorsBody"></tbody>
-        </table>
-      </div>
-      <div id="inspectorsEmpty" class="empty-msg" style="display:none;">هیچ بازرسی‌ای در این ماه ثبت نشده است.</div>
-    </div>
-
-  </div>
+  <!-- Toast Container -->
+  <div id="toast-container"></div>
 
   <script>
     var EXEC_URL = 'https://script.google.com/macros/s/AKfycbyh8ccieztX3ZkFF0IozE_beRcZja0BH8ieYbQ9qCL1tLDxkq2QB0Pz3JD4v0IRY6eo/exec';
     var currentToken = '';
-    var currentUser = '';
-    var availableMonths = [];
+    
+    var allOverdueData = [];
+
+    var JALALI_MONTHS = ['فروردین', 'اردیبهشت', 'خرداد', 'تیر', 'مرداد', 'شهریور', 'مهر', 'آبان', 'آذر', 'دی', 'بهمن', 'اسفند'];
 
     function goToLogin() {
       window.location.href = EXEC_URL + '?page=Login';
-    }
-
-    function handleSessionExpired() {
-      localStorage.clear();
-      sessionStorage.clear();
-      goToLogin();
     }
 
     function apiCall(request) {
@@ -197,29 +425,256 @@
 
     (function initPage() {
       currentToken = localStorage.getItem('token') || '';
-      currentUser = localStorage.getItem('fullName') || localStorage.getItem('username') || '';
+      var role = localStorage.getItem('role') || '';
 
       if (!currentToken) { goToLogin(); return; }
+      if (role !== 'manager' && role !== 'admin') {
+        alert('شما به این بخش دسترسی ندارید.');
+        window.location.href = 'index.html';
+        return;
+      }
 
-      apiCall({ action: 'auth.me', token: currentToken }).then(function(response) {
-        if (!response.success) {
-          handleSessionExpired();
-          return;
-        }
-        var role = response.data.role;
-        if (role !== 'manager' && role !== 'admin') {
-          alert('شما به این بخش دسترسی ندارید.');
-          window.location.href = 'index.html';
-          return;
-        }
-        document.getElementById('userInfo').textContent = currentUser;
-        loadMonths();
-      }).catch(function() {
-        handleSessionExpired();
-      });
+      loadMonths();
+      loadOverdueData();
     })();
 
+    // ============================================
+    // Load Data
+    // ============================================
+    function loadMonths() {
+      apiCall({ action: 'report.months', token: currentToken, payload: {} }).then(function(res) {
+        var select = document.getElementById('monthSelect');
+        select.innerHTML = '';
+
+        if (res.success && res.data.months.length > 0) {
+          res.data.months.forEach(function(m) {
+            var opt = document.createElement('option');
+            opt.value = m.year + '-' + m.month;
+            opt.textContent = JALALI_MONTHS[m.month - 1] + ' ' + m.year;
+            select.appendChild(opt);
+          });
+          
+          // انتخاب اولین ماه (جدیدترین)
+          select.value = res.data.months[0].year + '-' + res.data.months[0].month;
+          loadReportData();
+        } else {
+          select.innerHTML = '<option value="">داده‌ای یافت نشد</option>';
+        }
+      }).catch(function() {
+        showToast('خطا در دریافت لیست ماه‌ها', 'error');
+      });
+    }
+
+    function loadOverdueData() {
+      apiCall({ action: 'dashboard.overdue', token: currentToken, payload: {} }).then(function(res) {
+        if (res.success) {
+          allOverdueData = res.data.items || [];
+          
+          var note = document.getElementById('overdueNote');
+          if (allOverdueData.length > 0) {
+            document.getElementById('overdue-text').textContent = toFa(allOverdueData.length);
+            note.style.display = 'flex';
+          } else {
+            note.style.display = 'none';
+          }
+        }
+      }).catch(function() {});
+    }
+
+    function loadReportData() {
+      var val = document.getElementById('monthSelect').value;
+      if (!val) return;
+
+      var parts = val.split('-');
+      var year = parseInt(parts[0], 10);
+      var month = parseInt(parts[1], 10);
+
+      // نمایش وضعیت لودینگ
+      document.getElementById('stat-total').textContent = '...';
+
+      apiCall({
+        action: 'report.monthly',
+        token: currentToken,
+        payload: { year: year, month: month }
+      }).then(function(res) {
+        if (res.success) {
+          renderReport(res.data);
+        } else {
+          showToast(res.error, 'error');
+        }
+      }).catch(function() {
+        showToast('خطا در دریافت گزارش', 'error');
+      });
+    }
+
+    // ============================================
+    // Render Data
+    // ============================================
+    function renderReport(data) {
+      // آمار کلی
+      document.getElementById('stat-total').textContent = toFa(data.totalInspections);
+      document.getElementById('stat-approved').textContent = toFa(data.approvalStatus.approved);
+      document.getElementById('stat-pending').textContent = toFa(data.approvalStatus.pending);
+      document.getElementById('stat-rejected').textContent = toFa(data.approvalStatus.rejected);
+
+      // وضعیت نهایی
+      var s = data.statusBreakdown.salem;
+      var r = data.statusBreakdown.needsRepair;
+      var d = data.statusBreakdown.defective;
+      var totalFinal = s + r + d;
+
+      document.getElementById('val-final-total').textContent = toFa(totalFinal);
+      document.getElementById('val-salem').textContent = toFa(s);
+      document.getElementById('val-repair').textContent = toFa(r);
+      document.getElementById('val-defective').textContent = toFa(d);
+
+      // رسم نمودار دایره‌ای با Conic Gradient
+      var donut = document.getElementById('donutChart');
+      if (totalFinal > 0) {
+        var pSalem = (s / totalFinal) * 100;
+        var pRepair = (r / totalFinal) * 100;
+        // معیوب مابقی است
+        donut.style.background = 'conic-gradient(' +
+          'var(--status-green) 0% ' + pSalem + '%, ' +
+          'var(--status-orange) ' + pSalem + '% ' + (pSalem + pRepair) + '%, ' +
+          'var(--status-red) ' + (pSalem + pRepair) + '% 100%)';
+      } else {
+        donut.style.background = '#e2e8f0';
+      }
+
+      // تفکیک نوع تجهیز
+      var tCO2 = data.byType.CO2 || 0;
+      var tPowder = data.byType.powder || 0;
+      var tWater = data.byType.water || 0;
+      var tFirebox = data.byType.firebox || 0;
+      var totalType = tCO2 + tPowder + tWater + tFirebox;
+
+      document.getElementById('val-co2').textContent = toFa(tCO2);
+      document.getElementById('val-powder').textContent = toFa(tPowder);
+      document.getElementById('val-water').textContent = toFa(tWater);
+      document.getElementById('val-firebox').textContent = toFa(tFirebox);
+
+      if (totalType > 0) {
+        document.getElementById('bar-co2').style.width = (tCO2 / totalType * 100) + '%';
+        document.getElementById('bar-powder').style.width = (tPowder / totalType * 100) + '%';
+        document.getElementById('bar-water').style.width = (tWater / totalType * 100) + '%';
+        document.getElementById('bar-firebox').style.width = (tFirebox / totalType * 100) + '%';
+      }
+
+      // عملکرد بازرسان
+      var tbody = document.getElementById('inspectors-body');
+      tbody.innerHTML = '';
+
+      if (data.inspectors && data.inspectors.length > 0) {
+        data.inspectors.forEach(function(insp, idx) {
+          var tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td class="rank">${toFa(idx + 1)}</td>
+            <td>${insp.username}</td>
+            <td>${toFa(insp.count)}</td>
+            <td style="color: ${insp.defective > 0 ? 'var(--status-red)' : 'var(--text-muted)'}">${toFa(insp.defective)}</td>
+            <td style="color: ${insp.needsRepair > 0 ? 'var(--status-orange)' : 'var(--text-muted)'}">${toFa(insp.needsRepair)}</td>
+          `;
+          tbody.appendChild(tr);
+        });
+      } else {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#999;">داده‌ای ثبت نشده است.</td></tr>';
+      }
+    }
+
+    // ============================================
+    // Overdue Modal (2-Step)
+    // ============================================
+    function openOverdueModal() {
+      backToInspectors();
+      renderOverdueInspectors();
+      openModal('overdueModal');
+    }
+
+    function renderOverdueInspectors() {
+      var listEl = document.getElementById('overdue-inspectors-list');
+      listEl.innerHTML = '';
+
+      if (allOverdueData.length === 0) {
+        listEl.innerHTML = '<div class="empty-msg">هیچ تجهیز عقب‌افتاده‌ای وجود ندارد.</div>';
+        return;
+      }
+
+      // گروه‌بندی بر اساس بازرس
+      var grouped = {};
+      allOverdueData.forEach(function(item) {
+        var insp = item.assignedTo || 'بدون مسئول';
+        if (!grouped[insp]) grouped[insp] = [];
+        grouped[insp].push(item);
+      });
+
+      for (var insp in grouped) {
+        var count = grouped[insp].length;
+        
+        var item = document.createElement('div');
+        item.className = 'inspector-overdue-item';
+        item.onclick = (function(username) {
+          return function() { showInspectorEquipment(username); };
+        })(insp);
+        
+        item.innerHTML = `
+          <div>
+            <div class="name"><i class="fa-solid fa-user" style="color:var(--copper-main); margin-left:6px;"></i>بازرس: ${insp}</div>
+          </div>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <span class="count-badge">${toFa(count)} تجهیز</span>
+            <i class="fa-solid fa-chevron-left arrow"></i>
+          </div>
+        `;
+        listEl.appendChild(item);
+      }
+    }
+
+    function showInspectorEquipment(username) {
+      var equipments = allOverdueData.filter(function(item) {
+        var insp = item.assignedTo || 'بدون مسئول';
+        return insp === username;
+      });
+
+      document.getElementById('current-inspector-name').textContent = username;
+      
+      var listEl = document.getElementById('overdue-equipment-list');
+      listEl.innerHTML = '';
+
+      equipments.forEach(function(eq) {
+        var daysText = parseInt(eq.daysUntilOverdue, 10) < 0 
+          ? toFa(Math.abs(parseInt(eq.daysUntilOverdue, 10))) + ' روز عقب' 
+          : toFa(eq.daysUntilOverdue) + ' روز مانده';
+
+        var item = document.createElement('div');
+        item.className = 'equip-overdue-item';
+        item.innerHTML = `
+          <div class="barcode"><i class="fa-solid fa-barcode" style="margin-left:6px;"></i>${eq.barcode}</div>
+          <div class="meta">
+            <span><i class="fa-solid fa-location-dot"></i> ${eq.location || '-'}</span>
+            <span class="days">${daysText}</span>
+          </div>
+        `;
+        listEl.appendChild(item);
+      });
+
+      document.getElementById('overdue-view-inspectors').style.display = 'none';
+      document.getElementById('overdue-view-equipment').style.display = 'block';
+    }
+
+    function backToInspectors() {
+      document.getElementById('overdue-view-inspectors').style.display = 'block';
+      document.getElementById('overdue-view-equipment').style.display = 'none';
+    }
+
+    // ============================================
+    // Utilities
+    // ============================================
+    function openModal(id) { document.getElementById(id).classList.add('show'); }
+    function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+
     function doLogout() {
+      if (!confirm('از حساب کاربری خارج می‌شوید؟')) return;
       var token = currentToken;
       localStorage.clear();
       sessionStorage.clear();
@@ -228,208 +683,22 @@
         headers: { 'Content-Type': 'text/plain;charset=utf-8' },
         body: JSON.stringify({ action: 'auth.logout', token: token }),
         redirect: 'follow'
-      }).finally(function() {
-        goToLogin();
-      });
+      }).finally(function() { goToLogin(); });
     }
 
-    function toFa(n) {
-      return String(n).replace(/\d/g, function(d) { return '۰۱۲۳۴۵۶۷۸۹'[d]; });
+    function showToast(message, type = 'success') {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      let icon = type === 'error' ? 'fa-circle-exclamation' : (type === 'info' ? 'fa-info-circle' : 'fa-check-circle');
+      toast.innerHTML = `<i class="fa-solid ${icon}"></i> ${message}`;
+      container.appendChild(toast);
+      setTimeout(() => { toast.remove(); }, 3000);
     }
 
-    function loadMonths() {
-      apiCall({
-        action: 'report.months',
-        token: currentToken
-      }).then(function(response) {
-        document.getElementById('loadingBox').style.display = 'none';
-        if (!response.success) {
-          if (response.error && (response.error.indexOf('نشست') !== -1 || response.error.indexOf('منقضی') !== -1)) {
-            handleSessionExpired();
-            return;
-          }
-          alert('خطا: ' + response.error);
-          return;
-        }
-        availableMonths = response.data.months || [];
-        populateMonthSelect();
-        if (availableMonths.length > 0) {
-          loadReport();
-        }
-      }).catch(function(err) {
-        document.getElementById('loadingBox').style.display = 'none';
-        alert('خطا: ' + err.message);
-      });
-    }
-
-    function populateMonthSelect() {
-      var select = document.getElementById('monthSelect');
-      select.innerHTML = '';
-
-      if (availableMonths.length === 0) {
-        select.innerHTML = '<option value="">ماهی یافت نشد</option>';
-        return;
-      }
-
-      availableMonths.forEach(function(m) {
-        var opt = document.createElement('option');
-        opt.value = m.year + '-' + m.month;
-        opt.textContent = m.label;
-        select.appendChild(opt);
-      });
-
-      select.value = availableMonths[0].year + '-' + availableMonths[0].month;
-    }
-
-    function loadReport() {
-      var val = document.getElementById('monthSelect').value;
-      if (!val) return;
-
-      var parts = val.split('-');
-      var year = parseInt(parts[0], 10);
-      var month = parseInt(parts[1], 10);
-
-      document.getElementById('loadingBox').style.display = 'block';
-      document.getElementById('reportContent').style.display = 'none';
-
-      apiCall({
-        action: 'report.monthly',
-        token: currentToken,
-        payload: { year: year, month: month }
-      }).then(function(response) {
-        document.getElementById('loadingBox').style.display = 'none';
-
-        if (!response.success) {
-          alert('خطا: ' + response.error);
-          return;
-        }
-
-        renderReport(response.data);
-      }).catch(function(err) {
-        document.getElementById('loadingBox').style.display = 'none';
-        alert('خطا: ' + err.message);
-      });
-    }
-
-    function renderReport(r) {
-      document.getElementById('reportContent').style.display = 'block';
-      document.getElementById('reportTitle').textContent = 'گزارش ' + r.monthLabel;
-
-      document.getElementById('statTotal').textContent = toFa(r.totalInspections);
-      document.getElementById('statApproved').textContent = toFa(r.approvalStatus.approved);
-      document.getElementById('statPending').textContent = toFa(r.approvalStatus.pending);
-      document.getElementById('statRejected').textContent = toFa(r.approvalStatus.rejected);
-
-      document.getElementById('statSalem').textContent = toFa(r.statusBreakdown.salem);
-      document.getElementById('statNeedsRepair').textContent = toFa(r.statusBreakdown.needsRepair);
-      document.getElementById('statDefective').textContent = toFa(r.statusBreakdown.defective);
-
-      var note = document.getElementById('overdueNote');
-      if (r.overdueCount > 0) {
-        var src = r.overdueSource === 'history' ? 'پایان ماه' : 'وضعیت امروز (ماه جاری)';
-        note.innerHTML = '⚠️ تعداد تجهیزات عقب‌افتاده: <b>' + toFa(r.overdueCount) + '</b> (' + src + ')' +
-                         '<br>تجهیزات فعال: <b>' + toFa(r.totalEquipment) + '</b>';
-        note.style.display = 'block';
-      } else {
-        note.style.display = 'none';
-      }
-
-      renderBreakdown('typeBreakdown', [
-        { name: 'سیلندر CO2', val: r.byType.CO2, cls: 'co2' },
-        { name: 'سیلندر پودری', val: r.byType.powder, cls: 'powder' },
-        { name: 'سیلندر آب', val: r.byType.water, cls: 'water' },
-        { name: 'فایر باکس', val: r.byType.firebox, cls: 'firebox' }
-      ], r.totalInspections);
-
-      renderBreakdown('statusBreakdown', [
-        { name: 'سالم', val: r.statusBreakdown.salem, cls: 'salem' },
-        { name: 'نیاز به اصلاح', val: r.statusBreakdown.needsRepair, cls: 'needsRepair' },
-        { name: 'معیوب', val: r.statusBreakdown.defective, cls: 'defective' }
-      ], r.totalInspections);
-
-      renderInspectors(r.inspectors);
-    }
-
-    function renderBreakdown(containerId, items, total) {
-      var container = document.getElementById(containerId);
-      container.innerHTML = '';
-
-      items.forEach(function(item) {
-        var pct = total > 0 ? (item.val / total) * 100 : 0;
-
-        var row = document.createElement('div');
-        row.className = 'breakdown-row';
-
-        var name = document.createElement('span');
-        name.className = 'name';
-        name.textContent = item.name;
-        row.appendChild(name);
-
-        var bar = document.createElement('div');
-        bar.className = 'breakdown-bar';
-
-        var fill = document.createElement('div');
-        fill.className = 'breakdown-bar-fill ' + item.cls;
-        fill.style.width = pct + '%';
-        bar.appendChild(fill);
-        row.appendChild(bar);
-
-        var val = document.createElement('span');
-        val.className = 'val';
-        val.textContent = toFa(item.val);
-        row.appendChild(val);
-
-        container.appendChild(row);
-      });
-    }
-
-    function renderInspectors(inspectors) {
-      var tbody = document.getElementById('inspectorsBody');
-      var empty = document.getElementById('inspectorsEmpty');
-      var wrap = document.getElementById('inspectorsTableWrap');
-
-      tbody.innerHTML = '';
-
-      if (!inspectors || inspectors.length === 0) {
-        wrap.style.display = 'none';
-        empty.style.display = 'block';
-        return;
-      }
-
-      wrap.style.display = 'block';
-      empty.style.display = 'none';
-
-      inspectors.forEach(function(insp, idx) {
-        var tr = document.createElement('tr');
-
-        var td1 = document.createElement('td');
-        td1.className = 'rank';
-        td1.textContent = toFa(idx + 1);
-        tr.appendChild(td1);
-
-        var td2 = document.createElement('td');
-        td2.textContent = insp.username;
-        tr.appendChild(td2);
-
-        var td3 = document.createElement('td');
-        td3.textContent = toFa(insp.count);
-        tr.appendChild(td3);
-
-        var td4 = document.createElement('td');
-        td4.textContent = toFa(insp.defective);
-        td4.style.color = insp.defective > 0 ? '#c62828' : '#666';
-        tr.appendChild(td4);
-
-        var td5 = document.createElement('td');
-        td5.textContent = toFa(insp.needsRepair);
-        td5.style.color = insp.needsRepair > 0 ? '#e65100' : '#666';
-        tr.appendChild(td5);
-
-        tbody.appendChild(tr);
-      });
-    }
+    function toFa(n) { return String(n).replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]); }
   </script>
 
   <script src="pwa.js" defer></script>
 </body>
-  </html>
+</html>
