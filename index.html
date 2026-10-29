@@ -4,102 +4,292 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#1e3c72">
+  <meta name="theme-color" content="#C0611A">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="HSE CSP">
   <title>اسکن تجهیز - HSE</title>
+  
   <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
   <script src="offline.js"></script>
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: Tahoma, Arial, sans-serif; background: #f0f2f5; min-height: 100vh; padding: 16px; }
-    .header { background: #1e3c72; color: #fff; padding: 16px; border-radius: 12px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; gap: 8px; }
-    .header h1 { font-size: 18px; }
-    .header .user { font-size: 13px; opacity: 0.9; }
-    .header-btns { display: flex; gap: 8px; flex-wrap: wrap; }
-    .logout-btn { background: rgba(255,255,255,0.2); border: none; color: #fff; padding: 8px 14px; border-radius: 8px; cursor: pointer; font-family: inherit; font-size: 13px; }
-    .logout-btn:hover { background: rgba(255,255,255,0.3); }
-    .logout-btn.pending-active { background: #ff9800; }
-    .pending-count { background: #fff; color: #ff9800; padding: 1px 6px; border-radius: 10px; font-size: 11px; font-weight: bold; margin-right: 4px; }
-    .card { background: #fff; border-radius: 12px; padding: 20px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
-    .card h2 { font-size: 16px; color: #1e3c72; margin-bottom: 14px; }
-    #reader { width: 100%; border-radius: 12px; overflow: hidden; margin-bottom: 12px; }
-    .divider { text-align: center; color: #999; margin: 20px 0; font-size: 13px; position: relative; }
-    .divider::before, .divider::after { content: ''; position: absolute; top: 50%; width: 40%; height: 1px; background: #ddd; }
-    .divider::before { right: 0; }
-    .divider::after { left: 0; }
-    .search-group { display: flex; gap: 8px; }
-    .search-group input { flex: 1; padding: 14px 16px; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 15px; font-family: inherit; }
-    .search-group input:focus { outline: none; border-color: #2a5298; }
-    .search-group button { padding: 14px 20px; background: #1e3c72; color: #fff; border: none; border-radius: 10px; font-family: inherit; font-size: 15px; font-weight: bold; cursor: pointer; }
-    .start-btn { width: 100%; padding: 14px; background: #2a5298; color: #fff; border: none; border-radius: 10px; font-family: inherit; font-size: 15px; font-weight: bold; cursor: pointer; margin-top: 12px; }
-    .start-btn:disabled { background: #999; }
+  
+  <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet" type="text/css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-    /* Pending Modal */
-    .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); display: none; z-index: 2000; align-items: center; justify-content: center; padding: 16px; }
-    .modal-overlay.show { display: flex; }
-    .modal { background: #fff; border-radius: 12px; padding: 20px; width: 100%; max-width: 600px; max-height: 90vh; overflow-y: auto; }
-    .modal h3 { font-size: 16px; color: #1e3c72; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center; }
-    .modal h3 .count-badge { background: #ff9800; color: #fff; padding: 2px 10px; border-radius: 10px; font-size: 12px; }
-    .pending-item { background: #fff8e1; border: 2px solid #ff9800; border-radius: 8px; padding: 12px; margin-bottom: 10px; }
-    .pending-item .barcode { font-weight: bold; color: #1e3c72; font-size: 14px; }
-    .pending-item .meta { font-size: 12px; color: #666; margin-top: 4px; }
-    .pending-item .status { font-size: 12px; color: #e65100; font-weight: bold; margin-top: 4px; }
-    .pending-actions { display: flex; gap: 6px; margin-top: 10px; }
-    .pending-actions button { flex: 1; padding: 8px; border: none; border-radius: 6px; font-family: inherit; font-size: 12px; font-weight: bold; cursor: pointer; }
-    .btn-retry { background: #4caf50; color: #fff; }
-    .btn-delete { background: #d32f2f; color: #fff; }
-    .btn-close { width: 100%; padding: 12px; background: #e0e0e0; color: #333; border: none; border-radius: 8px; font-family: inherit; font-size: 14px; font-weight: bold; cursor: pointer; margin-top: 12px; }
-    .empty-pending { text-align: center; color: #999; padding: 30px; font-size: 14px; }
+  <style>
+    :root {
+      --copper-main: #E67E22;      
+      --copper-dark: #C0611A;      
+      --copper-light: #FAD7A8;     
+      --copper-bg: #F5F7FA;        
+      --text-dark: #2C3E50;        
+      --text-muted: #7F8C8D;
+      --status-green: #27ae60;
+      --status-red: #e74c3c;
+      --status-orange: #f39c12;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Vazirmatn', Tahoma, sans-serif; }
+    
+    body { 
+      background-color: var(--copper-bg); 
+      color: var(--text-dark);
+      padding: 0 0 100px 0; 
+      min-height: 100vh;
+    }
+
+    /* هدر */
+    .header {
+      background: linear-gradient(135deg, var(--copper-dark), var(--copper-main));
+      color: #fff;
+      padding: 24px 20px 40px 20px;
+      border-radius: 0 0 24px 24px;
+      box-shadow: 0 4px 15px rgba(230, 126, 34, 0.3);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: -20px; 
+      position: relative;
+      z-index: 2;
+    }
+
+    .header-text h1 { font-size: 20px; font-weight: 700; margin-bottom: 4px; display: flex; align-items: center; gap: 8px;}
+    .header-text p { font-size: 13px; opacity: 0.9; }
+    
+    .pending-badge { background: #fff; color: var(--copper-dark); font-size: 12px; padding: 2px 8px; border-radius: 12px; font-weight: bold; display: none;}
+    
+    .avatar {
+      width: 45px; height: 45px;
+      background: rgba(255,255,255,0.2);
+      border-radius: 50%;
+      display: flex; justify-content: center; align-items: center;
+      font-size: 20px; backdrop-filter: blur(5px);
+      border: 1px solid rgba(255,255,255,0.4);
+    }
+
+    .container { padding: 0 16px; position: relative; z-index: 3; margin-top: 30px; max-width: 700px; margin-left: auto; margin-right: auto;}
+
+    /* کارت‌ها */
+    .card {
+      background: #fff;
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 16px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+      border: 1px solid rgba(230, 126, 34, 0.1);
+    }
+
+    .card-title {
+      font-size: 15px; font-weight: 700; color: var(--copper-dark);
+      margin-bottom: 16px; display: flex; align-items: center; gap: 8px;
+      border-bottom: 1px dashed var(--copper-light); padding-bottom: 10px;
+    }
+
+    /* اسکنر */
+    #reader { width: 100%; border-radius: 12px; overflow: hidden; margin-bottom: 12px; background: #000; min-height: 250px; display: none;}
+    #reader video { border-radius: 12px; }
+    
+    .btn-primary {
+      background: linear-gradient(135deg, var(--copper-main), var(--copper-dark));
+      color: #fff;
+      border: none;
+      padding: 16px 20px;
+      border-radius: 50px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      width: 100%;
+      box-shadow: 0 6px 15px rgba(230, 126, 34, 0.4);
+      display: flex; justify-content: center; align-items: center; gap: 10px;
+      transition: all 0.3s;
+    }
+    .btn-primary:active { transform: translateY(2px); box-shadow: 0 2px 8px rgba(230, 126, 34, 0.4); }
+    .btn-primary:disabled { background: #ccc; box-shadow: none; cursor: not-allowed; }
+
+    /* فیلد جستجو */
+    .search-box {
+      display: flex;
+      background: #fff;
+      border-radius: 50px;
+      padding: 5px 5px 5px 15px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+      border: 1px solid #eee;
+      margin-bottom: 20px;
+    }
+    .search-box input {
+      border: none; outline: none; flex: 1; font-family: inherit; font-size: 14px; padding: 10px;
+      background: transparent;
+    }
+    .search-box button {
+      background: var(--copper-light); color: var(--copper-dark);
+      border: none; border-radius: 50px; width: 45px; height: 45px;
+      display: flex; justify-content: center; align-items: center; cursor: pointer;
+      transition: 0.2s;
+    }
+    .search-box button:active { background: var(--copper-main); color: #fff; }
+
+    /* شبکه پنل مدیریت */
+    .btn-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+    .grid-btn {
+      background: #FFF4E6; 
+      border: 1px solid var(--copper-light);
+      border-radius: 12px;
+      padding: 16px;
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;
+      color: var(--copper-dark); font-weight: 700; font-size: 13px;
+      text-decoration: none; cursor: pointer; transition: 0.2s;
+      text-align: center;
+      position: relative;
+    }
+    .grid-btn i { font-size: 24px; color: var(--copper-main); }
+    .grid-btn:active { background: var(--copper-light); }
+
+    /* دکمه‌های به زودی */
+    .grid-btn.future-module {
+      border: 2px dashed var(--copper-main);
+      background: #FCE3CC; 
+    }
+    .grid-btn.health-module i { color: #e74c3c; } 
+    .grid-btn.unsafe-module i { color: #d35400; }
+    
+    .badge-soon {
+      position: absolute; top: -8px; right: 10px;
+      background: var(--copper-main); color: #fff;
+      font-size: 9px; padding: 2px 6px; border-radius: 8px; font-weight: 800;
+    }
+
+    /* منوی پایین */
+    .bottom-nav {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      background: #fff;
+      display: flex; justify-content: space-around; align-items: center;
+      padding: 10px;
+      box-shadow: 0 -2px 15px rgba(0,0,0,0.05);
+      border-radius: 24px 24px 0 0;
+      z-index: 100;
+    }
+    .nav-item {
+      display: flex; flex-direction: column; align-items: center; gap: 4px;
+      color: var(--text-muted); font-size: 11px; font-weight: 700; text-decoration: none;
+      transition: 0.2s; background: none; border: none; cursor: pointer;
+    }
+    .nav-item i { font-size: 20px; margin-bottom: 2px; }
+    .nav-item.active { color: var(--copper-main); }
+
+    /* Toast */
+    #toast-container { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 999; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
+    .toast { background: #333; color: #fff; padding: 12px 24px; border-radius: 50px; font-size: 13px; font-weight: 700; box-shadow: 0 4px 12px rgba(0,0,0,0.15); display: flex; align-items: center; gap: 8px; animation: toastIn 0.3s ease-out, toastOut 0.3s ease-in 2.7s forwards; }
+    .toast.success { background: var(--status-green); }
+    .toast.error { background: var(--status-red); }
+    .toast.info { background: var(--copper-main); }
+    @keyframes toastIn { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    @keyframes toastOut { from { transform: translateY(0); opacity: 1; } to { transform: translateY(-20px); opacity: 0; } }
+
   </style>
 </head>
 <body>
 
-  <div class="header">
-    <div>
-      <h1>اسکن تجهیز</h1>
-      <div class="user" id="userInfo"></div>
+  <header class="header">
+    <div class="header-text">
+      <h1>
+        اسکن تجهیز
+        <span class="pending-badge" id="pendingBadge">0</span>
+      </h1>
+      <p id="userInfo">در حال بارگذاری...</p>
     </div>
-    <div class="header-btns">
-      <button class="logout-btn" id="pendingBtn" onclick="openPendingModal()">
-        ارسال‌های معلق <span class="pending-count" id="pendingCount" style="display:none;">0</span>
+    <div class="avatar">
+      <i class="fa-solid fa-user-tie"></i>
+    </div>
+  </header>
+
+  <div class="container">
+    
+    <!-- جستجوی دستی -->
+    <div class="search-box">
+      <input type="text" id="manualInput" placeholder="کد تجهیز را دستی وارد کنید...">
+      <button onclick="manualSearch()"><i class="fa-solid fa-magnifying-glass"></i></button>
+    </div>
+
+    <!-- اسکنر -->
+    <div class="card">
+      <div class="card-title">
+        <i class="fa-solid fa-camera"></i> اسکن با دوربین
+      </div>
+      <div id="reader"></div>
+      <button class="btn-primary" id="startScanBtn" onclick="startScanner()">
+        <i class="fa-solid fa-qrcode"></i> شروع اسکن
       </button>
-      <button class="logout-btn" onclick="window.location.href='history.html'">تاریخچه</button>
-      <button class="logout-btn" id="dashboardBtn" style="display:none;" onclick="window.location.href='dashboard.html'">داشبورد</button>
-      <button class="logout-btn" id="reportBtn" style="display:none;" onclick="window.location.href='report.html'">گزارش</button>
-      <button class="logout-btn" id="usersBtn" style="display:none;" onclick="window.location.href='users.html'">کاربران</button>
-      <button class="logout-btn" id="equipmentBtn" style="display:none;" onclick="window.location.href='equipment.html'">تجهیزات</button>
-      <button class="logout-btn" id="logsBtn" style="display:none;" onclick="window.location.href='logs.html'">لاگ‌ها</button>
-      <button class="logout-btn" onclick="doLogout()">خروج</button>
     </div>
+
+    <!-- پنل مدیریت (شامل دکمه‌های به زودی) -->
+    <div class="card" id="adminPanel" style="display:none;">
+      <div class="card-title">
+        <i class="fa-solid fa-gauge-high"></i> پنل مدیریت
+      </div>
+      <div class="btn-grid">
+        <a href="dashboard.html" class="grid-btn" id="adminDashboard" style="display:none;">
+          <i class="fa-solid fa-chart-pie"></i>
+          <span>داشبورد</span>
+        </a>
+        <a href="report.html" class="grid-btn" id="adminReport" style="display:none;">
+          <i class="fa-solid fa-file-invoice"></i>
+          <span>گزارشات</span>
+        </a>
+        <a href="users.html" class="grid-btn" id="adminUsers" style="display:none;">
+          <i class="fa-solid fa-users-gear"></i>
+          <span>کاربران</span>
+        </a>
+        <a href="equipment.html" class="grid-btn" id="adminEquipment" style="display:none;">
+          <i class="fa-solid fa-fire-extinguisher"></i>
+          <span>تجهیزات</span>
+        </a>
+        <a href="logs.html" class="grid-btn" id="adminLogs" style="display:none;">
+          <i class="fa-solid fa-list-ul"></i>
+          <span>لاگ‌ها</span>
+        </a>
+
+        <!-- دکمه‌های به زودی -->
+        <a href="#" class="grid-btn future-module" onclick="showToast('این بخش به زودی فعال می‌شود.', 'info')">
+          <span class="badge-soon">به زودی</span>
+          <i class="fa-solid fa-file-signature"></i>
+          <span>گزارشات ارسالی پرسنل</span>
+        </a>
+        <a href="#" class="grid-btn future-module health-module" onclick="showToast('ماژول بهداشت به زودی اضافه می‌شود.', 'info')">
+          <span class="badge-soon">به زودی</span>
+          <i class="fa-solid fa-heart-pulse"></i>
+          <span>چک‌لیست‌های بهداشتی</span>
+        </a>
+        <a href="#" class="grid-btn future-module unsafe-module" onclick="showToast('بخش گزارش موارد ناایمن به زودی فعال می‌شود.', 'info')">
+          <span class="badge-soon">به زودی</span>
+          <i class="fa-solid fa-triangle-exclamation"></i>
+          <span>ارسال گزارش موارد نا ایمن</span>
+        </a>
+      </div>
+    </div>
+
   </div>
 
-  <div class="card">
-    <h2>اسکن با دوربین</h2>
-    <div id="reader"></div>
-    <button class="start-btn" id="startScanBtn" onclick="startScanner()">شروع اسکن</button>
-  </div>
+  <!-- منوی پایین -->
+  <nav class="bottom-nav">
+    <button class="nav-item active" onclick="window.location.reload()">
+      <i class="fa-solid fa-house"></i>
+      <span>خانه</span>
+    </button>
+    <button class="nav-item" onclick="window.location.href='history.html'">
+      <i class="fa-solid fa-clock-rotate-left"></i>
+      <span>تاریخچه</span>
+    </button>
+    <button class="nav-item" onclick="doLogout()">
+      <i class="fa-solid fa-arrow-right-from-bracket"></i>
+      <span>خروج</span>
+    </button>
+  </nav>
 
-  <div class="card">
-    <div class="divider">یا</div>
-    <h2>جستجوی دستی</h2>
-    <div class="search-group">
-      <input type="text" id="manualInput" placeholder="کد تجهیز را وارد کنید">
-      <button onclick="manualSearch()">جستجو</button>
-    </div>
-  </div>
-
-  <!-- Pending Modal -->
-  <div class="modal-overlay" id="pendingModal">
-    <div class="modal">
-      <h3>
-        <span>ارسال‌های معلق (آفلاین)</span>
-        <span class="count-badge" id="modalCount">0</span>
-      </h3>
-      <div id="pendingList"></div>
-      <button class="btn-close" onclick="closePendingModal()">بستن</button>
-    </div>
-  </div>
+  <!-- Toast Container -->
+  <div id="toast-container"></div>
 
   <script>
     var EXEC_URL = 'https://script.google.com/macros/s/AKfycbyh8ccieztX3ZkFF0IozE_beRcZja0BH8ieYbQ9qCL1tLDxkq2QB0Pz3JD4v0IRY6eo/exec';
@@ -108,6 +298,7 @@
     var html5QrCode = null;
     var isScanning = false;
 
+    // خواندن توکن از URL
     (function readTokenFromHash() {
       if (window.location.hash.indexOf('token=') !== -1) {
         var params = new URLSearchParams(window.location.hash.substring(1));
@@ -132,29 +323,49 @@
 
       document.getElementById('userInfo').textContent = currentUser;
 
+      // نمایش پنل مدیریت بر اساس نقش
       if (role === 'manager' || role === 'admin') {
-        document.getElementById('dashboardBtn').style.display = 'inline-block';
-        document.getElementById('reportBtn').style.display = 'inline-block';
+        document.getElementById('adminPanel').style.display = 'block';
+        document.getElementById('adminDashboard').style.display = 'flex';
+        document.getElementById('adminReport').style.display = 'flex';
       }
       if (role === 'admin') {
-        document.getElementById('usersBtn').style.display = 'inline-block';
-        document.getElementById('equipmentBtn').style.display = 'inline-block';
-        document.getElementById('logsBtn').style.display = 'inline-block';
+        document.getElementById('adminUsers').style.display = 'flex';
+        document.getElementById('adminEquipment').style.display = 'flex';
+        document.getElementById('adminLogs').style.display = 'flex';
+      } else {
+        document.getElementById('adminUsers').style.display = 'none';
+        document.getElementById('adminEquipment').style.display = 'none';
+        document.getElementById('adminLogs').style.display = 'none';
+        if (role === 'inspector') {
+          document.getElementById('adminPanel').style.display = 'none';
+        }
       }
 
-      bindEvents();
+      // بایند کردن کلید Enter برای جستجو
+      document.getElementById('manualInput').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') manualSearch();
+      });
+
       updatePendingBadge();
       processPendingQueue();
     })();
 
-    function bindEvents() {
-      document.getElementById('manualInput').addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') manualSearch();
-      });
+    // ============================================
+    // Toast Notification
+    // ============================================
+    function showToast(message, type = 'success') {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      let icon = type === 'error' ? 'fa-circle-exclamation' : (type === 'info' ? 'fa-info-circle' : 'fa-check-circle');
+      toast.innerHTML = `<i class="fa-solid ${icon}"></i> ${message}`;
+      container.appendChild(toast);
+      setTimeout(() => { toast.remove(); }, 3000);
     }
 
     // ============================================
-    // Pending queue helpers
+    // Pending Queue Logic (ارسال معلق)
     // ============================================
     function getPendingKeys() {
       var keys = [];
@@ -166,18 +377,13 @@
     }
 
     function updatePendingBadge() {
-      var keys = getPendingKeys();
-      var count = keys.length;
-      var counterEl = document.getElementById('pendingCount');
-      var btnEl = document.getElementById('pendingBtn');
-
+      var count = getPendingKeys().length;
+      var badge = document.getElementById('pendingBadge');
       if (count === 0) {
-        counterEl.style.display = 'none';
-        btnEl.classList.remove('pending-active');
+        badge.style.display = 'none';
       } else {
-        counterEl.textContent = count;
-        counterEl.style.display = 'inline-block';
-        btnEl.classList.add('pending-active');
+        badge.textContent = count;
+        badge.style.display = 'inline-block';
       }
     }
 
@@ -188,32 +394,13 @@
       keys.forEach(function(key) {
         trySendFromLocalStorage(key);
       });
-
-      if (typeof getPendingSubmissions === 'function') {
-        getPendingSubmissions().then(function(items) {
-          items.forEach(function(item) {
-            if (item.retries > 5) return;
-            fetch(EXEC_URL, {
-              method: 'POST',
-              headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-              body: JSON.stringify(item.payload),
-              redirect: 'follow'
-            }).then(function(r) { return r.json(); }).then(function(res) {
-              if (res.success) deletePendingSubmission(item.id);
-              else incrementRetry(item.id);
-            }).catch(function() { incrementRetry(item.id); });
-          });
-        }).catch(function() {});
-      }
     }
 
     function trySendFromLocalStorage(key) {
       var raw = localStorage.getItem(key);
       if (!raw) return;
-
       var payload;
-      try { payload = JSON.parse(raw); }
-      catch (e) { localStorage.removeItem(key); return; }
+      try { payload = JSON.parse(raw); } catch (e) { localStorage.removeItem(key); return; }
 
       fetch(EXEC_URL, {
         method: 'POST',
@@ -225,117 +412,11 @@
           localStorage.removeItem(key);
           updatePendingBadge();
         }
-      }).catch(function() {
-        // Keep in queue for retry
-      });
+      }).catch(function() {});
     }
 
     // ============================================
-    // Pending Modal
-    // ============================================
-    function openPendingModal() {
-      renderPendingList();
-      document.getElementById('pendingModal').classList.add('show');
-    }
-
-    function closePendingModal() {
-      document.getElementById('pendingModal').classList.remove('show');
-    }
-
-    function renderPendingList() {
-      var keys = getPendingKeys();
-      var listEl = document.getElementById('pendingList');
-      var modalCountEl = document.getElementById('modalCount');
-      listEl.innerHTML = '';
-      modalCountEl.textContent = keys.length;
-
-      if (keys.length === 0) {
-        listEl.innerHTML = '<div class="empty-pending">هیچ ارسال معلقی وجود ندارد. ✅</div>';
-        return;
-      }
-
-      keys.sort().reverse(); // Newest first
-
-      keys.forEach(function(key) {
-        var raw = localStorage.getItem(key);
-        if (!raw) return;
-
-        var payload;
-        try { payload = JSON.parse(raw); }
-        catch (e) {
-          localStorage.removeItem(key);
-          return;
-        }
-
-        var inner = payload.payload || {};
-        var div = document.createElement('div');
-        div.className = 'pending-item';
-
-        var barcodeEl = document.createElement('div');
-        barcodeEl.className = 'barcode';
-        barcodeEl.textContent = 'کد: ' + (inner.barcode || '?');
-        div.appendChild(barcodeEl);
-
-        var metaEl = document.createElement('div');
-        metaEl.className = 'meta';
-        metaEl.textContent = 'نتیجه: ' + (inner.finalStatus || '-') + ' | آیتم‌ها: ' + (inner.items ? inner.items.length : 0);
-        div.appendChild(metaEl);
-
-        var statusEl = document.createElement('div');
-        statusEl.className = 'status';
-        statusEl.textContent = '⏳ در انتظار ارسال';
-        div.appendChild(statusEl);
-
-        var actions = document.createElement('div');
-        actions.className = 'pending-actions';
-
-        var retryBtn = document.createElement('button');
-        retryBtn.className = 'btn-retry';
-        retryBtn.textContent = 'ارسال مجدد';
-        retryBtn.onclick = function() {
-          retryBtn.disabled = true;
-          retryBtn.textContent = '...';
-          fetch(EXEC_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-            body: JSON.stringify(payload),
-            redirect: 'follow'
-          }).then(function(r) { return r.json(); }).then(function(res) {
-            if (res.success) {
-              localStorage.removeItem(key);
-              renderPendingList();
-              updatePendingBadge();
-            } else {
-              retryBtn.disabled = false;
-              retryBtn.textContent = 'ارسال مجدد';
-              alert('خطا: ' + res.error);
-            }
-          }).catch(function(err) {
-            retryBtn.disabled = false;
-            retryBtn.textContent = 'ارسال مجدد';
-            alert('خطا در ارتباط: ' + err.message);
-          });
-        };
-        actions.appendChild(retryBtn);
-
-        var deleteBtn = document.createElement('button');
-        deleteBtn.className = 'btn-delete';
-        deleteBtn.textContent = 'حذف';
-        deleteBtn.onclick = function() {
-          if (!confirm('این ارسال معلق حذف شود؟')) return;
-          localStorage.removeItem(key);
-          renderPendingList();
-          updatePendingBadge();
-        };
-        actions.appendChild(deleteBtn);
-
-        div.appendChild(actions);
-        listEl.appendChild(div);
-      });
-    }
-
-    // ============================================
-    // Auth / Scan
+    // Auth & Scan
     // ============================================
     function doLogout() {
       var token = currentToken;
@@ -346,21 +427,18 @@
         headers: { 'Content-Type': 'text/plain;charset=utf-8' },
         body: JSON.stringify({ action: 'auth.logout', token: token }),
         redirect: 'follow'
-      }).finally(function() {
-        goToLogin();
-      });
+      }).finally(function() { goToLogin(); });
     }
 
     function startScanner() {
       if (isScanning) return;
-
       var btn = document.getElementById('startScanBtn');
       btn.disabled = true;
-      btn.textContent = 'در حال راه‌اندازی دوربین...';
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> در حال راه‌اندازی...';
 
-      if (!html5QrCode) {
-        html5QrCode = new Html5Qrcode('reader');
-      }
+      document.getElementById('reader').style.display = 'block';
+
+      if (!html5QrCode) { html5QrCode = new Html5Qrcode('reader'); }
 
       html5QrCode.start(
         { facingMode: 'environment' },
@@ -369,11 +447,11 @@
         function() {}
       ).then(function() {
         isScanning = true;
-        btn.textContent = 'دوربین فعال است';
+        btn.innerHTML = '<i class="fa-solid fa-camera"></i> دوربین فعال است';
       }).catch(function(err) {
         btn.disabled = false;
-        btn.textContent = 'شروع اسکن';
-        alert('خطا در دسترسی به دوربین: ' + err);
+        btn.innerHTML = '<i class="fa-solid fa-qrcode"></i> شروع اسکن';
+        showToast('خطا در دسترسی به دوربین: ' + err, 'error');
       });
     }
 
@@ -381,9 +459,10 @@
       if (html5QrCode && isScanning) {
         html5QrCode.stop().then(function() {
           isScanning = false;
+          document.getElementById('reader').style.display = 'none';
           var btn = document.getElementById('startScanBtn');
           btn.disabled = false;
-          btn.textContent = 'شروع اسکن';
+          btn.innerHTML = '<i class="fa-solid fa-qrcode"></i> شروع اسکن';
         });
       }
     }
@@ -396,10 +475,7 @@
     function manualSearch() {
       var input = document.getElementById('manualInput');
       var code = input.value.trim();
-      if (!code) {
-        alert('لطفاً کد تجهیز را وارد کنید.');
-        return;
-      }
+      if (!code) { showToast('لطفاً کد تجهیز را وارد کنید.', 'error'); return; }
       goToChecklist(code);
     }
 
