@@ -4,136 +4,341 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#1e3c72">
+  <meta name="theme-color" content="#C0611A">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="HSE CSP">
   <title>فرم چک‌لیست بازرسی</title>
+  
   <script src="offline.js"></script>
+  
+  <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet" type="text/css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: Tahoma, Arial, sans-serif; background: #f0f2f5; min-height: 100vh; padding: 16px; padding-bottom: 100px; }
-    .header { background: #1e3c72; color: #fff; padding: 16px; border-radius: 12px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; }
-    .header h1 { font-size: 18px; }
-    .header .user { font-size: 13px; opacity: 0.9; }
-    .back-btn { background: rgba(255,255,255,0.2); border: none; color: #fff; padding: 8px 14px; border-radius: 8px; cursor: pointer; font-family: inherit; font-size: 13px; }
-    .card { background: #fff; border-radius: 12px; padding: 20px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
-    .card h2 { font-size: 16px; color: #1e3c72; margin-bottom: 14px; }
-    .equipment-info { background: #e3f2fd; padding: 14px; border-radius: 8px; border-right: 4px solid #1e3c72; }
-    .info-row { display: flex; justify-content: space-between; padding: 6px 0; font-size: 14px; }
-    .info-row .label { color: #555; }
-    .info-row .value { font-weight: bold; color: #222; }
-    .progress-bar { height: 10px; background: #e0e0e0; border-radius: 6px; overflow: hidden; margin-top: 10px; }
-    .progress-fill { height: 100%; background: #4caf50; transition: width 0.3s; width: 0%; }
-    .progress-text { text-align: center; font-size: 13px; color: #666; margin-top: 6px; }
-    .item { background: #f9f9f9; border: 2px solid #e0e0e0; border-radius: 10px; padding: 14px; margin-bottom: 12px; transition: border-color 0.2s; }
-    .item.confirmed { background: #fff; border-color: #ccc; }
-    .item-name { font-size: 15px; font-weight: bold; color: #222; margin-bottom: 12px; }
-    .item-name .optional { font-size: 12px; color: #888; font-weight: normal; margin-right: 6px; }
+    :root {
+      --copper-main: #E67E22;      
+      --copper-dark: #C0611A;      
+      --copper-light: #FAD7A8;     
+      --copper-bg: #F5F7FA;        
+      --text-dark: #2C3E50;        
+      --text-muted: #7F8C8D;
+      
+      --status-green: #27ae60;
+      --status-red: #e74c3c;
+      --status-orange: #f39c12;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Vazirmatn', Tahoma, sans-serif; }
+    
+    body { 
+      background-color: var(--copper-bg); 
+      color: var(--text-dark);
+      padding: 0 0 100px 0; 
+      min-height: 100vh;
+    }
+
+    /* بخش ثابت بالا */
+    .sticky-top {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: var(--copper-bg);
+    }
+
+    .header {
+      background: linear-gradient(135deg, var(--copper-dark), var(--copper-main));
+      color: #fff;
+      padding: 16px 20px;
+      border-radius: 0 0 24px 24px;
+      box-shadow: 0 4px 15px rgba(230, 126, 34, 0.3);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .header h1 { font-size: 18px; font-weight: 700; }
+    
+    .back-btn { 
+      background: rgba(255,255,255,0.2); 
+      border: none; color: #fff; 
+      padding: 8px 14px; 
+      border-radius: 8px; 
+      cursor: pointer; 
+      font-family: inherit;
+      font-size: 13px;
+      display: flex; 
+      align-items: center; 
+      gap: 6px;
+    }
+
+    /* نوار پیشرفت */
+    .progress-container {
+      background: #fff;
+      padding: 12px 20px;
+      border-bottom: 1px solid #eee;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+    }
+    .progress-header { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 6px; color: var(--text-muted); font-weight: 700; }
+    .progress-bar { height: 8px; background: #e2e8f0; border-radius: 4px; overflow: hidden; }
+    .progress-fill { height: 100%; background: linear-gradient(90deg, var(--copper-main), var(--copper-dark)); width: 0%; transition: width 0.3s; }
+
+    .container { padding: 16px; max-width: 600px; margin: 0 auto; }
+
+    /* کارت‌ها */
+    .card {
+      background: #fff;
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 16px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+      border: 1px solid rgba(230, 126, 34, 0.1);
+    }
+
+    .card-title {
+      font-size: 15px; font-weight: 700; color: var(--copper-dark);
+      margin-bottom: 16px; display: flex; align-items: center; gap: 8px;
+      border-bottom: 1px dashed var(--copper-light); padding-bottom: 10px;
+    }
+
+    /* اطلاعات تجهیز */
+    .info-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f0f0f0; font-size: 13px; }
+    .info-row:last-child { border-bottom: none; }
+    .info-row .label { color: var(--text-muted); display: flex; align-items: center; gap: 6px; }
+    .info-row .value { font-weight: 700; color: var(--text-dark); }
+
+    /* آیتم‌های چک‌لیست */
+    .item {
+      background: #F8FAFC; border: 1px solid #e2e8f0;
+      border-radius: 12px; padding: 16px; margin-bottom: 12px;
+      transition: all 0.3s;
+    }
+    
+    .item-name {
+      font-size: 14px; font-weight: 700; margin-bottom: 12px; color: var(--text-dark);
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    
     .status-buttons { display: flex; gap: 8px; }
-    .status-btn { flex: 1; padding: 12px 8px; border: 2px solid #ddd; background: #fff; border-radius: 8px; font-family: inherit; font-size: 13px; font-weight: bold; cursor: pointer; transition: all 0.2s; }
-    .status-btn.salem { color: #2e7d32; }
-    .status-btn.salem.active { background: #4caf50 !important; color: #fff !important; border-color: #4caf50 !important; }
-    .status-btn.defective { color: #c62828; }
-    .status-btn.defective.active { background: #d32f2f !important; color: #fff !important; border-color: #d32f2f !important; }
-    .status-btn.repair { color: #e65100; }
-    .status-btn.repair.active { background: #f57c00 !important; color: #fff !important; border-color: #f57c00 !important; }
-    .final-section { background: #fff8e1; border-right: 4px solid #ff9800; padding: 16px; border-radius: 8px; margin-bottom: 16px; }
-    .final-section h3 { font-size: 15px; color: #e65100; margin-bottom: 12px; }
-    .notes-box textarea { width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-family: inherit; font-size: 14px; min-height: 80px; resize: vertical; }
-    .notes-box textarea:focus { outline: none; border-color: #2a5298; }
-    .notes-box label { display: block; margin-bottom: 8px; font-size: 14px; font-weight: bold; color: #333; }
-    .photo-box { text-align: center; }
-    #cameraPreview { width: 100%; border-radius: 12px; display: none; background: #000; }
-    #capturedPhoto { max-width: 100%; max-height: 300px; border-radius: 12px; display: none; margin-bottom: 12px; }
-    .photo-btn { width: 100%; padding: 14px; background: #2a5298; color: #fff; border: none; border-radius: 10px; font-family: inherit; font-size: 15px; font-weight: bold; cursor: pointer; margin-top: 8px; }
-    .photo-btn.taken { background: #4caf50; }
-    .photo-btn.capture { background: #d32f2f; }
-    .photo-btn.cancel { background: #999; }
-    .photo-status { font-size: 13px; color: #666; margin-top: 8px; }
-    .fixed-bottom { position: fixed; bottom: 0; left: 0; right: 0; background: #fff; padding: 16px; box-shadow: 0 -4px 12px rgba(0,0,0,0.08); }
-    .submit-btn { width: 100%; padding: 16px; background: #1e3c72; color: #fff; border: none; border-radius: 10px; font-family: inherit; font-size: 16px; font-weight: bold; cursor: pointer; }
-    .submit-btn:disabled { background: #ccc; cursor: not-allowed; }
+    
+    .status-btn {
+      flex: 1; padding: 10px 4px; border: 1px solid #e2e8f0; background: #fff;
+      border-radius: 8px; font-family: inherit; font-size: 12px; font-weight: 700;
+      cursor: pointer; transition: all 0.2s; color: var(--text-muted);
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+    }
+    
+    /* رنگ‌های فعال دکمه‌ها */
+    .status-btn.salem.active { background: var(--status-green); color: #fff; border-color: var(--status-green); }
+    .status-btn.defective.active { background: var(--status-red); color: #fff; border-color: var(--status-red); }
+    .status-btn.repair.active { background: var(--status-orange); color: #fff; border-color: var(--status-orange); }
+
+    /* وضعیت نهایی */
+    .final-section { background: #FFF9F0; border: 2px dashed var(--copper-main); }
+    .final-section .card-title { color: var(--copper-main); border-bottom: none; margin-bottom: 8px; padding-bottom: 0; }
+
+    /* کادر مدرن آپلود عکس */
+    .photo-upload-box {
+      border: 2px dashed #bdc3c7;
+      border-radius: 12px;
+      padding: 30px 20px;
+      text-align: center;
+      cursor: pointer;
+      background: #FAFAFA;
+      transition: all 0.2s;
+      color: var(--text-muted);
+      position: relative;
+    }
+    .photo-upload-box:hover { border-color: var(--copper-main); background: #FFF4E6; color: var(--copper-dark); }
+    .photo-upload-box i { font-size: 32px; margin-bottom: 10px; color: var(--copper-main); }
+    .photo-upload-box span { display: block; font-size: 13px; font-weight: 700; }
+    .photo-preview { width: 100%; max-height: 200px; object-fit: contain; border-radius: 8px; display: none; margin-bottom: 10px; background: #000;}
+    
+    .photo-input { display: none; }
+
+    /* یادداشت */
+    .notes-box textarea {
+      width: 100%; padding: 12px; border: 1px solid #e2e8f0; border-radius: 10px; 
+      font-family: inherit; font-size: 14px; resize: vertical; min-height: 80px; background: #F8FAFC;
+    }
+    .notes-box textarea:focus { outline: none; border-color: var(--copper-main); background: #fff; }
+
+    /* دکمه ثبت پایین صفحه */
+    .fixed-bottom {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      background: #fff; padding: 16px; box-shadow: 0 -4px 15px rgba(0,0,0,0.05);
+      border-radius: 24px 24px 0 0; z-index: 100;
+    }
+    .submit-btn {
+      width: 100%; padding: 16px; border-radius: 50px; border: none;
+      background: linear-gradient(135deg, var(--copper-main), var(--copper-dark));
+      color: #fff; font-family: inherit; font-size: 16px; font-weight: 700;
+      cursor: pointer; box-shadow: 0 6px 15px rgba(230, 126, 34, 0.4);
+      transition: all 0.3s;
+      display: flex; justify-content: center; align-items: center; gap: 8px;
+    }
+    .submit-btn:disabled { background: #ccc; box-shadow: none; cursor: not-allowed; }
+
+    /* Bottom Sheet (خلاصه قبل از ثبت) */
+    .bottom-sheet-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 200; display: none; opacity: 0; transition: opacity 0.3s; }
+    .bottom-sheet-overlay.show { display: block; opacity: 1; }
+    .bottom-sheet { position: fixed; bottom: -100%; left: 0; right: 0; background: #fff; border-radius: 24px 24px 0 0; padding: 24px 20px; z-index: 201; transition: bottom 0.3s ease-in-out; box-shadow: 0 -4px 20px rgba(0,0,0,0.1); }
+    .bottom-sheet.show { bottom: 0; }
+    .sheet-handle { width: 40px; height: 5px; background: #ddd; border-radius: 5px; margin: 0 auto 20px auto; }
+    .sheet-title { font-size: 18px; font-weight: 800; color: var(--copper-dark); margin-bottom: 16px; text-align: center; }
+    .summary-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #eee; font-size: 14px; }
+    .summary-row:last-of-type { border-bottom: none; margin-bottom: 20px; }
+    .btn-confirm-submit { width: 100%; padding: 16px; border-radius: 12px; border: none; background: var(--status-green); color: #fff; font-family: inherit; font-size: 16px; font-weight: 700; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 8px; }
+    .btn-cancel-submit { width: 100%; padding: 16px; border-radius: 12px; border: none; background: #f0f0f0; color: var(--text-dark); font-family: inherit; font-size: 16px; font-weight: 700; cursor: pointer; margin-top: 10px; }
+    
     .loading-box { text-align: center; padding: 40px 20px; color: #666; font-size: 15px; }
   </style>
 </head>
 <body>
 
-  <div class="header">
-    <div>
+  <div class="sticky-top">
+    <header class="header">
       <h1>فرم چک‌لیست</h1>
-      <div class="user" id="userInfo"></div>
-    </div>
-    <button class="back-btn" onclick="goBack()">بازگشت</button>
-  </div>
+      <button class="back-btn" onclick="goBack()"><i class="fa-solid fa-arrow-right"></i> بازگشت</button>
+    </header>
 
-  <div class="card" id="loadingCard">
-    <div class="loading-box">در حال آماده‌سازی...</div>
-  </div>
-
-  <div class="card" id="equipmentCard" style="display:none;">
-    <h2>اطلاعات تجهیز</h2>
-    <div class="equipment-info" id="equipmentInfo"></div>
-  </div>
-
-  <div class="card" id="checklistCard" style="display:none;">
-    <h2>موارد بازرسی</h2>
-    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
-    <div class="progress-text" id="progressText">۰ از ۰</div>
-    <div id="itemsContainer" style="margin-top: 16px;"></div>
-  </div>
-
-  <div id="finalSection" class="final-section" style="display:none;">
-    <h3>وضعیت نهایی تجهیز (ملاک گزارش)</h3>
-    <div class="status-buttons">
-      <button class="status-btn salem" onclick="setFinal('salem', this)">سالم</button>
-      <button class="status-btn defective" onclick="setFinal('defective', this)">معیوب</button>
-      <button class="status-btn repair" onclick="setFinal('needsRepair', this)">نیاز به اصلاح</button>
+    <div class="progress-container">
+      <div class="progress-header">
+        <span>پیشرفت بازرسی</span>
+        <span id="progress-text">۰ از ۰</span>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
     </div>
   </div>
 
-  <div class="card" id="photoCard" style="display:none;">
-    <h2>عکس تجهیز (اجباری)</h2>
-    <div class="photo-box">
-      <video id="cameraPreview" playsinline autoplay muted></video>
-      <img id="capturedPhoto" alt="پیش‌نمایش عکس">
-      <button class="photo-btn" id="photoBtn" onclick="openCamera()">باز کردن دوربین</button>
-      <button class="photo-btn capture" id="captureBtn" style="display:none" onclick="capturePhoto()">گرفتن عکس</button>
-      <button class="photo-btn cancel" id="cancelBtn" style="display:none" onclick="cancelCamera()">لغو</button>
-      <div class="photo-status" id="photoStatus"></div>
+  <div class="container" id="mainContainer">
+    
+    <div id="loadingCard" class="card">
+      <div class="loading-box">در حال دریافت اطلاعات...</div>
     </div>
-  </div>
 
-  <div class="card" id="notesCard" style="display:none;">
-    <div class="notes-box">
-      <label for="notesInput">یادداشت (اختیاری)</label>
-      <textarea id="notesInput" placeholder="توضیحات اضافی در صورت نیاز"></textarea>
+    <div id="equipmentCard" class="card" style="display:none;">
+      <div class="card-title">
+        <i class="fa-solid fa-circle-info"></i> اطلاعات تجهیز
+      </div>
+      <div class="info-row">
+        <span class="label"><i class="fa-solid fa-barcode"></i> کد</span>
+        <span class="value" id="eq-barcode">-</span>
+      </div>
+      <div class="info-row">
+        <span class="label"><i class="fa-solid fa-layer-group"></i> نوع</span>
+        <span class="value" id="eq-type">-</span>
+      </div>
+      <div class="info-row">
+        <span class="label"><i class="fa-solid fa-location-dot"></i> موقعیت</span>
+        <span class="value" id="eq-location">-</span>
+      </div>
+      <div class="info-row" id="eq-plant-row" style="display:none;">
+        <span class="label"><i class="fa-solid fa-industry"></i> کارخانه</span>
+        <span class="value" id="eq-plant">-</span>
+      </div>
     </div>
+
+    <div id="checklistContainer" style="display:none;">
+      <div class="card" style="padding: 16px;">
+        <div class="card-title" style="padding-right:4px;">
+          <i class="fa-solid fa-list-check"></i> موارد بازرسی
+        </div>
+        <div id="itemsContainer"></div>
+      </div>
+
+      <div class="card final-section" data-item-id="final">
+        <div class="card-title">
+          <i class="fa-solid fa-flag-checkered"></i> وضعیت نهایی تجهیز
+        </div>
+        <p style="font-size:11px; color:#777; margin-bottom:12px;">ملاک اصلی گزارش‌گیری</p>
+        <div class="status-buttons">
+          <button class="status-btn salem" onclick="setFinal('salem', this)"><i class="fa-solid fa-check"></i> سالم</button>
+          <button class="status-btn defective" onclick="setFinal('defective', this)"><i class="fa-solid fa-xmark"></i> معیوب</button>
+          <button class="status-btn repair" onclick="setFinal('needsRepair', this)"><i class="fa-solid fa-wrench"></i> اصلاح</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">
+          <i class="fa-solid fa-camera"></i> عکس تجهیز (اجباری)
+        </div>
+        
+        <input type="file" id="photoInput" class="photo-input" accept="image/*" capture="environment" onchange="onPhotoSelected(event)">
+        <img id="capturedPhoto" class="photo-preview">
+        
+        <div class="photo-upload-box" id="photoBox" onclick="document.getElementById('photoInput').click()">
+          <i class="fa-solid fa-camera-retro"></i>
+          <span>برای گرفتن عکس اینجا کلیک کنید</span>
+        </div>
+        <div id="photoStatus" style="font-size:12px; color:#777; text-align:center; margin-top:8px;"></div>
+      </div>
+
+      <div class="card">
+        <div class="notes-box">
+          <textarea id="notesInput" placeholder="یادداشت (اختیاری)..."></textarea>
+        </div>
+      </div>
+    </div>
+
   </div>
 
   <div class="fixed-bottom" id="submitBar" style="display:none;">
-    <button class="submit-btn" id="submitBtn" onclick="submitInspection()" disabled>ثبت بازرسی</button>
+    <button class="submit-btn" id="submitBtn" onclick="openSummary()" disabled>
+      <i class="fa-solid fa-paper-plane"></i> ثبت نهایی بازرسی
+    </button>
+  </div>
+
+  <!-- Bottom Sheet خلاصه -->
+  <div class="bottom-sheet-overlay" id="sheetOverlay" onclick="closeSummary()"></div>
+  <div class="bottom-sheet" id="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">خلاصه بازرسی</div>
+    
+    <div class="summary-row">
+      <span style="color:var(--text-muted);">موارد سالم</span>
+      <span style="font-weight:800; color:var(--status-green);" id="sum-salem">۰</span>
+    </div>
+    <div class="summary-row">
+      <span style="color:var(--text-muted);">موارد نیاز به اصلاح</span>
+      <span style="font-weight:800; color:var(--status-orange);" id="sum-repair">۰</span>
+    </div>
+    <div class="summary-row">
+      <span style="color:var(--text-muted);">موارد معیوب</span>
+      <span style="font-weight:800; color:var(--status-red);" id="sum-defective">۰</span>
+    </div>
+    <div class="summary-row">
+      <span style="color:var(--text-muted);">وضعیت نهایی</span>
+      <span style="font-weight:800; color:var(--copper-dark);" id="sum-final">ثبت نشده</span>
+    </div>
+    <div class="summary-row">
+      <span style="color:var(--text-muted);">عکس پیوست شده</span>
+      <span style="font-weight:800; color:var(--status-green);">بله</span>
+    </div>
+
+    <button class="btn-confirm-submit" onclick="submitInspection()">
+      <i class="fa-solid fa-check-double"></i> تایید و ثبت نهایی
+    </button>
+    <button class="btn-cancel-submit" onclick="closeSummary()">بازگشت و اصلاح</button>
   </div>
 
   <script>
     var EXEC_URL = 'https://script.google.com/macros/s/AKfycbyh8ccieztX3ZkFF0IozE_beRcZja0BH8ieYbQ9qCL1tLDxkq2QB0Pz3JD4v0IRY6eo/exec';
     var INDEX_URL = 'index.html';
+    
     var currentToken = '';
     var currentBarcode = '';
-    var currentUser = '';
     var currentEquipment = null;
     var checklistItems = [];
     var itemStates = {};
     var finalStatus = null;
     var photoBase64 = null;
     var photoMimeType = 'image/jpeg';
-    var videoStream = null;
 
     function goToLogin() {
       window.location.href = EXEC_URL + '?page=Login';
     }
 
     function goBack() {
-      stopCamera();
       window.location.href = INDEX_URL;
     }
 
@@ -149,7 +354,6 @@
     (function initPage() {
       currentToken = localStorage.getItem('token') || '';
       currentBarcode = sessionStorage.getItem('currentBarcode') || '';
-      currentUser = localStorage.getItem('fullName') || localStorage.getItem('username') || '';
 
       if (!currentToken) { goToLogin(); return; }
       if (!currentBarcode) {
@@ -157,8 +361,6 @@
         goBack();
         return;
       }
-
-      document.getElementById('userInfo').textContent = currentUser;
 
       apiCall({
         action: 'inspection.prepare',
@@ -170,15 +372,15 @@
           goBack();
           return;
         }
+        
         currentEquipment = response.data.equipment;
         checklistItems = response.data.checklist;
+
         document.getElementById('loadingCard').style.display = 'none';
         document.getElementById('equipmentCard').style.display = 'block';
-        document.getElementById('checklistCard').style.display = 'block';
-        document.getElementById('finalSection').style.display = 'block';
-        document.getElementById('photoCard').style.display = 'block';
-        document.getElementById('notesCard').style.display = 'block';
+        document.getElementById('checklistContainer').style.display = 'block';
         document.getElementById('submitBar').style.display = 'block';
+
         renderEquipmentInfo();
         renderChecklist();
       }).catch(function(err) {
@@ -188,21 +390,13 @@
     })();
 
     function renderEquipmentInfo() {
-      var el = document.getElementById('equipmentInfo');
-      el.innerHTML = '';
-      appendInfo(el, 'کد', currentEquipment.barcode);
-      appendInfo(el, 'نوع', currentEquipment.type === 'cylinder' ? 'سیلندر' : 'فایر باکس');
-      if (currentEquipment.cylinderType) appendInfo(el, 'نوع سیلندر', currentEquipment.cylinderType);
-      if (currentEquipment.location) appendInfo(el, 'موقعیت', currentEquipment.location);
-      if (currentEquipment.plant) appendInfo(el, 'کارخانه', currentEquipment.plant);
-    }
-
-    function appendInfo(parent, label, value) {
-      var row = document.createElement('div');
-      row.className = 'info-row';
-      var l = document.createElement('span'); l.className = 'label'; l.textContent = label;
-      var v = document.createElement('span'); v.className = 'value'; v.textContent = String(value);
-      row.appendChild(l); row.appendChild(v); parent.appendChild(row);
+      document.getElementById('eq-barcode').textContent = currentEquipment.barcode;
+      document.getElementById('eq-type').textContent = currentEquipment.type === 'cylinder' ? ('سیلندر ' + currentEquipment.cylinderType) : 'فایر باکس';
+      document.getElementById('eq-location').textContent = currentEquipment.location || '-';
+      if (currentEquipment.plant) {
+        document.getElementById('eq-plant-row').style.display = 'flex';
+        document.getElementById('eq-plant').textContent = currentEquipment.plant;
+      }
     }
 
     function renderChecklist() {
@@ -219,17 +413,19 @@
         name.textContent = item.name;
         if (!item.isRequired) {
           var opt = document.createElement('span');
-          opt.className = 'optional';
-          opt.textContent = '(اختیاری)';
+          opt.style.cssText = 'font-size:10px; color:#888; font-weight:normal; background:#eee; padding:2px 6px; border-radius:4px;';
+          opt.textContent = 'اختیاری';
           name.appendChild(opt);
         }
         div.appendChild(name);
 
         var btns = document.createElement('div');
         btns.className = 'status-buttons';
+        
         btns.appendChild(createStatusBtn('سالم', 'salem', item.templateId));
         btns.appendChild(createStatusBtn('معیوب', 'defective', item.templateId));
         btns.appendChild(createStatusBtn('نیاز به اصلاح', 'needsRepair', item.templateId));
+        
         div.appendChild(btns);
         container.appendChild(div);
       });
@@ -239,34 +435,32 @@
 
     function createStatusBtn(label, type, templateId) {
       var btn = document.createElement('button');
-      btn.className = 'status-btn ' + (type === 'salem' ? 'salem' : (type === 'defective' ? 'defective' : 'repair'));
-      btn.textContent = label;
-      btn.dataset.type = type;
+      var cls = type === 'salem' ? 'salem' : (type === 'defective' ? 'defective' : 'repair');
+      btn.className = 'status-btn ' + cls;
+      var icon = type === 'salem' ? 'fa-check' : (type === 'defective' ? 'fa-xmark' : 'fa-wrench');
+      btn.innerHTML = `<i class="fa-solid ${icon}"></i> ${label}`;
       btn.onclick = function() { setItemStatus(templateId, type, btn); };
       return btn;
     }
 
     function setItemStatus(templateId, type, btn) {
       var parent = btn.parentElement;
-      var buttons = parent.querySelectorAll('.status-btn');
-      buttons.forEach(function(b) { b.classList.remove('active'); });
+      parent.querySelectorAll('.status-btn').forEach(function(b) { b.classList.remove('active'); });
 
-      var current = itemStates[templateId];
-      if (current === type) {
+      if (itemStates[templateId] === type) {
         delete itemStates[templateId];
-        document.getElementById('item-' + templateId).classList.remove('confirmed');
+        btn.classList.remove('active');
       } else {
         itemStates[templateId] = type;
         btn.classList.add('active');
-        document.getElementById('item-' + templateId).classList.add('confirmed');
       }
       updateProgress();
     }
 
     function setFinal(type, btn) {
       finalStatus = type;
-      var buttons = document.querySelectorAll('#finalSection .status-btn');
-      buttons.forEach(function(b) { b.classList.remove('active'); });
+      var parent = btn.parentElement;
+      parent.querySelectorAll('.status-btn').forEach(function(b) { b.classList.remove('active'); });
       btn.classList.add('active');
       updateProgress();
     }
@@ -280,84 +474,91 @@
 
       var total = requiredItems.length;
       var percent = total > 0 ? (confirmedCount / total) * 100 : 0;
-      document.getElementById('progressFill').style.width = percent + '%';
-      document.getElementById('progressText').textContent = confirmedCount + ' از ' + total;
+      
+      document.getElementById('progress-fill').style.width = percent + '%';
+      document.getElementById('progress-text').textContent = toFa(confirmedCount) + ' از ' + toFa(total);
 
       var allConfirmed = (confirmedCount === total && total > 0);
       document.getElementById('submitBtn').disabled = !(allConfirmed && finalStatus && photoBase64);
     }
 
-    function openCamera() {
-      document.getElementById('photoStatus').textContent = 'در حال باز کردن دوربین...';
+    // ============================================
+    // Photo Processing
+    // ============================================
+    function onPhotoSelected(event) {
+      var file = event.target.files[0];
+      if (!file) return;
 
-      navigator.mediaDevices.getUserMedia({
-        video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } }
-      }).then(function(stream) {
-        videoStream = stream;
-        var video = document.getElementById('cameraPreview');
-        video.srcObject = stream;
-        video.style.display = 'block';
-        document.getElementById('capturedPhoto').style.display = 'none';
-        document.getElementById('photoBtn').style.display = 'none';
-        document.getElementById('captureBtn').style.display = 'block';
-        document.getElementById('cancelBtn').style.display = 'block';
-        document.getElementById('photoStatus').textContent = 'دوربین فعال است.';
-      }).catch(function(err) {
-        document.getElementById('photoStatus').textContent = 'خطا در دسترسی به دوربین: ' + err.message;
-      });
+      document.getElementById('photoStatus').textContent = 'در حال فشرده‌سازی...';
+
+      var reader = new FileReader();
+      reader.onload = function(e) {
+        var img = new Image();
+        img.onload = function() {
+          var canvas = document.createElement('canvas');
+          var MAX_WIDTH = 1024;
+          var scale = Math.min(1, MAX_WIDTH / img.width);
+          canvas.width = Math.round(img.width * scale);
+          canvas.height = Math.round(img.height * scale);
+
+          var ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+          var dataUrl = canvas.toDataURL('image/jpeg', 0.5);
+          photoBase64 = dataUrl.split(',')[1];
+          photoMimeType = 'image/jpeg';
+
+          var preview = document.getElementById('capturedPhoto');
+          preview.src = 'data:image/jpeg;base64,' + photoBase64;
+          preview.style.display = 'block';
+          
+          document.getElementById('photoBox').style.display = 'none';
+
+          var sizeKB = Math.round(photoBase64.length * 0.75 / 1024);
+          document.getElementById('photoStatus').textContent = 'حجم عکس: ' + sizeKB + ' کیلوبایت (برای تغییر کلیک کنید)';
+          document.getElementById('photoBox').style.display = 'block'; // Show box again to allow changing
+
+          updateProgress();
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
     }
 
-    function stopCamera() {
-      if (videoStream) {
-        videoStream.getTracks().forEach(function(t) { t.stop(); });
-        videoStream = null;
+    // ============================================
+    // Summary & Submit
+    // ============================================
+    function openSummary() {
+      var salem = 0, defective = 0, repair = 0;
+      
+      for (var id in itemStates) {
+        var state = itemStates[id];
+        if (state === 'salem') salem++;
+        if (state === 'defective') defective++;
+        if (state === 'needsRepair') repair++;
       }
-      document.getElementById('cameraPreview').style.display = 'none';
-      document.getElementById('captureBtn').style.display = 'none';
-      document.getElementById('cancelBtn').style.display = 'none';
+
+      document.getElementById('sum-salem').textContent = toFa(salem);
+      document.getElementById('sum-repair').textContent = toFa(repair);
+      document.getElementById('sum-defective').textContent = toFa(defective);
+      
+      var finalLabels = { 'salem': 'سالم', 'defective': 'معیوب', 'needsRepair': 'نیاز به اصلاح' };
+      document.getElementById('sum-final').textContent = finalLabels[finalStatus] || 'ثبت نشده';
+
+      document.getElementById('sheetOverlay').classList.add('show');
+      document.getElementById('sheet').classList.add('show');
     }
 
-    function cancelCamera() {
-      stopCamera();
-      document.getElementById('photoBtn').style.display = 'block';
-      document.getElementById('photoStatus').textContent = '';
-    }
-
-    function capturePhoto() {
-      var video = document.getElementById('cameraPreview');
-      var canvas = document.createElement('canvas');
-      var MAX_WIDTH = 1024;
-      var scale = Math.min(1, MAX_WIDTH / video.videoWidth);
-      canvas.width = Math.round(video.videoWidth * scale);
-      canvas.height = Math.round(video.videoHeight * scale);
-
-      var ctx = canvas.getContext('2d');
-      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-      var dataUrl = canvas.toDataURL('image/jpeg', 0.5);
-      photoBase64 = dataUrl.split(',')[1];
-      photoMimeType = 'image/jpeg';
-
-      stopCamera();
-
-      var preview = document.getElementById('capturedPhoto');
-      preview.src = 'data:image/jpeg;base64,' + photoBase64;
-      preview.style.display = 'block';
-
-      var sizeKB = Math.round(photoBase64.length * 0.75 / 1024);
-      document.getElementById('photoStatus').textContent = 'حجم نهایی: ' + sizeKB + ' کیلوبایت';
-
-      var btn = document.getElementById('photoBtn');
-      btn.textContent = 'تغییر عکس';
-      btn.classList.add('taken');
-      btn.style.display = 'block';
-
-      updateProgress();
+    function closeSummary() {
+      document.getElementById('sheetOverlay').classList.remove('show');
+      document.getElementById('sheet').classList.remove('show');
     }
 
     function submitInspection() {
+      closeSummary();
       var btn = document.getElementById('submitBtn');
       btn.disabled = true;
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> در حال ارسال...';
 
       var payload = {
         action: 'inspection.save',
@@ -381,29 +582,39 @@
         }
       });
 
-      // 1. Save SYNCHRONOUSLY to localStorage (instant)
+      // ذخیره در حافظه محلی (آفلاین)
       var key = 'hse_pending_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
       try {
         localStorage.setItem(key, JSON.stringify(payload));
         console.log('Saved to localStorage:', key);
       } catch (e) {
         console.error('localStorage failed:', e);
-        if (typeof savePendingSubmission === 'function') {
-          savePendingSubmission(payload).then(function(id) {
-            console.log('Fallback IndexedDB saved:', id);
-          }).catch(function(err) {
-            console.error('IndexedDB also failed:', err);
-          });
-        }
       }
 
-      // 2. Show success INSTANTLY
-      btn.textContent = 'ثبت شد ✓';
-      btn.style.background = '#4caf50';
+      btn.innerHTML = '<i class="fa-solid fa-check"></i> ثبت شد';
+      btn.style.background = 'var(--status-green)';
       sessionStorage.removeItem('currentBarcode');
 
-      // 3. Navigate IMMEDIATELY (no delay)
-      window.location.replace(INDEX_URL);
+      // ارسال در پس‌زمینه (اگر تلاش اول شکست خورد، در اسکنر بعدی دوباره ارسال می‌شود)
+      fetch(EXEC_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify(payload),
+        redirect: 'follow'
+      }).then(function(r) { return r.json(); }).then(function(res) {
+        if (res.success) {
+          localStorage.removeItem(key);
+        }
+      }).catch(function() {});
+
+      // بازگشت فوری به اسکنر
+      setTimeout(function() {
+        window.location.replace(INDEX_URL);
+      }, 400);
+    }
+
+    function toFa(n) {
+      return String(n).replace(/\d/g, function(d) { return '۰۱۲۳۴۵۶۷۸۹'[d]; });
     }
   </script>
 
