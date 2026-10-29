@@ -4,157 +4,332 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#1e3c72">
+  <meta name="theme-color" content="#C0611A">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="HSE CSP">
   <title>مدیریت کاربران</title>
+  
+  <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet" type="text/css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: Tahoma, Arial, sans-serif; background: #f0f2f5; min-height: 100vh; padding: 16px; }
-    .header { background: #1e3c72; color: #fff; padding: 16px; border-radius: 12px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
-    .header h1 { font-size: 18px; }
-    .header .user { font-size: 13px; opacity: 0.9; }
-    .header-btns { display: flex; gap: 8px; flex-wrap: wrap; }
-    .header-btn { background: rgba(255,255,255,0.2); border: none; color: #fff; padding: 8px 14px; border-radius: 8px; cursor: pointer; font-family: inherit; font-size: 13px; }
-    .header-btn:hover { background: rgba(255,255,255,0.3); }
-    .card { background: #fff; border-radius: 12px; padding: 20px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
-    .card h2 { font-size: 16px; color: #1e3c72; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center; }
-    .card h2 .count { font-size: 14px; color: #999; font-weight: normal; }
-    .add-btn { background: #4caf50; color: #fff; border: none; padding: 10px 20px; border-radius: 8px; font-family: inherit; font-size: 14px; font-weight: bold; cursor: pointer; }
-    .add-btn:hover { background: #388e3c; }
-    .user-list { display: grid; grid-template-columns: 1fr; gap: 12px; }
-    @media (min-width: 600px) { .user-list { grid-template-columns: 1fr 1fr; } }
-    @media (min-width: 900px) { .user-list { grid-template-columns: 1fr 1fr 1fr; } }
-    .user-card { background: #f9f9f9; border: 2px solid #e0e0e0; border-radius: 10px; padding: 16px; position: relative; }
-    .user-card.inactive { opacity: 0.6; background: #f0f0f0; }
-    .user-card .user-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
-    .user-card .username { font-size: 16px; font-weight: bold; color: #222; }
-    .user-card .fullname { font-size: 14px; color: #555; margin-bottom: 4px; }
-    .user-card .meta { font-size: 12px; color: #777; margin-bottom: 4px; }
-    .badge { padding: 3px 10px; border-radius: 6px; font-size: 11px; font-weight: bold; display: inline-block; }
-    .badge.active { background: #e8f5e9; color: #2e7d32; }
-    .badge.inactive { background: #ffebee; color: #c62828; }
-    .badge.role-admin { background: #e3f2fd; color: #0d47a1; }
-    .badge.role-manager { background: #fff3e0; color: #e65100; }
-    .badge.role-inspector { background: #f3e5f5; color: #6a1b9a; }
-    .user-actions { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
-    .btn { padding: 8px 12px; border: none; border-radius: 6px; font-family: inherit; font-size: 12px; font-weight: bold; cursor: pointer; }
-    .btn-edit { background: #2a5298; color: #fff; }
-    .btn-password { background: #f57c00; color: #fff; }
-    .btn-role { background: #6a1b9a; color: #fff; }
-    .btn-toggle { background: #d32f2f; color: #fff; }
-    .btn-toggle.activate { background: #4caf50; }
-    .btn:disabled { background: #ccc; cursor: not-allowed; }
-    .empty-msg { text-align: center; color: #999; padding: 30px; font-size: 14px; }
-    .loading-box { text-align: center; padding: 40px 20px; color: #666; font-size: 15px; }
-    .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); display: none; z-index: 1000; align-items: center; justify-content: center; padding: 20px; }
+    :root {
+      --copper-main: #E67E22;      
+      --copper-dark: #C0611A;      
+      --copper-light: #FAD7A8;     
+      --copper-bg: #F5F7FA;        
+      --text-dark: #2C3E50;        
+      --text-muted: #7F8C8D;
+      
+      --status-green: #27ae60;
+      --status-red: #e74c3c;
+      --status-orange: #f39c12;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Vazirmatn', Tahoma, sans-serif; }
+    
+    body { 
+      background-color: var(--copper-bg); 
+      color: var(--text-dark);
+      padding: 0 0 100px 0; 
+      min-height: 100vh;
+    }
+
+    /* هدر */
+    .header {
+      background: linear-gradient(135deg, var(--copper-dark), var(--copper-main));
+      color: #fff;
+      padding: 16px 20px;
+      border-radius: 0 0 24px 24px;
+      box-shadow: 0 4px 15px rgba(230, 126, 34, 0.3);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .header h1 { font-size: 18px; font-weight: 700; }
+    
+    .avatar {
+      width: 40px; height: 40px;
+      background: rgba(255,255,255,0.2);
+      border-radius: 50%;
+      display: flex; justify-content: center; align-items: center;
+      font-size: 18px; backdrop-filter: blur(5px);
+      border: 1px solid rgba(255,255,255,0.4);
+    }
+
+    .container { padding: 0 16px; max-width: 700px; margin: 0 auto; }
+
+    /* نوار جستجو و دکمه افزودن */
+    .top-bar {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+    .search-container {
+      flex: 1;
+      position: relative;
+    }
+    .search-container input {
+      width: 100%;
+      padding: 12px 40px 12px 16px;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      font-family: inherit;
+      font-size: 13px;
+      background: #fff;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+      transition: 0.3s;
+    }
+    .search-container input:focus { outline: none; border-color: var(--copper-main); }
+    .search-container i {
+      position: absolute;
+      right: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+    }
+    
+    .add-btn {
+      background: linear-gradient(135deg, var(--copper-main), var(--copper-dark));
+      color: #fff; border: none; padding: 12px 16px; border-radius: 12px;
+      font-family: inherit; font-size: 14px; font-weight: 700; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 4px 10px rgba(230, 126, 34, 0.3);
+      transition: 0.2s;
+    }
+    .add-btn:active { transform: scale(0.95); }
+
+    /* کارت‌های کاربر */
+    .user-card {
+      background: #fff; border: 1px solid #e2e8f0; border-radius: 16px;
+      padding: 16px; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+    }
+    .user-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+    .user-name { font-size: 16px; font-weight: 800; color: var(--text-dark); }
+    .user-meta { font-size: 12px; color: var(--text-muted); margin-top: 4px; display: flex; gap: 12px;}
+    
+    .badge-role { padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; }
+    .badge-role.admin { background: #E3F2FD; color: #0D47A1; }
+    .badge-role.manager { background: #FEF5E7; color: var(--status-orange); }
+    .badge-role.inspector { background: #F3E5F5; color: #6A1B9A; }
+    
+    .badge-active { background: #E8F8F5; color: var(--status-green); padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; }
+    .badge-inactive { background: #FDEDEC; color: var(--status-red); padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; }
+
+    /* دکمه‌های عملیات */
+    .user-actions {
+      display: flex; gap: 8px; border-top: 1px solid #f0f0f0; padding-top: 12px;
+    }
+    .btn-action {
+      flex: 1; padding: 10px; border-radius: 8px; border: 1px solid #e2e8f0;
+      background: #F8FAFC; color: var(--text-dark); font-family: inherit; font-size: 13px; font-weight: 700;
+      cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;
+      transition: 0.2s;
+    }
+    .btn-action:active { background: #e2e8f0; }
+    .btn-action.more-btn { flex: 0.2; background: #FFF4E6; color: var(--copper-dark); border-color: var(--copper-light); }
+
+    /* منوی پایین */
+    .bottom-nav {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      background: #fff; display: flex; justify-content: space-around; align-items: center;
+      padding: 10px; box-shadow: 0 -2px 15px rgba(0,0,0,0.05);
+      border-radius: 24px 24px 0 0; z-index: 100;
+    }
+    .nav-item {
+      display: flex; flex-direction: column; align-items: center; gap: 4px;
+      color: var(--text-muted); font-size: 11px; font-weight: 700; text-decoration: none; cursor: pointer;
+    }
+    .nav-item i { font-size: 20px; margin-bottom: 2px; }
+    .nav-item.active { color: var(--copper-main); }
+
+    /* مدال‌ها و Bottom Sheet */
+    .modal-overlay {
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.5); z-index: 200; display: none; align-items: center; justify-content: center; padding: 16px;
+    }
     .modal-overlay.show { display: flex; }
-    .modal { background: #fff; border-radius: 12px; padding: 20px; max-width: 500px; width: 100%; max-height: 90vh; overflow-y: auto; }
-    .modal h3 { font-size: 16px; color: #1e3c72; margin-bottom: 16px; }
-    .modal .form-group { margin-bottom: 14px; }
-    .modal .form-group label { display: block; margin-bottom: 6px; font-size: 14px; font-weight: bold; color: #333; }
-    .modal .form-group input, .modal .form-group select { width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-family: inherit; font-size: 14px; }
-    .modal .form-group input:focus, .modal .form-group select:focus { outline: none; border-color: #2a5298; }
-    .modal-btns { display: flex; gap: 8px; margin-top: 16px; }
-    .modal-btns button { flex: 1; padding: 12px; border: none; border-radius: 8px; font-family: inherit; font-size: 15px; font-weight: bold; cursor: pointer; }
-    .modal-btns .btn-cancel { background: #e0e0e0; color: #333; }
-    .modal-btns .btn-confirm { background: #1e3c72; color: #fff; }
-    .modal-btns .btn-danger { background: #d32f2f; color: #fff; }
-    .error-msg { color: #d32f2f; font-size: 13px; margin-top: 8px; display: none; }
+    
+    .modal-content {
+      background: #fff; border-radius: 16px; width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto;
+      padding: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); animation: slideUp 0.3s ease-out;
+    }
+    
+    @keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+    .modal-title { font-size: 16px; font-weight: 800; color: var(--copper-dark); margin-bottom: 16px; border-bottom: 1px solid #eee; padding-bottom: 12px; display: flex; justify-content: space-between; align-items: center;}
+    .modal-close { background: none; border: none; font-size: 20px; color: #999; cursor: pointer; }
+
+    .form-group { margin-bottom: 14px; }
+    .form-group label { display: block; margin-bottom: 6px; font-size: 13px; font-weight: 700; color: var(--text-dark); }
+    .form-group input, .form-group select {
+      width: 100%; padding: 12px; border: 1px solid #e2e8f0; border-radius: 10px;
+      font-family: inherit; font-size: 14px; background: #F8FAFC;
+    }
+    .form-group input:focus, .form-group select:focus { outline: none; border-color: var(--copper-main); background: #fff; }
+    .form-group input:disabled { background: #eee; color: #999; cursor: not-allowed; }
+    
+    .input-with-icon { position: relative; }
+    .input-with-icon input { padding-left: 40px; }
+    .input-with-icon i { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-muted); cursor: pointer; }
+
+    .modal-btns { display: flex; gap: 10px; margin-top: 20px; }
+    .btn-cancel { flex: 1; padding: 12px; border-radius: 10px; border: none; background: #f0f0f0; font-family: inherit; font-weight: 700; cursor: pointer; }
+    .btn-confirm { flex: 1; padding: 12px; border-radius: 10px; border: none; background: var(--copper-main); color: #fff; font-family: inherit; font-weight: 700; cursor: pointer; }
+
+    /* Bottom Sheet */
+    .bottom-sheet-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 300; display: none; opacity: 0; transition: opacity 0.3s; }
+    .bottom-sheet-overlay.show { display: block; opacity: 1; }
+    .bottom-sheet { position: fixed; bottom: -100%; left: 0; right: 0; background: #fff; border-radius: 24px 24px 0 0; padding: 20px; z-index: 301; transition: bottom 0.3s ease-in-out; box-shadow: 0 -4px 20px rgba(0,0,0,0.1); }
+    .bottom-sheet.show { bottom: 0; }
+    .sheet-handle { width: 40px; height: 5px; background: #ddd; border-radius: 5px; margin: 0 auto 20px auto; }
+    .sheet-title { font-size: 16px; font-weight: 800; color: var(--copper-dark); margin-bottom: 16px; text-align: center; }
+    .sheet-action-btn { width: 100%; padding: 14px; border: none; background: #F8FAFC; border-radius: 10px; font-family: inherit; font-size: 14px; font-weight: 700; color: var(--text-dark); display: flex; align-items: center; gap: 12px; margin-bottom: 10px; cursor: pointer; transition: 0.2s; text-align: right; }
+    .sheet-action-btn:active { background: #e2e8f0; }
+    .sheet-action-btn.danger { color: var(--status-red); background: #FDEDEC; }
+    .sheet-action-btn.success { color: var(--status-green); background: #E8F8F5; }
+
+    /* Toast */
+    #toast-container { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 999; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
+    .toast { background: #333; color: #fff; padding: 12px 24px; border-radius: 50px; font-size: 13px; font-weight: 700; box-shadow: 0 4px 12px rgba(0,0,0,0.15); display: flex; align-items: center; gap: 8px; animation: toastIn 0.3s ease-out, toastOut 0.3s ease-in 2.7s forwards; }
+    .toast.success { background: var(--status-green); }
+    .toast.error { background: var(--status-red); }
+    .toast.info { background: var(--copper-main); }
+    @keyframes toastIn { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    @keyframes toastOut { from { transform: translateY(0); opacity: 1; } to { transform: translateY(-20px); opacity: 0; } }
+
   </style>
 </head>
 <body>
 
-  <div class="header">
-    <div>
-      <h1>مدیریت کاربران</h1>
-      <div class="user" id="userInfo"></div>
+  <header class="header">
+    <h1>مدیریت کاربران</h1>
+    <div class="avatar">
+      <i class="fa-solid fa-users-gear"></i>
     </div>
-    <div class="header-btns">
-      <button class="header-btn" onclick="window.location.href='index.html'">اسکنر</button>
-      <button class="header-btn" onclick="window.location.href='dashboard.html'">داشبورد</button>
-      <button class="header-btn" onclick="window.location.href='logs.html'">لاگ‌ها</button>
-      <button class="header-btn" onclick="window.location.href='history.html'">تاریخچه</button>
-      <button class="header-btn" onclick="doLogout()">خروج</button>
+  </header>
+
+  <div class="container">
+    
+    <div class="top-bar">
+      <div class="search-container">
+        <input type="text" id="searchInput" placeholder="جستجوی نام یا شماره پرسنلی..." oninput="handleSearch()">
+        <i class="fa-solid fa-magnifying-glass"></i>
+      </div>
+      <button class="add-btn" onclick="openUserModal('add')"><i class="fa-solid fa-plus"></i></button>
     </div>
+
+    <div id="userList">
+      <div class="empty-state"><i class="fa-solid fa-spinner fa-spin"></i> در حال بارگذاری...</div>
+    </div>
+
   </div>
 
-  <div class="card">
-    <h2>
-      <span>کاربران سیستم</span>
-      <span>
-        <span class="count" id="userCount"></span>
-        <button class="add-btn" onclick="openAddModal()">افزودن کاربر جدید</button>
-      </span>
-    </h2>
+  <!-- منوی پایین -->
+  <nav class="bottom-nav">
+    <a href="index.html" class="nav-item">
+      <i class="fa-solid fa-house"></i>
+      <span>خانه</span>
+    </a>
+    <a href="history.html" class="nav-item">
+      <i class="fa-solid fa-clock-rotate-left"></i>
+      <span>تاریخچه</span>
+    </a>
+    <a href="users.html" class="nav-item active">
+      <i class="fa-solid fa-users-gear"></i>
+      <span>کاربران</span>
+    </a>
+    <a href="#" class="nav-item" onclick="doLogout()">
+      <i class="fa-solid fa-arrow-right-from-bracket"></i>
+      <span>خروج</span>
+    </a>
+  </nav>
 
-    <div id="loadingBox" class="loading-box">در حال بارگذاری...</div>
-    <div id="userList" class="user-list"></div>
-    <div id="emptyBox" class="empty-msg" style="display:none;">هیچ کاربری یافت نشد.</div>
+  <!-- Toast Container -->
+  <div id="toast-container"></div>
+
+  <!-- Bottom Sheet (منوی عملیات) -->
+  <div class="bottom-sheet-overlay" id="actionSheetOverlay" onclick="closeActionSheet()"></div>
+  <div class="bottom-sheet" id="actionSheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title" id="actionSheetTitle">عملیات کاربر</div>
+    
+    <button class="sheet-action-btn" onclick="sheetChangePassword()">
+      <i class="fa-solid fa-key" style="color:var(--copper-main);"></i> تغییر رمز عبور
+    </button>
+    <button class="sheet-action-btn" onclick="sheetChangeRole()">
+      <i class="fa-solid fa-user-tag" style="color:#6A1B9A;"></i> تغییر نقش
+    </button>
+    <button class="sheet-action-btn" id="sheetToggleBtn" onclick="sheetToggleActive()">
+      <!-- متن و آیکون داینامیک توسط JS پر می‌شود -->
+    </button>
   </div>
 
-  <div class="modal-overlay" id="addModal">
-    <div class="modal">
-      <h3>افزودن کاربر جدید</h3>
+  <!-- مدال افزودن / ویرایش کاربر -->
+  <div class="modal-overlay" id="userModal">
+    <div class="modal-content">
+      <div class="modal-title">
+        <span id="userModalTitle">افزودن کاربر جدید</span>
+        <button class="modal-close" onclick="closeModal('userModal')">&times;</button>
+      </div>
+      
       <div class="form-group">
-        <label>شماره پرسنلی *</label>
-        <input type="text" id="addUsername" placeholder="مثال: 1002" inputmode="numeric">
+        <label>شماره پرسنلی</label>
+        <input type="text" id="inp-username" placeholder="مثال: ۱۰۰۲" inputmode="numeric">
+      </div>
+      <div class="form-group" id="password-group">
+        <label>رمز عبور</label>
+        <input type="text" id="inp-password" placeholder="حداقل ۴ کاراکتر">
       </div>
       <div class="form-group">
-        <label>رمز عبور *</label>
-        <input type="text" id="addPassword" placeholder="حداقل ۴ کاراکتر">
-      </div>
-      <div class="form-group">
-        <label>نام و نام خانوادگی *</label>
-        <input type="text" id="addFullName" placeholder="مثال: علی رضایی">
+        <label>نام و نام خانوادگی</label>
+        <input type="text" id="inp-fullname" placeholder="مثال: علی رضایی">
       </div>
       <div class="form-group">
         <label>واحد سازمانی</label>
-        <input type="text" id="addDepartment" placeholder="مثال: واحد HSE">
+        <input type="text" id="inp-department" placeholder="مثال: واحد HSE">
       </div>
       <div class="form-group">
-        <label>نقش *</label>
-        <select id="addRole">
+        <label>نقش</label>
+        <select id="inp-role">
           <option value="inspector">بازرس</option>
           <option value="manager">مدیر</option>
           <option value="admin">مدیر سیستم</option>
         </select>
       </div>
-      <div class="error-msg" id="addError"></div>
+
       <div class="modal-btns">
-        <button class="btn-cancel" onclick="closeModal('addModal')">لغو</button>
-        <button class="btn-confirm" onclick="createUser()">ایجاد کاربر</button>
+        <button class="btn-cancel" onclick="closeModal('userModal')">لغو</button>
+        <button class="btn-confirm" id="btn-save-user" onclick="saveUser()">ذخیره</button>
       </div>
     </div>
   </div>
 
-  <div class="modal-overlay" id="editModal">
-    <div class="modal">
-      <h3>ویرایش اطلاعات کاربر</h3>
-      <div class="form-group">
-        <label>نام و نام خانوادگی *</label>
-        <input type="text" id="editFullName">
-      </div>
-      <div class="form-group">
-        <label>واحد سازمانی</label>
-        <input type="text" id="editDepartment">
-      </div>
-      <div class="error-msg" id="editError"></div>
-      <div class="modal-btns">
-        <button class="btn-cancel" onclick="closeModal('editModal')">لغو</button>
-        <button class="btn-confirm" onclick="updateUser()">ذخیره تغییرات</button>
-      </div>
-    </div>
-  </div>
-
+  <!-- مدال تغییر رمز -->
   <div class="modal-overlay" id="passwordModal">
-    <div class="modal">
-      <h3>تغییر رمز عبور</h3>
-      <div class="form-group">
-        <label>رمز عبور جدید *</label>
-        <input type="text" id="newPassword" placeholder="حداقل ۴ کاراکتر">
+    <div class="modal-content">
+      <div class="modal-title">
+        <span>تغییر رمز عبور</span>
+        <button class="modal-close" onclick="closeModal('passwordModal')">&times;</button>
       </div>
-      <div class="error-msg" id="passwordError"></div>
+      
+      <div class="form-group">
+        <label>شماره پرسنلی</label>
+        <input type="text" id="pass-username" disabled>
+      </div>
+      <div class="form-group">
+        <label>رمز عبور جدید</label>
+        <div class="input-with-icon">
+          <input type="password" id="inp-new-password" placeholder="حداقل ۴ کاراکتر">
+          <i class="fa-solid fa-eye" id="togglePassIcon" onclick="togglePasswordVisibility()"></i>
+        </div>
+      </div>
+      
       <div class="modal-btns">
         <button class="btn-cancel" onclick="closeModal('passwordModal')">لغو</button>
         <button class="btn-confirm" onclick="changePassword()">تغییر رمز</button>
@@ -162,18 +337,27 @@
     </div>
   </div>
 
+  <!-- مدال تغییر نقش -->
   <div class="modal-overlay" id="roleModal">
-    <div class="modal">
-      <h3>تغییر نقش کاربر</h3>
+    <div class="modal-content">
+      <div class="modal-title">
+        <span>تغییر نقش کاربر</span>
+        <button class="modal-close" onclick="closeModal('roleModal')">&times;</button>
+      </div>
+      
       <div class="form-group">
-        <label>نقش جدید *</label>
-        <select id="newRole">
+        <label>شماره پرسنلی</label>
+        <input type="text" id="role-username" disabled>
+      </div>
+      <div class="form-group">
+        <label>نقش جدید</label>
+        <select id="inp-new-role">
           <option value="inspector">بازرس</option>
           <option value="manager">مدیر</option>
           <option value="admin">مدیر سیستم</option>
         </select>
       </div>
-      <div class="error-msg" id="roleError"></div>
+      
       <div class="modal-btns">
         <button class="btn-cancel" onclick="closeModal('roleModal')">لغو</button>
         <button class="btn-confirm" onclick="changeRole()">تغییر نقش</button>
@@ -184,18 +368,18 @@
   <script>
     var EXEC_URL = 'https://script.google.com/macros/s/AKfycbyh8ccieztX3ZkFF0IozE_beRcZja0BH8ieYbQ9qCL1tLDxkq2QB0Pz3JD4v0IRY6eo/exec';
     var currentToken = '';
-    var currentUser = '';
-    var usersList = [];
-    var actionTargetUsername = null;
+    
+    var usersData = [];
+    var searchTerm = '';
+    var editingUser = null; 
+    var actionTargetUser = null; 
+    var changingPassUser = null;
+    var changingRoleUser = null;
+
+    var roleLabels = { 'admin': 'مدیر سیستم', 'manager': 'مدیر', 'inspector': 'بازرس' };
 
     function goToLogin() {
       window.location.href = EXEC_URL + '?page=Login';
-    }
-
-    function handleSessionExpired() {
-      localStorage.clear();
-      sessionStorage.clear();
-      goToLogin();
     }
 
     function apiCall(request) {
@@ -209,29 +393,343 @@
 
     (function initPage() {
       currentToken = localStorage.getItem('token') || '';
-      currentUser = localStorage.getItem('fullName') || localStorage.getItem('username') || '';
+      var role = localStorage.getItem('role') || '';
 
       if (!currentToken) { goToLogin(); return; }
 
-      apiCall({ action: 'auth.me', token: currentToken }).then(function(response) {
-        if (!response.success) {
-          handleSessionExpired();
-          return;
-        }
-        var role = response.data.role;
-        if (role !== 'admin') {
-          alert('شما به این بخش دسترسی ندارید.');
-          window.location.href = 'index.html';
-          return;
-        }
-        document.getElementById('userInfo').textContent = currentUser;
+      if (role !== 'admin') {
+        alert('شما به این بخش دسترسی ندارید.');
+        window.location.href = 'index.html';
+        return;
+      }
+
+      apiCall({ action: 'auth.me', token: currentToken }).then(function(res) {
+        if (!res.success) { goToLogin(); return; }
         loadUsers();
-      }).catch(function() {
-        handleSessionExpired();
-      });
+      }).catch(function() { goToLogin(); });
     })();
 
+    function loadUsers() {
+      document.getElementById('userList').innerHTML = '<div class="empty-state"><i class="fa-solid fa-spinner fa-spin"></i> در حال بارگذاری...</div>';
+      
+      apiCall({ action: 'user.getAll', token: currentToken }).then(function(res) {
+        if (!res.success) {
+          if (res.error.indexOf('نشست') !== -1) { goToLogin(); return; }
+          showToast(res.error, 'error');
+          return;
+        }
+        usersData = res.data.users || [];
+        renderUsers();
+      }).catch(function() {
+        showToast('خطا در ارتباط با سرور.', 'error');
+      });
+    }
+
+    function renderUsers() {
+      const listEl = document.getElementById('userList');
+      listEl.innerHTML = '';
+
+      let filtered = usersData;
+      if (searchTerm) {
+        filtered = usersData.filter(u => 
+          u.fullName.toLowerCase().includes(searchTerm) || 
+          u.username.includes(searchTerm)
+        );
+      }
+
+      if (filtered.length === 0) {
+        listEl.innerHTML = '<div class="empty-state"><i class="fa-solid fa-user-slash"></i>کاربری یافت نشد.</div>';
+        return;
+      }
+
+      filtered.forEach(user => {
+        const div = document.createElement('div');
+        div.className = 'user-card';
+        
+        let roleClass = user.role;
+        let roleLabel = roleLabels[user.role] || user.role;
+        
+        let activeBadge = user.isActive 
+          ? '<span class="badge-active">فعال</span>' 
+          : '<span class="badge-inactive">غیرفعال</span>';
+
+        div.innerHTML = `
+          <div class="user-header">
+            <div>
+              <div class="user-name">${user.fullName}</div>
+              <div class="user-meta">
+                <span><i class="fa-solid fa-id-card"></i> ${user.username}</span>
+                <span><i class="fa-solid fa-building"></i> ${user.department || '-'}</span>
+              </div>
+            </div>
+            <div style="display:flex; flex-direction:column; align-items:flex-end; gap:6px;">
+              <span class="badge-role ${roleClass}">${roleLabel}</span>
+              ${activeBadge}
+            </div>
+          </div>
+          <div class="user-actions">
+            <button class="btn-action" onclick="openUserModal('edit', '${user.username}')"><i class="fa-solid fa-pen"></i> ویرایش</button>
+            <button class="btn-action more-btn" onclick="openActionSheet('${user.username}')"><i class="fa-solid fa-ellipsis-vertical"></i></button>
+          </div>
+        `;
+        listEl.appendChild(div);
+      });
+    }
+
+    function handleSearch() {
+      searchTerm = document.getElementById('searchInput').value.trim().toLowerCase();
+      renderUsers();
+    }
+
+    function showToast(message, type = 'success') {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      let icon = type === 'error' ? 'fa-circle-exclamation' : (type === 'info' ? 'fa-info-circle' : 'fa-check-circle');
+      toast.innerHTML = `<i class="fa-solid ${icon}"></i> ${message}`;
+      container.appendChild(toast);
+      setTimeout(() => { toast.remove(); }, 3000);
+    }
+
+    // ============================================
+    // Bottom Sheet
+    // ============================================
+    function openActionSheet(username) {
+      actionTargetUser = usersData.find(u => u.username === username);
+      if (!actionTargetUser) return;
+
+      document.getElementById('actionSheetTitle').textContent = `عملیات برای: ${actionTargetUser.fullName}`;
+      
+      const toggleBtn = document.getElementById('sheetToggleBtn');
+      if (actionTargetUser.isActive) {
+        toggleBtn.className = 'sheet-action-btn danger';
+        toggleBtn.innerHTML = '<i class="fa-solid fa-ban"></i> غیرفعال کردن کاربر';
+      } else {
+        toggleBtn.className = 'sheet-action-btn success';
+        toggleBtn.innerHTML = '<i class="fa-solid fa-check-circle"></i> فعال کردن کاربر';
+      }
+
+      document.getElementById('actionSheetOverlay').classList.add('show');
+      document.getElementById('actionSheet').classList.add('show');
+    }
+
+    function closeActionSheet() {
+      document.getElementById('actionSheetOverlay').classList.remove('show');
+      document.getElementById('actionSheet').classList.remove('show');
+    }
+
+    function sheetChangePassword() {
+      closeActionSheet();
+      openPasswordModal(actionTargetUser.username);
+    }
+    function sheetChangeRole() {
+      closeActionSheet();
+      openRoleModal(actionTargetUser.username);
+    }
+    function sheetToggleActive() {
+      closeActionSheet();
+      toggleUserActive(actionTargetUser.username);
+    }
+
+    // ============================================
+    // Modals
+    // ============================================
+    function openModal(id) { document.getElementById(id).classList.add('show'); }
+    function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+
+    function openUserModal(mode, username = null) {
+      editingUser = { mode, username };
+      const modalTitle = document.getElementById('userModalTitle');
+      const passGroup = document.getElementById('password-group');
+
+      if (mode === 'add') {
+        modalTitle.textContent = 'افزودن کاربر جدید';
+        document.getElementById('inp-username').value = '';
+        document.getElementById('inp-username').disabled = false;
+        document.getElementById('inp-password').value = '';
+        document.getElementById('inp-fullname').value = '';
+        document.getElementById('inp-department').value = '';
+        document.getElementById('inp-role').value = 'inspector';
+        passGroup.style.display = 'block';
+      } else {
+        const user = usersData.find(u => u.username === username);
+        modalTitle.textContent = 'ویرایش اطلاعات کاربر';
+        document.getElementById('inp-username').value = user.username;
+        document.getElementById('inp-username').disabled = true;
+        document.getElementById('inp-password').value = '';
+        document.getElementById('inp-fullname').value = user.fullName;
+        document.getElementById('inp-department').value = user.department || '';
+        document.getElementById('inp-role').value = user.role;
+        passGroup.style.display = 'none';
+      }
+
+      openModal('userModal');
+    }
+
+    function saveUser() {
+      const mode = editingUser.mode;
+      const username = document.getElementById('inp-username').value.trim();
+      const fullName = document.getElementById('inp-fullname').value.trim();
+      const department = document.getElementById('inp-department').value.trim();
+      const role = document.getElementById('inp-role').value;
+      const password = document.getElementById('inp-password').value.trim();
+      const btn = document.getElementById('btn-save-user');
+
+      if (!username || !fullName) {
+        showToast('شماره پرسنلی و نام کامل اجباری هستند.', 'error');
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = 'در حال ذخیره...';
+
+      if (mode === 'add') {
+        if (!password || password.length < 4) {
+          showToast('رمز عبور باید حداقل ۴ کاراکتر باشد.', 'error');
+          btn.disabled = false;
+          btn.textContent = 'ذخیره';
+          return;
+        }
+        
+        apiCall({
+          action: 'user.create',
+          token: currentToken,
+          payload: { username, password, fullName, department, role }
+        }).then(function(res) {
+          btn.disabled = false;
+          btn.textContent = 'ذخیره';
+          if (res.success) {
+            showToast('کاربر جدید اضافه شد.');
+            closeModal('userModal');
+            loadUsers();
+          } else {
+            showToast(res.error, 'error');
+          }
+        }).catch(function() {
+          btn.disabled = false;
+          btn.textContent = 'ذخیره';
+          showToast('خطای شبکه', 'error');
+        });
+
+      } else {
+        apiCall({
+          action: 'user.update',
+          token: currentToken,
+          payload: { username: editingUser.username, fullName, department, role }
+        }).then(function(res) {
+          btn.disabled = false;
+          btn.textContent = 'ذخیره';
+          if (res.success) {
+            showToast('اطلاعات کاربر ویرایش شد.');
+            closeModal('userModal');
+            loadUsers();
+          } else {
+            showToast(res.error, 'error');
+          }
+        }).catch(function() {
+          btn.disabled = false;
+          btn.textContent = 'ذخیره';
+          showToast('خطای شبکه', 'error');
+        });
+      }
+    }
+
+    function openPasswordModal(username) {
+      changingPassUser = username;
+      document.getElementById('pass-username').value = username;
+      document.getElementById('inp-new-password').value = '';
+      document.getElementById('inp-new-password').type = 'password';
+      document.getElementById('togglePassIcon').className = 'fa-solid fa-eye';
+      openModal('passwordModal');
+    }
+
+    function togglePasswordVisibility() {
+      const input = document.getElementById('inp-new-password');
+      const icon = document.getElementById('togglePassIcon');
+      if (input.type === 'password') {
+        input.type = 'text';
+        icon.className = 'fa-solid fa-eye-slash';
+      } else {
+        input.type = 'password';
+        icon.className = 'fa-solid fa-eye';
+      }
+    }
+
+    function changePassword() {
+      const newPassword = document.getElementById('inp-new-password').value.trim();
+      if (!newPassword || newPassword.length < 4) {
+        showToast('رمز عبور باید حداقل ۴ کاراکتر باشد.', 'error');
+        return;
+      }
+      
+      apiCall({
+        action: 'user.changePassword',
+        token: currentToken,
+        payload: { username: changingPassUser, newPassword: newPassword }
+      }).then(function(res) {
+        if (res.success) {
+          showToast(`رمز عبور کاربر ${changingPassUser} تغییر یافت.`);
+          closeModal('passwordModal');
+        } else {
+          showToast(res.error, 'error');
+        }
+      }).catch(function() { showToast('خطای شبکه', 'error'); });
+    }
+
+    function openRoleModal(username) {
+      changingRoleUser = username;
+      const user = usersData.find(u => u.username === username);
+      document.getElementById('role-username').value = username;
+      document.getElementById('inp-new-role').value = user.role;
+      openModal('roleModal');
+    }
+
+    function changeRole() {
+      const newRole = document.getElementById('inp-new-role').value;
+      const user = usersData.find(u => u.username === changingRoleUser);
+
+      if (user.role === newRole) {
+        closeModal('roleModal');
+        return;
+      }
+
+      apiCall({
+        action: 'user.changeRole',
+        token: currentToken,
+        payload: { username: changingRoleUser, role: newRole }
+      }).then(function(res) {
+        if (res.success) {
+          showToast(`نقش کاربر ${changingRoleUser} تغییر یافت.`);
+          closeModal('roleModal');
+          loadUsers();
+        } else {
+          showToast(res.error, 'error');
+        }
+      }).catch(function() { showToast('خطای شبکه', 'error'); });
+    }
+
+    function toggleUserActive(username) {
+      const user = usersData.find(u => u.username === username);
+      const targetStatus = !user.isActive;
+      
+      if (!confirm(`آیا کاربر ${user.fullName} ${targetStatus ? 'فعال' : 'غیرفعال'} شود؟`)) return;
+
+      apiCall({
+        action: 'user.toggleActive',
+        token: currentToken,
+        payload: { username: username, isActive: targetStatus }
+      }).then(function(res) {
+        if (res.success) {
+          showToast(`وضعیت کاربر ${user.fullName} تغییر یافت.`, 'info');
+          loadUsers();
+        } else {
+          showToast(res.error, 'error');
+        }
+      }).catch(function() { showToast('خطای شبکه', 'error'); });
+    }
+
     function doLogout() {
+      if (!confirm('از حساب کاربری خارج می‌شوید؟')) return;
       var token = currentToken;
       localStorage.clear();
       sessionStorage.clear();
@@ -240,323 +738,7 @@
         headers: { 'Content-Type': 'text/plain;charset=utf-8' },
         body: JSON.stringify({ action: 'auth.logout', token: token }),
         redirect: 'follow'
-      }).finally(function() {
-        goToLogin();
-      });
-    }
-
-    function toFa(n) {
-      return String(n).replace(/\d/g, function(d) {
-        return '۰۱۲۳۴۵۶۷۸۹'[d];
-      });
-    }
-
-    function loadUsers() {
-      document.getElementById('loadingBox').style.display = 'block';
-      document.getElementById('userList').innerHTML = '';
-
-      apiCall({
-        action: 'user.getAll',
-        token: currentToken,
-        payload: {}
-      }).then(function(response) {
-        document.getElementById('loadingBox').style.display = 'none';
-        if (!response.success) {
-          if (response.error && (response.error.indexOf('نشست') !== -1 || response.error.indexOf('منقضی') !== -1)) {
-            handleSessionExpired();
-            return;
-          }
-          alert('خطا: ' + response.error);
-          return;
-        }
-        usersList = response.data.users || [];
-        renderUsers();
-      }).catch(function(err) {
-        document.getElementById('loadingBox').style.display = 'none';
-        alert('خطا: ' + err.message);
-      });
-    }
-
-    function renderUsers() {
-      var container = document.getElementById('userList');
-      container.innerHTML = '';
-
-      if (usersList.length === 0) {
-        document.getElementById('emptyBox').style.display = 'block';
-        document.getElementById('userCount').textContent = '';
-        return;
-      }
-
-      document.getElementById('emptyBox').style.display = 'none';
-      document.getElementById('userCount').textContent = toFa(usersList.length) + ' کاربر';
-
-      usersList.forEach(function(user) {
-        container.appendChild(createUserCard(user));
-      });
-    }
-
-    function createUserCard(user) {
-      var div = document.createElement('div');
-      div.className = 'user-card' + (user.isActive ? '' : ' inactive');
-
-      var header = document.createElement('div');
-      header.className = 'user-header';
-
-      var username = document.createElement('div');
-      username.className = 'username';
-      username.textContent = user.username;
-      header.appendChild(username);
-
-      var badge = document.createElement('span');
-      badge.className = 'badge ' + (user.isActive ? 'active' : 'inactive');
-      badge.textContent = user.isActive ? 'فعال' : 'غیرفعال';
-      header.appendChild(badge);
-
-      div.appendChild(header);
-
-      var fullname = document.createElement('div');
-      fullname.className = 'fullname';
-      fullname.textContent = user.fullName || '-';
-      div.appendChild(fullname);
-
-      if (user.department) {
-        var dept = document.createElement('div');
-        dept.className = 'meta';
-        dept.textContent = 'واحد: ' + user.department;
-        div.appendChild(dept);
-      }
-
-      var roleLabels = {
-        'inspector': 'بازرس',
-        'manager': 'مدیر',
-        'admin': 'مدیر سیستم'
-      };
-      var roleBadge = document.createElement('span');
-      roleBadge.className = 'badge role-' + user.role;
-      roleBadge.textContent = roleLabels[user.role] || user.role;
-      div.appendChild(roleBadge);
-
-      if (user.lastLogin) {
-        var last = document.createElement('div');
-        last.className = 'meta';
-        last.style.marginTop = '8px';
-        last.textContent = 'آخرین ورود: ' + formatDate(user.lastLogin);
-        div.appendChild(last);
-      }
-
-      var actions = document.createElement('div');
-      actions.className = 'user-actions';
-
-      var editBtn = document.createElement('button');
-      editBtn.className = 'btn btn-edit';
-      editBtn.textContent = 'ویرایش';
-      editBtn.onclick = function() { openEditModal(user); };
-      actions.appendChild(editBtn);
-
-      var passBtn = document.createElement('button');
-      passBtn.className = 'btn btn-password';
-      passBtn.textContent = 'تغییر رمز';
-      passBtn.onclick = function() { openPasswordModal(user); };
-      actions.appendChild(passBtn);
-
-      var roleBtn = document.createElement('button');
-      roleBtn.className = 'btn btn-role';
-      roleBtn.textContent = 'تغییر نقش';
-      roleBtn.onclick = function() { openRoleModal(user); };
-      actions.appendChild(roleBtn);
-
-      var toggleBtn = document.createElement('button');
-      toggleBtn.className = 'btn btn-toggle' + (user.isActive ? '' : ' activate');
-      toggleBtn.textContent = user.isActive ? 'غیرفعال' : 'فعال‌سازی';
-      toggleBtn.onclick = function() { toggleActive(user); };
-      actions.appendChild(toggleBtn);
-
-      div.appendChild(actions);
-      return div;
-    }
-
-    function formatDate(dateVal) {
-      if (!dateVal) return '-';
-      try {
-        var d = new Date(dateVal);
-        var y = d.getFullYear();
-        var m = ('0' + (d.getMonth() + 1)).slice(-2);
-        var day = ('0' + d.getDate()).slice(-2);
-        return y + '/' + m + '/' + day;
-      } catch (e) {
-        return String(dateVal);
-      }
-    }
-
-    function openModal(id) { document.getElementById(id).classList.add('show'); }
-    function closeModal(id) { document.getElementById(id).classList.remove('show'); }
-
-    function openAddModal() {
-      document.getElementById('addUsername').value = '';
-      document.getElementById('addPassword').value = '';
-      document.getElementById('addFullName').value = '';
-      document.getElementById('addDepartment').value = '';
-      document.getElementById('addRole').value = 'inspector';
-      document.getElementById('addError').style.display = 'none';
-      openModal('addModal');
-    }
-
-    function openEditModal(user) {
-      actionTargetUsername = user.username;
-      document.getElementById('editFullName').value = user.fullName || '';
-      document.getElementById('editDepartment').value = user.department || '';
-      document.getElementById('editError').style.display = 'none';
-      openModal('editModal');
-    }
-
-    function openPasswordModal(user) {
-      actionTargetUsername = user.username;
-      document.getElementById('newPassword').value = '';
-      document.getElementById('passwordError').style.display = 'none';
-      openModal('passwordModal');
-    }
-
-    function openRoleModal(user) {
-      actionTargetUsername = user.username;
-      document.getElementById('newRole').value = user.role || 'inspector';
-      document.getElementById('roleError').style.display = 'none';
-      openModal('roleModal');
-    }
-
-    function createUser() {
-      var username = document.getElementById('addUsername').value.trim();
-      var password = document.getElementById('addPassword').value.trim();
-      var fullName = document.getElementById('addFullName').value.trim();
-      var department = document.getElementById('addDepartment').value.trim();
-      var role = document.getElementById('addRole').value;
-
-      var errEl = document.getElementById('addError');
-      errEl.style.display = 'none';
-
-      if (!username || !password || !fullName) {
-        errEl.textContent = 'همه فیلدهای اجباری را پر کنید.';
-        errEl.style.display = 'block';
-        return;
-      }
-
-      apiCall({
-        action: 'user.create',
-        token: currentToken,
-        payload: { username: username, password: password, fullName: fullName, department: department, role: role }
-      }).then(function(response) {
-        if (response.success) {
-          closeModal('addModal');
-          loadUsers();
-        } else {
-          errEl.textContent = response.error;
-          errEl.style.display = 'block';
-        }
-      }).catch(function(err) {
-        errEl.textContent = 'خطا: ' + err.message;
-        errEl.style.display = 'block';
-      });
-    }
-
-    function updateUser() {
-      var fullName = document.getElementById('editFullName').value.trim();
-      var department = document.getElementById('editDepartment').value.trim();
-      var errEl = document.getElementById('editError');
-      errEl.style.display = 'none';
-
-      if (!fullName) {
-        errEl.textContent = 'نام و نام خانوادگی اجباری است.';
-        errEl.style.display = 'block';
-        return;
-      }
-
-      apiCall({
-        action: 'user.update',
-        token: currentToken,
-        payload: { username: actionTargetUsername, fullName: fullName, department: department }
-      }).then(function(response) {
-        if (response.success) {
-          closeModal('editModal');
-          loadUsers();
-        } else {
-          errEl.textContent = response.error;
-          errEl.style.display = 'block';
-        }
-      }).catch(function(err) {
-        errEl.textContent = 'خطا: ' + err.message;
-        errEl.style.display = 'block';
-      });
-    }
-
-    function changePassword() {
-      var newPassword = document.getElementById('newPassword').value.trim();
-      var errEl = document.getElementById('passwordError');
-      errEl.style.display = 'none';
-
-      if (!newPassword || newPassword.length < 4) {
-        errEl.textContent = 'رمز عبور باید حداقل ۴ کاراکتر باشد.';
-        errEl.style.display = 'block';
-        return;
-      }
-
-      apiCall({
-        action: 'user.changePassword',
-        token: currentToken,
-        payload: { username: actionTargetUsername, newPassword: newPassword }
-      }).then(function(response) {
-        if (response.success) {
-          closeModal('passwordModal');
-          alert('رمز عبور با موفقیت تغییر یافت.');
-        } else {
-          errEl.textContent = response.error;
-          errEl.style.display = 'block';
-        }
-      }).catch(function(err) {
-        errEl.textContent = 'خطا: ' + err.message;
-        errEl.style.display = 'block';
-      });
-    }
-
-    function changeRole() {
-      var newRole = document.getElementById('newRole').value;
-      var errEl = document.getElementById('roleError');
-      errEl.style.display = 'none';
-
-      apiCall({
-        action: 'user.changeRole',
-        token: currentToken,
-        payload: { username: actionTargetUsername, role: newRole }
-      }).then(function(response) {
-        if (response.success) {
-          closeModal('roleModal');
-          loadUsers();
-        } else {
-          errEl.textContent = response.error;
-          errEl.style.display = 'block';
-        }
-      }).catch(function(err) {
-        errEl.textContent = 'خطا: ' + err.message;
-        errEl.style.display = 'block';
-      });
-    }
-
-    function toggleActive(user) {
-      var willActivate = !user.isActive;
-      var msg = willActivate ? 'این کاربر فعال شود؟' : 'این کاربر غیرفعال شود؟';
-      if (!confirm(msg)) return;
-
-      apiCall({
-        action: 'user.toggleActive',
-        token: currentToken,
-        payload: { username: user.username, isActive: willActivate }
-      }).then(function(response) {
-        if (response.success) {
-          loadUsers();
-        } else {
-          alert('خطا: ' + response.error);
-        }
-      }).catch(function(err) {
-        alert('خطا: ' + err.message);
-      });
+      }).finally(function() { goToLogin(); });
     }
   </script>
 
