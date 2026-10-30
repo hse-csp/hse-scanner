@@ -409,6 +409,10 @@
         redirect: 'follow'
       }).then(function(r) { return r.json(); }).then(function(res) {
         if (res.success) {
+          // ★ NEW: log duplicate detections for debugging
+          if (res.data && res.data.duplicate) {
+            console.log('[sync] duplicate detected, removed from queue:', key);
+          }
           localStorage.removeItem(key);
           updatePendingBadge();
         }
