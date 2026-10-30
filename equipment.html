@@ -438,13 +438,20 @@
       
       apiCall({ action: 'equipment.getAll', token: currentToken, payload: {} }).then(function(response) {
         if (!response.success) {
-          document.getElementById('equipmentList').innerHTML = '<div class="empty-state"><i class="fa-solid fa-circle-exclamation"></i>' + (response.error || 'خطا') + '</div>';
+          document.getElementById('equipmentList').innerHTML = '<div class="empty-state"><i class="fa-solid fa-circle-exclamation"></i>' + (response.error || 'خطا در دریافت اطلاعات') + '</div>';
           return;
         }
+        
+        // چک کردن اینکه دیتا به چه شکلی برگشته است
         cylindersList = response.data.cylinders || [];
         fireboxesList = response.data.fireboxes || [];
+        
+        console.log("Cylinders loaded:", cylindersList.length);
+        console.log("Fireboxes loaded:", fireboxesList.length);
+        
         renderList();
       }).catch(function(err) {
+        console.error("Error loading equipment:", err);
         document.getElementById('equipmentList').innerHTML = '<div class="empty-state"><i class="fa-solid fa-wifi"></i>خطا در ارتباط با سرور</div>';
       });
     }
@@ -505,17 +512,22 @@
       const listEl = document.getElementById('equipmentList');
       listEl.innerHTML = '';
 
-      let list = currentTab === 'cylinder' ? cylindersList : fireboxesList;
+      // انتخاب لیست بر اساس تب
+      let rawList = currentTab === 'cylinder' ? cylindersList : fireboxesList;
+      
+      // اگر دیتا آبجکت است (نه آرایه)، آن را به آرایه تبدیل می‌کنیم
+      let list = Object.values(rawList);
 
       if (currentStatusFilter !== 'all') {
-        list = list.filter(e => e.status === currentStatusFilter);
+        list = list.filter(e => e.Status === currentStatusFilter || e.status === currentStatusFilter);
       }
 
       if (searchTerm) {
-        list = list.filter(e => 
-          (e.barcode && e.barcode.toLowerCase().includes(searchTerm)) || 
-          (e.location && e.location.toLowerCase().includes(searchTerm))
-        );
+        list = list.filter(e => {
+          var bc = (e.Barcode || e.barcode || '').toLowerCase();
+          var loc = (e.Location || e.location || '').toLowerCase();
+          return bc.includes(searchTerm) || loc.includes(searchTerm);
+        });
       }
 
       if (list.length === 0) {
@@ -524,24 +536,33 @@
       }
 
       list.forEach(equip => {
+        // پشتیبانی از نام‌گذاری با حروف بزرگ (Google Sheets) یا کوچک
+        let barcode = equip.Barcode || equip.barcode || '-';
+        let location = equip.Location || equip.location || '-';
+        let plant = equip.Plant || equip.plant || '';
+        let assignedTo = equip.AssignedTo || equip.assignedTo || '';
+        let capacity = equip.Capacity || equip.capacity || '';
+        let equipStatus = equip.Status || equip.status || 'active';
+        let equipType = equip.CylinderType || equip.cylinderType || equip.type || 'CO2';
+
         const div = document.createElement('div');
         div.className = 'equip-card';
         
         let typeBadge = currentTab === 'cylinder' 
-          ? `<span class="badge badge-${equip.type}">${typeLabels[equip.type] || equip.type}</span>` 
+          ? `<span class="badge badge-${equipType}">${typeLabels[equipType] || equipType}</span>` 
           : `<span class="badge badge-firebox">فایر باکس</span>`;
 
-        let statusBadge = `<span class="badge ${equip.status}">${statusLabels[equip.status] || equip.status}</span>`;
+        let statusBadge = `<span class="badge ${equipStatus}">${statusLabels[equipStatus] || equipStatus}</span>`;
 
         div.innerHTML = `
           <div class="equip-header">
             <div>
-              <div class="equip-barcode"><i class="fa-solid fa-barcode" style="color:var(--copper-main);"></i> ${equip.barcode}</div>
+              <div class="equip-barcode"><i class="fa-solid fa-barcode" style="color:var(--copper-main);"></i> ${barcode}</div>
               <div class="equip-meta">
-                <span><i class="fa-solid fa-location-dot"></i> ${equip.location || '-'}</span>
-                ${equip.capacity ? `<span><i class="fa-solid fa-weight-hanging"></i> ${equip.capacity}</span>` : ''}
-                ${equip.plant ? `<span><i class="fa-solid fa-industry"></i> ${equip.plant}</span>` : ''}
-                ${equip.assignedTo ? `<span><i class="fa-solid fa-user-check"></i> بازرس: ${equip.assignedTo}</span>` : ''}
+                <span><i class="fa-solid fa-location-dot"></i> ${location}</span>
+                ${capacity ? `<span><i class="fa-solid fa-weight-hanging"></i> ${capacity}</span>` : ''}
+                ${plant ? `<span><i class="fa-solid fa-industry"></i> ${plant}</span>` : ''}
+                ${assignedTo ? `<span><i class="fa-solid fa-user-check"></i> بازرس: ${assignedTo}</span>` : ''}
               </div>
             </div>
             <div style="display:flex; flex-direction:column; align-items:flex-end; gap:6px;">
@@ -550,277 +571,5 @@
             </div>
           </div>
           <div class="equip-actions">
-            <button class="btn-action" onclick="openEquipModal('edit', '${equip.barcode}')"><i class="fa-solid fa-pen"></i> ویرایش</button>
-            <button class="btn-action more-btn" onclick="openActionSheet('${equip.barcode}')"><i class="fa-solid fa-ellipsis-vertical"></i></button>
-          </div>
-        `;
-        listEl.appendChild(div);
-      });
-    }
-
-    // ============================================
-    // Toast
-    // ============================================
-    function showToast(message, type = 'success') {
-      const container = document.getElementById('toast-container');
-      const toast = document.createElement('div');
-      toast.className = `toast ${type}`;
-      let icon = type === 'error' ? 'fa-circle-exclamation' : (type === 'info' ? 'fa-info-circle' : 'fa-check-circle');
-      toast.innerHTML = `<i class="fa-solid ${icon}"></i> ${message}`;
-      container.appendChild(toast);
-      setTimeout(() => { toast.remove(); }, 3000);
-    }
-
-    // ============================================
-    // Bottom Sheet
-    // ============================================
-    function openActionSheet(barcode) {
-      var list = currentTab === 'cylinder' ? cylindersList : fireboxesList;
-      actionTargetEquip = list.find(e => e.barcode === barcode);
-      if (!actionTargetEquip) return;
-
-      document.getElementById('actionSheetTitle').textContent = `عملیات برای: ${actionTargetEquip.barcode}`;
-      document.getElementById('actionSheetOverlay').classList.add('show');
-      document.getElementById('actionSheet').classList.add('show');
-    }
-
-    function closeActionSheet() {
-      document.getElementById('actionSheetOverlay').classList.remove('show');
-      document.getElementById('actionSheet').classList.remove('show');
-    }
-
-    function sheetChangeStatus() {
-      closeActionSheet();
-      statusTargetEquip = actionTargetEquip;
-      document.getElementById('inp-new-status').value = actionTargetEquip.status;
-      openModal('statusModal');
-    }
-
-    function sheetDelete() {
-      closeActionSheet();
-      deleteTargetEquip = actionTargetEquip;
-      document.getElementById('del-barcode').textContent = actionTargetEquip.barcode;
-      openModal('deleteModal');
-    }
-
-    // ============================================
-    // Modals & Save Actions
-    // ============================================
-    function openModal(id) { document.getElementById(id).classList.add('show'); }
-    function closeModal(id) { document.getElementById(id).classList.remove('show'); }
-
-    function openEquipModal(mode, barcode = null) {
-      editingEquip = { mode, barcode };
-      const title = document.getElementById('equipModalTitle');
-      const barcodeInp = document.getElementById('inp-barcode');
-      const typeGroup = document.getElementById('type-group');
-      const capGroup = document.getElementById('capacity-group');
-      const saveBtn = document.getElementById('btn-save-equip');
-
-      if (mode === 'add') {
-        title.textContent = currentTab === 'cylinder' ? 'افزودن سیلندر جدید' : 'افزودن فایر باکس جدید';
-        barcodeInp.value = '';
-        barcodeInp.disabled = false;
-        document.getElementById('inp-location').value = '';
-        document.getElementById('inp-plant').value = '';
-        document.getElementById('inp-assigned-to').value = '';
-        
-        if (currentTab === 'cylinder') {
-          typeGroup.style.display = 'block';
-          capGroup.style.display = 'block';
-          document.getElementById('inp-cylinder-type').value = 'CO2';
-          document.getElementById('inp-capacity').value = '';
-        } else {
-          typeGroup.style.display = 'none';
-          capGroup.style.display = 'none';
-        }
-      } else {
-        var list = currentTab === 'cylinder' ? cylindersList : fireboxesList;
-        const equip = list.find(e => e.barcode === barcode);
-        title.textContent = 'ویرایش تجهیز';
-        barcodeInp.value = equip.barcode;
-        barcodeInp.disabled = true;
-        document.getElementById('inp-location').value = equip.location || '';
-        document.getElementById('inp-plant').value = equip.plant || '';
-        document.getElementById('inp-assigned-to').value = equip.assignedTo || '';
-        
-        if (currentTab === 'cylinder') {
-          typeGroup.style.display = 'block';
-          capGroup.style.display = 'block';
-          document.getElementById('inp-cylinder-type').value = equip.type || 'CO2';
-          document.getElementById('inp-capacity').value = equip.capacity || '';
-        } else {
-          typeGroup.style.display = 'none';
-          capGroup.style.display = 'none';
-        }
-      }
-      saveBtn.disabled = false;
-      saveBtn.textContent = 'ذخیره';
-      openModal('equipModal');
-    }
-
-    function saveEquip() {
-      const mode = editingEquip.mode;
-      const barcode = document.getElementById('inp-barcode').value.trim();
-      const location = document.getElementById('inp-location').value.trim();
-      const plant = document.getElementById('inp-plant').value.trim();
-      const assignedTo = document.getElementById('inp-assigned-to').value.trim();
-      const capacity = document.getElementById('inp-capacity').value.trim();
-      const cylinderType = document.getElementById('inp-cylinder-type').value;
-      const saveBtn = document.getElementById('btn-save-equip');
-
-      if (!barcode || !location) {
-        showToast('بارکد و موقعیت اجباری هستند.', 'error');
-        return;
-      }
-
-      saveBtn.disabled = true;
-      saveBtn.textContent = 'در حال ذخیره...';
-
-      var action = mode === 'add' ? 'equipment.create' : 'equipment.update';
-      var payload = { barcode, kind: currentTab, location, plant, assignedTo };
-      
-      if (currentTab === 'cylinder') {
-        payload.capacity = capacity;
-        payload.cylinderType = cylinderType;
-      }
-
-      apiCall({ action: action, token: currentToken, payload: payload }).then(function(res) {
-        saveBtn.disabled = false;
-        saveBtn.textContent = 'ذخیره';
-
-        if (res.success) {
-          showToast(mode === 'add' ? 'تجهیز جدید اضافه شد.' : 'تجهیز ویرایش شد.');
-          closeModal('equipModal');
-          loadAll();
-          loadFilters();
-        } else {
-          showToast(res.error, 'error');
-        }
-      }).catch(function() {
-        saveBtn.disabled = false;
-        saveBtn.textContent = 'ذخیره';
-        showToast('خطا در ارتباط با سرور', 'error');
-      });
-    }
-
-    function saveStatus() {
-      const newStatus = document.getElementById('inp-new-status').value;
-      const saveBtn = document.getElementById('btn-save-status');
-
-      saveBtn.disabled = true;
-      saveBtn.textContent = '...';
-
-      apiCall({
-        action: 'equipment.toggleStatus',
-        token: currentToken,
-        payload: { barcode: statusTargetEquip.barcode, kind: currentTab, status: newStatus }
-      }).then(function(res) {
-        saveBtn.disabled = false;
-        saveBtn.textContent = 'تغییر';
-        
-        if (res.success) {
-          showToast('وضعیت تجهیز تغییر یافت.', 'info');
-          closeModal('statusModal');
-          loadAll();
-        } else {
-          showToast(res.error, 'error');
-        }
-      }).catch(function() {
-        saveBtn.disabled = false;
-        saveBtn.textContent = 'تغییر';
-        showToast('خطا در ارتباط با سرور', 'error');
-      });
-    }
-
-    function confirmDelete() {
-      const delBtn = document.getElementById('btn-confirm-delete');
-      delBtn.disabled = true;
-      delBtn.textContent = 'در حال حذف...';
-
-      apiCall({
-        action: 'equipment.delete',
-        token: currentToken,
-        payload: { barcode: deleteTargetEquip.barcode, kind: currentTab }
-      }).then(function(res) {
-        delBtn.disabled = false;
-        delBtn.textContent = 'حذف';
-
-        if (res.success) {
-          showToast('تجهیز حذف شد.', 'error');
-          closeModal('deleteModal');
-          loadAll();
-          loadFilters();
-        } else {
-          showToast(res.error, 'error');
-        }
-      }).catch(function() {
-        delBtn.disabled = false;
-        delBtn.textContent = 'حذف';
-        showToast('خطا در ارتباط با سرور', 'error');
-      });
-    }
-
-    function openBulkAssignModal() {
-      loadFilters(); // لود مجدد فیلترها برای اطمینان
-      openModal('bulkModal');
-    }
-
-    function executeBulkAssign() {
-      const plant = document.getElementById('bulk-plant').value;
-      const currentInsp = document.getElementById('bulk-current-insp').value;
-      const newInsp = document.getElementById('bulk-new-insp').value;
-      const btn = document.getElementById('btn-execute-bulk');
-
-      if (!newInsp) {
-        showToast('لطفاً بازرس جدید را انتخاب کنید.', 'error');
-        return;
-      }
-
-      if (!confirm('آیا از تخصیص دسته‌ای مطمئن هستید؟')) return;
-
-      btn.disabled = true;
-      btn.textContent = 'در حال اعمال...';
-
-      apiCall({
-        action: 'equipment.bulkAssign',
-        token: currentToken,
-        payload: { kind: currentTab, plant, currentAssignedTo: currentInsp, newAssignedTo: newInsp }
-      }).then(function(res) {
-        btn.disabled = false;
-        btn.textContent = 'اعمال تخصیص';
-
-        if (res.success) {
-          showToast(`${toFa(res.data.updated)} تجهیز تخصیص یافت.`);
-          closeModal('bulkModal');
-          loadAll();
-          loadFilters();
-        } else {
-          showToast(res.error, 'error');
-        }
-      }).catch(function() {
-        btn.disabled = false;
-        btn.textContent = 'اعمال تخصیص';
-        showToast('خطا در ارتباط با سرور', 'error');
-      });
-    }
-
-    function doLogout() {
-      if (!confirm('از حساب کاربری خارج می‌شوید؟')) return;
-      var token = currentToken;
-      localStorage.clear();
-      sessionStorage.clear();
-      fetch(EXEC_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        body: JSON.stringify({ action: 'auth.logout', token: token }),
-        redirect: 'follow'
-      }).finally(function() { goToLogin(); });
-    }
-
-    function toFa(n) { return String(n).replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]); }
-  </script>
-
-  <script src="pwa.js" defer></script>
-</body>
-</html>
+            <button class="btn-action" onclick="openEquipModal('edit', '${barcode}')"><i class="fa-solid fa-pen"></i> ویرایش</button>
+            <button class="btn-action more-btn" onclick="openActionSheet('${barcode}')"><i class="fa-solid
