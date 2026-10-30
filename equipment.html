@@ -35,7 +35,6 @@
       min-height: 100vh;
     }
 
-    /* هدر */
     .header {
       background: linear-gradient(135deg, var(--copper-dark), var(--copper-main));
       color: #fff;
@@ -64,7 +63,6 @@
 
     .container { padding: 0 16px; max-width: 700px; margin: 0 auto; }
 
-    /* تب‌ها */
     .tabs {
       display: flex; gap: 8px; margin-bottom: 16px; background: #fff; padding: 6px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.02);
     }
@@ -73,7 +71,6 @@
     }
     .tab.active { background: var(--copper-main); color: #fff; box-shadow: 0 2px 6px rgba(230, 126, 34, 0.3); }
 
-    /* نوار ابزار */
     .toolbar { display: flex; gap: 10px; margin-bottom: 12px; flex-wrap: wrap; }
     .search-container { flex: 1; min-width: 200px; position: relative; }
     .search-container input {
@@ -88,7 +85,6 @@
     .btn-add { background: linear-gradient(135deg, var(--copper-main), var(--copper-dark)); color: #fff; box-shadow: 0 4px 10px rgba(230, 126, 34, 0.3); }
     .btn-bulk { background: #FFF4E6; color: var(--copper-dark); border: 1px solid var(--copper-main); }
 
-    /* فیلتر وضعیت */
     .filter-bar {
       display: flex; gap: 8px; margin-bottom: 16px; overflow-x: auto; padding-bottom: 4px;
     }
@@ -99,7 +95,6 @@
     }
     .filter-btn.active { background: var(--copper-main); color: #fff; border-color: var(--copper-main); }
 
-    /* کارت‌های تجهیزات */
     .equip-card {
       background: #fff; border: 1px solid #e2e8f0; border-radius: 16px;
       padding: 16px; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.02);
@@ -125,7 +120,6 @@
     .btn-action:active { background: #e2e8f0; }
     .btn-action.more-btn { flex: 0.2; background: #FFF4E6; color: var(--copper-dark); border-color: var(--copper-light); }
 
-    /* منوی پایین */
     .bottom-nav {
       position: fixed; bottom: 0; left: 0; right: 0; background: #fff; display: flex; justify-content: space-around; align-items: center;
       padding: 10px; box-shadow: 0 -2px 15px rgba(0,0,0,0.05); border-radius: 24px 24px 0 0; z-index: 100;
@@ -136,7 +130,6 @@
     .nav-item i { font-size: 20px; margin-bottom: 2px; }
     .nav-item.active { color: var(--copper-main); }
 
-    /* مدال‌ها و Bottom Sheet */
     .modal-overlay {
       position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 200; display: none; align-items: center; justify-content: center; padding: 16px;
     }
@@ -161,7 +154,6 @@
     .btn-confirm { flex: 1; padding: 12px; border-radius: 10px; border: none; background: var(--copper-main); color: #fff; font-family: inherit; font-weight: 700; cursor: pointer; }
     .btn-danger { background: var(--status-red); }
 
-    /* Bottom Sheet */
     .bottom-sheet-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 300; display: none; opacity: 0; transition: opacity 0.3s; }
     .bottom-sheet-overlay.show { display: block; opacity: 1; }
     .bottom-sheet { position: fixed; bottom: -100%; left: 0; right: 0; background: #fff; border-radius: 24px 24px 0 0; padding: 20px; z-index: 301; transition: bottom 0.3s ease-in-out; box-shadow: 0 -4px 20px rgba(0,0,0,0.1); }
@@ -172,7 +164,6 @@
     .sheet-action-btn:active { background: #e2e8f0; }
     .sheet-action-btn.danger { color: var(--status-red); background: #FDEDEC; }
 
-    /* Toast */
     #toast-container { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 999; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
     .toast { background: #333; color: #fff; padding: 12px 24px; border-radius: 50px; font-size: 13px; font-weight: 700; box-shadow: 0 4px 12px rgba(0,0,0,0.15); display: flex; align-items: center; gap: 8px; animation: toastIn 0.3s ease-out, toastOut 0.3s ease-in 2.7s forwards; }
     .toast.success { background: var(--status-green); }
@@ -197,13 +188,11 @@
 
   <div class="container">
     
-    <!-- تب‌ها -->
     <div class="tabs">
       <button class="tab active" id="tab-cylinder" onclick="switchTab('cylinder')">سیلندرها</button>
       <button class="tab" id="tab-firebox" onclick="switchTab('firebox')">فایر باکس‌ها</button>
     </div>
 
-    <!-- نوار ابزار -->
     <div class="toolbar">
       <div class="search-container">
         <input type="text" id="searchInput" placeholder="جستجوی بارکد یا موقعیت..." oninput="handleSearch()">
@@ -213,7 +202,6 @@
       <button class="btn-tool btn-add" onclick="openEquipModal('add')"><i class="fa-solid fa-plus"></i> افزودن</button>
     </div>
 
-    <!-- فیلتر وضعیت -->
     <div class="filter-bar">
       <button class="filter-btn active" id="filter-all" onclick="applyStatusFilter('all', this)">همه</button>
       <button class="filter-btn" id="filter-active" onclick="applyStatusFilter('active', this)">فعال</button>
@@ -227,7 +215,6 @@
 
   </div>
 
-  <!-- منوی پایین -->
   <nav class="bottom-nav">
     <a href="index.html" class="nav-item">
       <i class="fa-solid fa-house"></i>
@@ -247,10 +234,8 @@
     </a>
   </nav>
 
-  <!-- Toast Container -->
   <div id="toast-container"></div>
 
-  <!-- Bottom Sheet (منوی عملیات) -->
   <div class="bottom-sheet-overlay" id="actionSheetOverlay" onclick="closeActionSheet()"></div>
   <div class="bottom-sheet" id="actionSheet">
     <div class="sheet-handle"></div>
@@ -264,7 +249,6 @@
     </button>
   </div>
 
-  <!-- مدال افزودن / ویرایش تجهیز -->
   <div class="modal-overlay" id="equipModal">
     <div class="modal-content">
       <div class="modal-title">
@@ -313,7 +297,6 @@
     </div>
   </div>
 
-  <!-- مدال تغییر وضعیت -->
   <div class="modal-overlay" id="statusModal">
     <div class="modal-content">
       <div class="modal-title">
@@ -335,7 +318,6 @@
     </div>
   </div>
 
-  <!-- مدال حذف -->
   <div class="modal-overlay" id="deleteModal">
     <div class="modal-content">
       <div class="modal-title">
@@ -350,7 +332,6 @@
     </div>
   </div>
 
-  <!-- مدال تخصیص دسته‌ای -->
   <div class="modal-overlay" id="bulkModal">
     <div class="modal-content">
       <div class="modal-title">
@@ -431,19 +412,47 @@
     })();
 
     // ============================================
-    // Load Data
+    // Load Data (با تبدیل هوشمند کلیدها)
     // ============================================
     function loadAll() {
       document.getElementById('equipmentList').innerHTML = '<div class="empty-state"><i class="fa-solid fa-spinner fa-spin"></i> در حال بارگذاری...</div>';
       
-      // با ارسال includeInactive: true همه تجهیزات (حتی اسقاط شده) را می‌گیریم تا فیلترها کار کنند
       apiCall({ action: 'equipment.getAll', token: currentToken, payload: { includeInactive: true } }).then(function(response) {
         if (!response.success) {
           document.getElementById('equipmentList').innerHTML = '<div class="empty-state"><i class="fa-solid fa-circle-exclamation"></i>' + (response.error || 'خطا') + '</div>';
           return;
         }
-        cylindersList = response.data.cylinders || [];
-        fireboxesList = response.data.fireboxes || [];
+
+        var rawCylinders = response.data.cylinders || [];
+        var rawFireboxes = response.data.fireboxes || [];
+
+        // تبدیل کلیدهای حروف بزرگ به حروف کوچک برای سازگاری
+        cylindersList = rawCylinders.map(function(c) {
+          return {
+            barcode: String(c.Barcode || c.barcode || ''),
+            location: String(c.Location || c.location || ''),
+            plant: String(c.Plant || c.plant || ''),
+            assignedTo: String(c.AssignedTo || c.assignedTo || ''),
+            status: String(c.Status || c.status || 'active'),
+            type: String(c.CylinderType || c.type || 'CO2'),
+            capacity: String(c.Capacity || c.capacity || ''),
+            lastInspection: c.LastInspection || c.lastInspection || ''
+          };
+        });
+
+        fireboxesList = rawFireboxes.map(function(f) {
+          return {
+            barcode: String(f.Barcode || f.barcode || ''),
+            location: String(f.Location || f.location || ''),
+            plant: String(f.Plant || f.plant || ''),
+            assignedTo: String(f.AssignedTo || f.assignedTo || ''),
+            status: String(f.Status || f.status || 'active'),
+            type: 'firebox',
+            capacity: '',
+            lastInspection: f.LastInspection || f.lastInspection || ''
+          };
+        });
+
         renderList();
       }).catch(function(err) {
         document.getElementById('equipmentList').innerHTML = '<div class="empty-state"><i class="fa-solid fa-wifi"></i>خطا در ارتباط با سرور</div>';
@@ -487,7 +496,7 @@
       document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
       document.getElementById('filter-all').classList.add('active');
       
-      loadFilters(); // لود مجدد فیلترها برای تب جدید
+      loadFilters();
       renderList();
     }
 
@@ -764,7 +773,7 @@
     }
 
     function openBulkAssignModal() {
-      loadFilters(); // لود مجدد فیلترها برای اطمینان
+      loadFilters();
       openModal('bulkModal');
     }
 
