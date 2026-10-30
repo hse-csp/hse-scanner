@@ -180,6 +180,7 @@
     .summary-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #eee; font-size: 14px; }
     .summary-row:last-of-type { border-bottom: none; margin-bottom: 20px; }
     .btn-confirm-submit { width: 100%; padding: 16px; border-radius: 12px; border: none; background: var(--status-green); color: #fff; font-family: inherit; font-size: 16px; font-weight: 700; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 8px; }
+    .btn-confirm-submit:disabled { background: #ccc; cursor: not-allowed; }
     .btn-cancel-submit { width: 100%; padding: 16px; border-radius: 12px; border: none; background: #f0f0f0; color: var(--text-dark); font-family: inherit; font-size: 16px; font-weight: 700; cursor: pointer; margin-top: 10px; }
     
     .loading-box { text-align: center; padding: 40px 20px; color: #666; font-size: 15px; }
@@ -315,7 +316,7 @@
       <span style="font-weight:800; color:var(--status-green);">بله</span>
     </div>
 
-    <button class="btn-confirm-submit" onclick="submitInspection()">
+    <button class="btn-confirm-submit" id="confirmSubmitBtn" onclick="submitInspection()">
       <i class="fa-solid fa-check-double"></i> تایید و ثبت نهایی
     </button>
     <button class="btn-cancel-submit" onclick="closeSummary()">بازگشت و اصلاح</button>
@@ -335,6 +336,21 @@
     var photoMimeType = 'image/jpeg';
     
     var videoStream = null;
+
+    // ============================================
+    // ★ UUID generator for clientRequestId
+    //   (uses crypto.randomUUID when available)
+    // ============================================
+    function generateUUID() {
+      if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+        return crypto.randomUUID();
+      }
+      return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        var r = Math.random() * 16 | 0;
+        var v = c === 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+      });
+    }
 
     function goToLogin() {
       window.location.href = EXEC_URL + '?page=Login';
@@ -536,7 +552,7 @@
       var ctx = canvas.getContext('2d');
       ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-      var dataUrl = canvas.toDataURL('image/jpeg', 0.5); // فشرده‌سازی
+      var dataUrl = canvas.toDataURL('image/jpeg', 0.5);
       photoBase64 = dataUrl.split(',')[1];
       photoMimeType = 'image/jpeg';
 
@@ -587,6 +603,11 @@
     }
 
     function submitInspection() {
+      // ★ Prevent double-tap
+      var confirmBtn = document.getElementById('confirmSubmitBtn');
+      if (confirmBtn.disabled) return;
+      confirmBtn.disabled = true;
+
       closeSummary();
       var btn = document.getElementById('submitBtn');
       btn.disabled = true;
@@ -596,6 +617,7 @@
         action: 'inspection.save',
         token: currentToken,
         payload: {
+          clientRequestId: generateUUID(),  // ★ NEW: unique id for dedup
           barcode: currentEquipment.barcode,
           items: [],
           finalStatus: finalStatus,
@@ -614,7 +636,7 @@
         }
       });
 
-      // ذخیره در حافظه محلی (آفلاین)
+      // Save to localStorage (offline queue)
       var key = 'hse_pending_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
       try {
         localStorage.setItem(key, JSON.stringify(payload));
@@ -626,7 +648,7 @@
       btn.style.background = 'var(--status-green)';
       sessionStorage.removeItem('currentBarcode');
 
-      // ارسال در پس‌زمینه
+      // Send to server
       fetch(EXEC_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'text/plain;charset=utf-8' },
@@ -638,7 +660,7 @@
         }
       }).catch(function() {});
 
-      // بازگشت فوری به اسکنر
+      // Navigate away
       setTimeout(function() {
         window.location.replace(INDEX_URL);
       }, 400);
