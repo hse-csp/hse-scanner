@@ -588,7 +588,6 @@
       editingUser = { mode, username };
       const modalTitle = document.getElementById('userModalTitle');
       const passGroup = document.getElementById('password-group');
-      const saveBtn = document.getElementById('btn-save-user');
 
       if (mode === 'add') {
         modalTitle.textContent = 'افزودن کاربر جدید';
@@ -645,7 +644,13 @@
         saveBtn.textContent = 'ذخیره';
 
         if (res.success) {
-          showToast(mode === 'add' ? 'کاربر جدید اضافه شد.' : 'اطلاعات کاربر ویرایش شد.');
+          if (mode === 'add') {
+            showToast('کاربر جدید اضافه شد.');
+          } else if (res.data && res.data.roleChanged) {
+            showToast('اطلاعات و نقش کاربر ویرایش شد. کاربر باید دوباره وارد شود.');
+          } else {
+            showToast('اطلاعات کاربر ویرایش شد.');
+          }
           closeModal('userModal');
           loadUsers();
         } else {
