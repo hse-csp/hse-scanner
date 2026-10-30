@@ -423,7 +423,7 @@
         }
 
         loadCounts();
-        loadPending();
+        loadPending(currentFilter);
         loadOverdue();
       }).catch(function() {
         localStorage.clear();
@@ -463,13 +463,15 @@
       }).catch(function() {});
     }
 
-    function loadPending() {
-      apiCall({ action: 'dashboard.pending', token: currentToken }).then(function(response) {
+    function loadPending(status) {
+      var statusToFetch = status || currentFilter || 'pending';
+
+      apiCall({
+        action: 'dashboard.pending',
+        token: currentToken,
+        payload: { status: statusToFetch }
+      }).then(function(response) {
         if (response.success) {
-          // همه چیز را در دیتای "در انتظار" ذخیره می‌کنیم
-          // در واقعیت، این API باید همه موارد را برگرداند و ما در فرانت فیلتر می‌کنیم
-          // ولی چون در کد قبلی اینگونه بود، فعلا برای سادگی از همان استفاده می‌کنیم
-          // *نکته*: در کد نهایی بک‌اند، API های جداگانه برای pending/approved/rejected بهتر است
           allPendingData = response.data.inspections || [];
           renderList();
         } else {
@@ -523,9 +525,10 @@
       } else {
         currentFilter = status;
         document.querySelectorAll('.stat-card').forEach(c => c.classList.remove('active'));
-        document.getElementById('stat-' + status).classList.add('active');
+        var card = document.getElementById('stat-' + status);
+        if (card) card.classList.add('active');
       }
-      renderList();
+      loadPending(currentFilter);
     }
 
     function handleSearch() {
@@ -537,13 +540,7 @@
       const listEl = document.getElementById('pendingList');
       listEl.innerHTML = '';
 
-      // فیلتر کردن داده‌ها (چون API ما فقط pending را برمی‌گرداند، برای نمایش تایید شده و رد شده در واقعیت باید API جدا باشد)
-      // در این نسخه، ما فرض می‌کنیم allPendingData همه را دارد
       let filtered = allPendingData;
-      
-      if (currentFilter !== 'all') {
-        filtered = filtered.filter(d => d.status === currentFilter || (currentFilter === 'pending' && !d.status));
-      }
       
       if (currentSearch) {
         filtered = filtered.filter(d => 
@@ -641,7 +638,7 @@
         if (res.success) {
           showToast('بازرسی تایید شد.');
           loadCounts();
-          loadPending(); // رفرش لیست
+          loadPending(currentFilter);
         } else {
           showToast(res.error, 'error');
           btn.disabled = false;
@@ -673,7 +670,7 @@
         if (res.success) {
           showToast('بازرسی رد شد.', 'info');
           loadCounts();
-          loadPending();
+          loadPending(currentFilter);
         } else {
           showToast(res.error, 'error');
         }
@@ -701,7 +698,7 @@
           updateBatchBar();
           showToast('تایید گروهی انجام شد. موفق: ' + toFa(res.data.approvedCount));
           loadCounts();
-          loadPending();
+          loadPending(currentFilter);
         } else {
           showToast(res.error, 'error');
         }
