@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="icon" type="image/png" href="icons/favicon-32.png">
+  <meta name="theme-color" content="#C0611A">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="HSE CSP">
+  <title>لاگ‌ها و خطاها</title>
+  
+  <link href="assets/vazirmatn/Vazirmatn.css" rel="stylesheet" type="text/css" />
+  <link rel="stylesheet" href="assets/fa/css/all.min.css">
+
+  <style>
+    :root {
+      --copper-main: #E67E22;      
+      --copper-dark: #C0611A;      
+      --copper-light: #FAD7A8;     
+      --copper-bg: #F5F7FA;        
+      --text-dark: #2C3E50;        
+      --text-muted: #7F8C8D;
+      
+      --status-green: #27ae60;
+      --status-red: #e74c3c;
+      --status-orange: #f39c12;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Vazirmatn', Tahoma, sans-serif; }
+    
+    body { 
+      background-color: var(--copper-bg); 
+      color: var(--text-dark);
+      padding: 0 0 100px 0; 
+      min-height: 100vh;
+    }
+
+    /* هدر */
+    .header {
+      background: linear-gradient(135deg, var(--copper-dark), var(--copper-main));
+      color: #fff;
+      padding: 16px 20px;
+      border-radius: 0 0 24px 24px;
+      box-shadow: 0 4px 15px rgba(230, 126, 34, 0.3);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .header h1 { font-size: 18px; font-weight: 700; }
+    
+    .avatar {
+      width: 40px; height: 40px;
+      background: rgba(255,255,255,0.2);
+      border-radius: 50%;
+      display: flex; justify-content: center; align-items: center;
+      font-size: 18px; backdrop-filter: blur(5px);
+      border: 1px solid rgba(255,255,255,0.4);
+    }
+
+    .container { padding: 0 16px; max-width: 700px; margin: 0 auto; }
+
+    /* تب‌ها */
+    .tabs {
+      display: flex; gap: 8px; margin-bottom: 16px; background: #fff; padding: 6px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+    }
+    .tab {
+      flex: 1; padding: 10px; background: transparent; border: none; border-radius: 8px; font-family: inherit; font-size: 14px; font-weight: 700; color: var(--text-muted); cursor: pointer; transition: 0.2s;
+      display: flex; justify-content: center; align-items: center; gap: 8px;
+    }
+    .tab.active { background: var(--copper-main); color: #fff; box-shadow: 0 2px 6px rgba(230, 126, 34, 0.3); }
+    
+    .tab-badge {
+      background: var(--status-red); color: #fff; font-size: 11px; padding: 2px 7px; border-radius: 10px; font-weight: 800;
+    }
+    .tab.active .tab-badge { background: #fff; color: var(--copper-main); }
+
+    /* نوار جستجو */
+    .search-container {
+      margin-bottom: 16px;
+      position: relative;
+    }
+    .search-container input {
+      width: 100%;
+      padding: 12px 40px 12px 16px;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      font-family: inherit;
+      font-size: 13px;
+      background: #fff;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+      transition: 0.3s;
+    }
+    .search-container input:focus { outline: none; border-color: var(--copper-main); }
+    .search-container i {
+      position: absolute;
+      right: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+    }
+
+    /* فیلتر خطاها */
+    .filter-bar {
+      display: flex; gap: 8px; margin-bottom: 16px; overflow-x: auto; padding-bottom: 4px;
+    }
+    .filter-btn {
+      background: #fff; border: 1px solid #e2e8f0; border-radius: 50px;
+      padding: 6px 14px; font-family: inherit; font-size: 12px; font-weight: 700;
+      color: var(--text-muted); cursor: pointer; white-space: nowrap; transition: 0.2s;
+    }
+    .filter-btn.active { background: var(--copper-main); color: #fff; border-color: var(--copper-main); }
+
+    /* کارت‌های لاگ */
+    .log-item {
+      background: #fff; border: 1px solid #e2e8f0; border-radius: 12px;
+      padding: 14px; margin-bottom: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+    }
+    .log-item.critical { border-right: 4px solid var(--status-red); background: #FFF5F5; }
+    .log-item.resolved { opacity: 0.7; background: #F8FAFC; }
+
+    .log-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; gap: 8px;}
+    .log-func { font-size: 14px; font-weight: 800; color: var(--text-dark); }
+    .log-time { font-size: 11px; color: var(--text-muted); }
+    
+    .log-meta { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
+    .badge { padding: 3px 8px; border-radius: 4px; font-size: 10px; font-weight: 700; }
+    .badge.critical { background: #FDEDEC; color: var(--status-red); }
+    .badge.new { background: #FEF5E7; color: var(--status-orange); }
+    .badge.resolved { background: #E8F8F5; color: var(--status-green); }
+    .badge.success { background: #E8F8F5; color: var(--status-green); }
+    .badge.fail { background: #FDEDEC; color: var(--status-red); }
+
+    .log-msg { 
+      font-size: 13px; color: #444; margin-bottom: 10px; line-height: 1.5; 
+      display: flex; justify-content: space-between; align-items: flex-start; gap: 10px;
+      background: #f9f9f9; padding: 8px 12px; border-radius: 6px;
+    }
+    .copy-btn {
+      background: none; border: none; color: var(--copper-main); cursor: pointer; font-size: 16px;
+      padding: 4px;
+    }
+    .copy-btn:active { color: var(--copper-dark); }
+
+    /* Stack Trace */
+    .stack-toggle {
+      font-size: 12px; font-weight: 700; color: var(--copper-dark); cursor: pointer; text-decoration: underline; display: inline-block; margin-bottom: 10px;
+    }
+    .stack-content {
+      display: none; background: #2C3E50; color: #E2E8F0; padding: 10px; border-radius: 8px;
+      font-family: monospace; font-size: 11px; white-space: pre-wrap; word-break: break-all; margin-bottom: 10px;
+      max-height: 150px; overflow-y: auto;
+    }
+    .stack-content.show { display: block; }
+
+    .resolve-btn {
+      width: 100%; padding: 10px; background: #FFF4E6; color: var(--copper-dark);
+      border: 1px solid var(--copper-light); border-radius: 8px; font-family: inherit;
+      font-size: 12px; font-weight: 700; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 6px; transition: 0.2s;
+    }
+    .resolve-btn:active { background: var(--copper-main); color: #fff; }
+    .resolve-btn:disabled { background: #eee; color: #aaa; cursor: not-allowed; }
+
+    /* منوی پایین */
+    .bottom-nav {
+      position: fixed; bottom: 0; left: 0; right: 0; background: #fff; display: flex; justify-content: space-around; align-items: center;
+      padding: 10px; box-shadow: 0 -2px 15px rgba(0,0,0,0.05); border-radius: 24px 24px 0 0; z-index: 100;
+    }
+    .nav-item {
+      display: flex; flex-direction: column; align-items: center; gap: 4px; color: var(--text-muted); font-size: 11px; font-weight: 700; text-decoration: none; cursor: pointer;
+    }
+    .nav-item i { font-size: 20px; margin-bottom: 2px; }
+    .nav-item.active { color: var(--copper-main); }
+
+    /* Toast */
+    #toast-container { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 999; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
+    .toast { background: #333; color: #fff; padding: 12px 24px; border-radius: 50px; font-size: 13px; font-weight: 700; box-shadow: 0 4px 12px rgba(0,0,0,0.15); display: flex; align-items: center; gap: 8px; animation: toastIn 0.3s ease-out, toastOut 0.3s ease-in 2.7s forwards; }
+    .toast.success { background: var(--status-green); }
+    .toast.error { background: var(--status-red); }
+    .toast.info { background: var(--copper-main); }
+    @keyframes toastIn { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    @keyframes toastOut { from { transform: translateY(0); opacity: 1; } to { transform: translateY(-20px); opacity: 0; } }
+    
+    .empty-state { text-align: center; padding: 40px 10px; color: var(--text-muted); font-size: 14px; }
+    .empty-state i { font-size: 48px; color: #ccc; margin-bottom: 12px; display: block; }
+  </style>
+</head>
+<body>
+
+  <header class="header">
+    <h1>لاگ‌ها و خطاها</h1>
+    <div class="avatar">
+      <i class="fa-solid fa-list-ul"></i>
+    </div>
+  </header>
+
+  <div class="container">
+    
+    <!-- تب‌ها -->
+    <div class="tabs">
+      <button class="tab active" id="tab-errors" onclick="switchTab('errors')">
+        خطاهای سیستم <span class="tab-badge" id="err-badge" style="display:none;">0</span>
+      </button>
+      <button class="tab" id="tab-audit" onclick="switchTab('audit')">عملیات کاربران</button>
+    </div>
+
+    <!-- نوار جستجو -->
+    <div class="search-container">
+      <input type="text" id="searchInput" placeholder="جستجو در لاگ‌ها..." oninput="handleSearch()">
+      <i class="fa-solid fa-magnifying-glass"></i>
+    </div>
+
+    <!-- فیلتر خطاها -->
+    <div class="filter-bar" id="errorFilterBar">
+      <button class="filter-btn active" id="filter-all" onclick="setErrorFilter('all', this)">همه</button>
+      <button class="filter-btn" id="filter-unresolved" onclick="setErrorFilter('unresolved', this)">حل‌نشده‌ها</button>
+      <button class="filter-btn" id="filter-critical" onclick="setErrorFilter('critical', this)">بحرانی‌ها</button>
+    </div>
+
+    <!-- لیست لاگ‌ها -->
+    <div id="logsList">
+      <div class="empty-state"><i class="fa-solid fa-spinner fa-spin"></i> در حال بارگذاری...</div>
+    </div>
+
+  </div>
+
+  <!-- منوی پایین -->
+  <nav class="bottom-nav">
+    <a href="index.html" class="nav-item">
+      <i class="fa-solid fa-house"></i>
+      <span>خانه</span>
+    </a>
+    <a href="history.html" class="nav-item">
+      <i class="fa-solid fa-clock-rotate-left"></i>
+      <span>تاریخچه</span>
+    </a>
+    <a href="logs.html" class="nav-item active">
+      <i class="fa-solid fa-list-ul"></i>
+      <span>لاگ‌ها</span>
+    </a>
+    <a href="#" class="nav-item" onclick="doLogout()">
+      <i class="fa-solid fa-arrow-right-from-bracket"></i>
+      <span>خروج</span>
+    </a>
+  </nav>
+
+  <!-- Toast Container -->
+  <div id="toast-container"></div>
+
+  <script src="common.js"></script>
+  <script>
+    var currentToken = '';
+    
+    var errorsData = [];
+    var auditData = [];
+    
+    var currentTab = 'errors';
+    var currentErrorFilter = 'all';
+    var searchTerm = '';
+
+
+
+    (function initPage() {
+      currentToken = localStorage.getItem('token') || '';
+      var role = localStorage.getItem('role') || '';
+
+      if (!currentToken) { goToLogin(); return; }
+
+      if (role !== 'admin') {
+        alert('شما به این بخش دسترسی ندارید.');
+        window.location.href = 'index.html';
+        return;
+      }
+
+      loadData();
+    })();
+
+    // ============================================
+    // Load Data
+    // ============================================
+    function loadData() {
+      // لود همزمان خطاها و عملیات
+      Promise.all([
+        apiCall({ action: 'log.errors', token: currentToken, payload: {} }),
+        apiCall({ action: 'log.audit', token: currentToken, payload: {} })
+      ]).then(function(results) {
+        var resErrors = results[0];
+        var resAudit = results[1];
+
+        if (resErrors.success) {
+          errorsData = resErrors.data.logs || [];
+        }
+        if (resAudit.success) {
+          auditData = resAudit.data.logs || [];
+        }
+        
+        updateErrorBadge();
+        renderLogs();
+      }).catch(function(err) {
+        document.getElementById('logsList').innerHTML = '<div class="empty-state"><i class="fa-solid fa-wifi"></i>خطا در ارتباط با سرور</div>';
+      });
+    }
+
+    function updateErrorBadge() {
+      const unresolvedCount = errorsData.filter(e => e.status !== 'resolved').length;
+      const badge = document.getElementById('err-badge');
+      if (unresolvedCount > 0) {
+        badge.textContent = toFa(unresolvedCount);
+        badge.style.display = 'inline-block';
+      } else {
+        badge.style.display = 'none';
+      }
+    }
+
+    // ============================================
+    // UI Handlers
+    // ============================================
+    function switchTab(tab) {
+      currentTab = tab;
+      document.getElementById('tab-errors').classList.toggle('active', tab === 'errors');
+      document.getElementById('tab-audit').classList.toggle('active', tab === 'audit');
+      
+      document.getElementById('searchInput').value = '';
+      searchTerm = '';
+
+      document.getElementById('errorFilterBar').style.display = tab === 'errors' ? 'flex' : 'none';
+
+      if (tab === 'errors') {
+        currentErrorFilter = 'all';
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById('filter-all').classList.add('active');
+      }
+
+      renderLogs();
+    }
+
+    function setErrorFilter(filter, btn) {
+      currentErrorFilter = filter;
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      renderLogs();
+    }
+
+    function handleSearch() {
+      searchTerm = document.getElementById('searchInput').value.trim().toLowerCase();
+      renderLogs();
+    }
+
+    // ============================================
+    // Rendering
+    // ============================================
+    function renderLogs() {
+      const listEl = document.getElementById('logsList');
+      listEl.innerHTML = '';
+
+      if (currentTab === 'errors') {
+        let filtered = errorsData;
+        
+        if (currentErrorFilter === 'unresolved') {
+          filtered = filtered.filter(e => e.status !== 'resolved');
+        } else if (currentErrorFilter === 'critical') {
+          filtered = filtered.filter(e => e.isCritical);
+        }
+
+        if (searchTerm) {
+          filtered = filtered.filter(e => 
+            (e.functionName && e.functionName.toLowerCase().includes(searchTerm)) || 
+            (e.errorMessage && e.errorMessage.toLowerCase().includes(searchTerm))
+          );
+        }
+
+        if (filtered.length === 0) {
+          listEl.innerHTML = '<div class="empty-state"><i class="fa-solid fa-check-circle"></i>موردی یافت نشد.</div>';
+          return;
+        }
+
+        filtered.forEach(err => {
+          const div = document.createElement('div');
+          div.className = `log-item ${err.isCritical ? 'critical' : ''} ${err.status === 'resolved' ? 'resolved' : ''}`;
+          
+          let statusBadge = err.status === 'resolved' 
+            ? '<span class="badge resolved">حل شده</span>' 
+            : '<span class="badge new">جدید</span>';
+          
+          let criticalBadge = err.isCritical ? '<span class="badge critical">بحرانی</span>' : '';
+
+          let resolveBtn = '';
+          if (err.status !== 'resolved') {
+            resolveBtn = `<button class="resolve-btn" id="btn-resolve-${esc(err.errorId)}" onclick="resolveError(this.dataset.k0)" data-k0="${esc(err.errorId)}"><i class="fa-solid fa-check"></i> علامت‌گذاری به عنوان حل شده</button>`;
+          }
+
+          let safeErrorMessage = err.errorMessage || '';
+
+          div.innerHTML = `
+            <div class="log-header">
+              <span class="log-func"><i class="fa-solid fa-code" style="color:var(--copper-main); margin-left:4px;"></i> ${esc(err.functionName || '-')}</span>
+              <span class="log-time"><i class="fa-regular fa-clock"></i> ${formatDate(err.timestamp)}</span>
+            </div>
+            <div class="log-meta">
+              ${criticalBadge}
+              ${statusBadge}
+              <span class="badge" style="background:#eee; color:#555;">کاربر: ${esc(err.username || '-')}</span>
+            </div>
+            <div class="log-msg">
+              <span>${esc(err.errorMessage || '-')}</span>
+              <button class="copy-btn" onclick="copyToClipboard(this.dataset.k0)" data-k0="${esc(safeErrorMessage)}" title="کپی متن خطا"><i class="fa-regular fa-copy"></i></button>
+            </div>
+            <div class="stack-toggle" onclick="toggleStack(this.dataset.k0)" data-k0="${esc(err.errorId)}">نمایش/مخفف کردن جزئیات فنی</div>
+            <div class="stack-content" id="stack-${esc(err.errorId)}">${esc(err.stackTrace || 'جزئیات فنی موجود نیست.')}</div>
+            ${resolveBtn}
+          `;
+          listEl.appendChild(div);
+        });
+
+      } else {
+        let filtered = auditData;
+        if (searchTerm) {
+          filtered = filtered.filter(e => 
+            (e.action && e.action.toLowerCase().includes(searchTerm)) || 
+            (e.details && e.details.toLowerCase().includes(searchTerm)) || 
+            (e.username && e.username.includes(searchTerm))
+          );
+        }
+
+        if (filtered.length === 0) {
+          listEl.innerHTML = '<div class="empty-state"><i class="fa-solid fa-list-ul"></i>موردی یافت نشد.</div>';
+          return;
+        }
+
+        filtered.forEach(log => {
+          const div = document.createElement('div');
+          div.className = 'log-item';
+
+          const resultBadge = log.result === 'success' 
+            ? '<span class="badge success">موفق</span>' 
+            : '<span class="badge fail">ناموفق</span>';
+
+          div.innerHTML = `
+            <div class="log-header">
+              <span class="log-func"><i class="fa-solid fa-gear" style="color:var(--copper-main); margin-left:4px;"></i> ${esc(translateAction(log.action))}</span>
+              <span class="log-time"><i class="fa-regular fa-clock"></i> ${formatDate(log.timestamp)}</span>
+            </div>
+            <div class="log-meta">
+              ${resultBadge}
+              <span class="badge" style="background:#eee; color:#555;">کاربر: ${esc(log.username || '-')}</span>
+            </div>
+            <div class="log-msg">${esc(log.details || '-')}</div>
+          `;
+          listEl.appendChild(div);
+        });
+      }
+    }
+
+    // ============================================
+    // Actions
+    // ============================================
+    function resolveError(errorId) {
+      var btn = document.getElementById('btn-resolve-' + errorId);
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> در حال ثبت...';
+      }
+
+      apiCall({
+        action: 'log.errorResolve',
+        token: currentToken,
+        payload: { errorId: errorId }
+      }).then(function(res) {
+        if (res.success) {
+          var err = errorsData.find(e => e.errorId === errorId);
+          if (err) err.status = 'resolved';
+          
+          showToast('خطا به عنوان حل شده علامت‌گذاری شد.');
+          updateErrorBadge();
+          renderLogs();
+        } else {
+          showToast(res.error, 'error');
+          if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-check"></i> علامت‌گذاری به عنوان حل شده'; }
+        }
+      }).catch(function() {
+        showToast('خطا در ارتباط با سرور', 'error');
+        if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-check"></i> علامت‌گذاری به عنوان حل شده'; }
+      });
+    }
+
+    function toggleStack(errorId) {
+      const stackEl = document.getElementById('stack-' + errorId);
+      if (stackEl) {
+        stackEl.classList.toggle('show');
+      }
+    }
+
+    function copyToClipboard(text) {
+      const cleanText = text.replace(/\\'/g, "'");
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(cleanText).then(() => {
+          showToast('متن خطا کپی شد.', 'info');
+        }).catch(() => { fallbackCopy(cleanText); });
+      } else {
+        fallbackCopy(cleanText);
+      }
+    }
+
+    function fallbackCopy(text) {
+      const textArea = document.createElement("textarea");
+      textArea.value = text;
+      document.body.appendChild(textArea);
+      textArea.select();
+      try {
+        document.execCommand('copy');
+        showToast('متن خطا کپی شد.', 'info');
+      } catch (err) {
+        showToast('کپی ناموفق بود.', 'error');
+      }
+      document.body.removeChild(textArea);
+    }
+
+    function translateAction(action) {
+      if (!action) return '-';
+      var map = {
+        'inspection.save': 'ثبت بازرسی',
+        'inspection.approved': 'تأیید بازرسی',
+        'inspection.rejected': 'رد بازرسی',
+        'inspection.batch_approve': 'تأیید گروهی بازرسی',
+        'inspection.batch_approved': 'تأیید گروهی بازرسی',
+        'timing.test': 'تست سرعت',
+        'form.save': 'ثبت بازرسی چک‌لیست',
+        'form.assign': 'تخصیص فرم',
+        'form.toggle': 'فعال/غیرفعال‌سازی فرم',
+        'error.resolve': 'حل خطا',
+        'auth.login': 'ورود موفق',
+        'auth.login_failed': 'ورود ناموفق',
+        'auth.logout': 'خروج',
+        'user.create': 'ایجاد کاربر',
+        'user.update': 'ویرایش کاربر',
+        'user.password_change': 'تغییر رمز کاربر (توسط مدیر)',
+        'user.password_change_self': 'تغییر رمز توسط خود کاربر',
+        'user.role_change': 'تغییر نقش',
+        'user.toggle_active': 'فعال/غیرفعال‌سازی کاربر',
+        'equipment.create': 'افزودن تجهیز',
+        'equipment.update': 'ویرایش تجهیز',
+        'equipment.delete': 'حذف تجهیز',
+        'equipment.status_change': 'تغییر وضعیت تجهیز',
+        'equipment.bulk_assign': 'تخصیص دسته‌ای'
+      };
+      return map[action] || action;
+    }
+
+
+    // ============================================
+    // Helpers
+    // ============================================
+
+    
+  </script>
+
+  <script src="pwa.js" defer></script>
+</body>
+</html>

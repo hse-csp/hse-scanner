@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="icon" type="image/png" href="icons/favicon-32.png">
+  <meta name="theme-color" content="#C0611A">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="HSE CSP">
+  <title>اسکن تجهیز - HSE</title>
+  
+  <script src="assets/html5-qrcode.min.js"></script>
+  
+  <link href="assets/vazirmatn/Vazirmatn.css" rel="stylesheet" type="text/css" />
+  <link rel="stylesheet" href="assets/fa/css/all.min.css">
+
+  <style>
+    :root {
+      --copper-main: #E67E22;      
+      --copper-dark: #C0611A;      
+      --copper-light: #FAD7A8;     
+      --copper-bg: #F5F7FA;        
+      --text-dark: #2C3E50;        
+      --text-muted: #7F8C8D;
+      --status-green: #27ae60;
+      --status-red: #e74c3c;
+      --status-orange: #f39c12;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Vazirmatn', Tahoma, sans-serif; }
+    
+    body { 
+      background-color: var(--copper-bg); 
+      color: var(--text-dark);
+      padding: 0 0 100px 0; 
+      min-height: 100vh;
+    }
+
+    /* هدر */
+    .header {
+      background: linear-gradient(135deg, var(--copper-dark), var(--copper-main));
+      color: #fff;
+      padding: 24px 20px 40px 20px;
+      border-radius: 0 0 24px 24px;
+      box-shadow: 0 4px 15px rgba(230, 126, 34, 0.3);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: -20px; 
+      position: relative;
+      z-index: 2;
+    }
+
+    .header-text h1 { font-size: 20px; font-weight: 700; margin-bottom: 4px; display: flex; align-items: center; gap: 8px;}
+    .header-text p { font-size: 13px; opacity: 0.9; }
+    
+    .pending-badge { background: #fff; color: var(--copper-dark); font-size: 12px; padding: 2px 8px; border-radius: 12px; font-weight: bold; display: none;}
+    
+    .avatar {
+      width: 45px; height: 45px;
+      background: rgba(255,255,255,0.2);
+      border-radius: 50%;
+      display: flex; justify-content: center; align-items: center;
+      font-size: 20px; backdrop-filter: blur(5px);
+      border: 1px solid rgba(255,255,255,0.4);
+    }
+
+    .container { padding: 0 16px; position: relative; z-index: 3; margin-top: 30px; max-width: 700px; margin-left: auto; margin-right: auto;}
+
+    /* کارت‌ها */
+    .card {
+      background: #fff;
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 16px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+      border: 1px solid rgba(230, 126, 34, 0.1);
+    }
+
+    .card-title {
+      font-size: 15px; font-weight: 700; color: var(--copper-dark);
+      margin-bottom: 16px; display: flex; align-items: center; gap: 8px;
+      border-bottom: 1px dashed var(--copper-light); padding-bottom: 10px;
+    }
+
+    /* اسکنر */
+    #reader { width: 100%; border-radius: 12px; overflow: hidden; margin-bottom: 12px; background: #000; min-height: 250px; display: none;}
+    #reader video { border-radius: 12px; }
+    
+    .btn-primary {
+      background: linear-gradient(135deg, var(--copper-main), var(--copper-dark));
+      color: #fff;
+      border: none;
+      padding: 16px 20px;
+      border-radius: 50px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      width: 100%;
+      box-shadow: 0 6px 15px rgba(230, 126, 34, 0.4);
+      display: flex; justify-content: center; align-items: center; gap: 10px;
+      transition: all 0.3s;
+    }
+    .btn-primary:active { transform: translateY(2px); box-shadow: 0 2px 8px rgba(230, 126, 34, 0.4); }
+    .btn-primary:disabled { background: #ccc; box-shadow: none; cursor: not-allowed; }
+
+    /* فیلد جستجو */
+    .search-box {
+      display: flex;
+      background: #fff;
+      border-radius: 50px;
+      padding: 5px 5px 5px 15px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+      border: 1px solid #eee;
+      margin-bottom: 20px;
+    }
+    .search-box input {
+      border: none; outline: none; flex: 1; font-family: inherit; font-size: 14px; padding: 10px;
+      background: transparent;
+    }
+    .search-box button {
+      background: var(--copper-light); color: var(--copper-dark);
+      border: none; border-radius: 50px; width: 45px; height: 45px;
+      display: flex; justify-content: center; align-items: center; cursor: pointer;
+      transition: 0.2s;
+    }
+    .search-box button:active { background: var(--copper-main); color: #fff; }
+
+    /* شبکه پنل مدیریت */
+    .btn-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+    .grid-btn {
+      background: #FFF4E6; 
+      border: 1px solid var(--copper-light);
+      border-radius: 12px;
+      padding: 16px;
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;
+      color: var(--copper-dark); font-weight: 700; font-size: 13px;
+      text-decoration: none; cursor: pointer; transition: 0.2s;
+      text-align: center;
+      position: relative;
+    }
+    .grid-btn i { font-size: 24px; color: var(--copper-main); }
+    .grid-btn:active { background: var(--copper-light); }
+
+    /* دکمه‌های به زودی */
+    .grid-btn.future-module {
+      border: 2px dashed var(--copper-main);
+      background: #FCE3CC; 
+    }
+    .grid-btn.health-module i { color: #e74c3c; }
+    .grid-btn.fire-module i { color: #d35400; }
+    .grid-btn small { font-size: 10px; font-weight: 600; color: #a0784f; }
+    .grid-btn.unsafe-module i { color: #d35400; }
+    
+    .badge-soon {
+      position: absolute; top: -8px; right: 10px;
+      background: var(--copper-main); color: #fff;
+      font-size: 9px; padding: 2px 6px; border-radius: 8px; font-weight: 800;
+    }
+
+    /* منوی پایین */
+    .bottom-nav {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      background: #fff;
+      display: flex; justify-content: space-around; align-items: center;
+      padding: 10px;
+      box-shadow: 0 -2px 15px rgba(0,0,0,0.05);
+      border-radius: 24px 24px 0 0;
+      z-index: 100;
+    }
+    .nav-item {
+      display: flex; flex-direction: column; align-items: center; gap: 4px;
+      color: var(--text-muted); font-size: 11px; font-weight: 700; text-decoration: none;
+      transition: 0.2s; background: none; border: none; cursor: pointer;
+    }
+    .nav-item i { font-size: 20px; margin-bottom: 2px; }
+    .nav-item.active { color: var(--copper-main); }
+
+    /* Toast */
+    #toast-container { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 999; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
+    .toast { background: #333; color: #fff; padding: 12px 24px; border-radius: 50px; font-size: 13px; font-weight: 700; box-shadow: 0 4px 12px rgba(0,0,0,0.15); display: flex; align-items: center; gap: 8px; animation: toastIn 0.3s ease-out, toastOut 0.3s ease-in 2.7s forwards; }
+    .toast.success { background: var(--status-green); }
+    .toast.error { background: var(--status-red); }
+    .toast.info { background: var(--copper-main); }
+    @keyframes toastIn { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    @keyframes toastOut { from { transform: translateY(0); opacity: 1; } to { transform: translateY(-20px); opacity: 0; } }
+
+  </style>
+</head>
+<body>
+
+  <header class="header">
+    <div class="header-text">
+      <h1>
+        اسکن تجهیز
+        <span class="pending-badge" id="pendingBadge">0</span>
+      </h1>
+      <p id="userInfo">در حال بارگذاری...</p>
+    </div>
+    <div class="avatar">
+      <i class="fa-solid fa-user-tie"></i>
+    </div>
+  </header>
+
+  <div class="container">
+    
+    <!-- جستجوی دستی -->
+    <div class="search-box">
+      <input type="text" id="manualInput" placeholder="کد تجهیز را دستی وارد کنید...">
+      <button onclick="manualSearch()"><i class="fa-solid fa-magnifying-glass"></i></button>
+    </div>
+
+    <!-- اسکنر -->
+    <div class="card">
+      <div class="card-title">
+        <i class="fa-solid fa-camera"></i> اسکن با دوربین
+      </div>
+      <div id="reader"></div>
+      <button class="btn-primary" id="startScanBtn" onclick="startScanner()">
+        <i class="fa-solid fa-qrcode"></i> شروع اسکن
+      </button>
+    </div>
+
+    <!-- دسته‌بندی چک‌لیست‌ها (برای همه‌ی نقش‌ها) -->
+    <div class="card" id="checklistsCard">
+      <div class="card-title">
+        <i class="fa-solid fa-clipboard-list"></i> چک‌لیست‌ها
+      </div>
+      <div class="btn-grid">
+        <a href="forms.html?cat=hygiene" class="grid-btn health-module">
+          <i class="fa-solid fa-heart-pulse"></i>
+          <span>چک‌لیست‌های بهداشتی</span>
+          <small>پرسنل بهداری</small>
+        </a>
+        <a href="fire.html" class="grid-btn fire-module">
+          <i class="fa-solid fa-fire-extinguisher"></i>
+          <span>چک‌لیست‌های آتش‌نشانی</span>
+          <small>پرسنل آتش‌نشانی</small>
+        </a>
+      </div>
+    </div>
+
+    <!-- پنل مدیریت (شامل دکمه‌های به زودی) -->
+    <div class="card" id="adminPanel" style="display:none;">
+      <div class="card-title">
+        <i class="fa-solid fa-gauge-high"></i> پنل مدیریت
+      </div>
+      <div class="btn-grid">
+        <a href="dashboard.html" class="grid-btn" id="adminDashboard" style="display:none;">
+          <i class="fa-solid fa-chart-pie"></i>
+          <span>داشبورد</span>
+        </a>
+        <a href="report.html" class="grid-btn" id="adminReport" style="display:none;">
+          <i class="fa-solid fa-file-invoice"></i>
+          <span>گزارشات</span>
+        </a>
+        <a href="users.html" class="grid-btn" id="adminUsers" style="display:none;">
+          <i class="fa-solid fa-users-gear"></i>
+          <span>کاربران</span>
+        </a>
+        <a href="logs.html" class="grid-btn" id="adminLogs" style="display:none;">
+          <i class="fa-solid fa-list-ul"></i>
+          <span>لاگ‌ها</span>
+        </a>
+
+        <!-- دکمه‌های به زودی -->
+        <a href="#" class="grid-btn future-module" onclick="showToast('این بخش به زودی فعال می‌شود.', 'info')">
+          <span class="badge-soon">به زودی</span>
+          <i class="fa-solid fa-file-signature"></i>
+          <span>گزارشات ارسالی پرسنل</span>
+        </a>
+        <a href="#" class="grid-btn future-module unsafe-module" onclick="showToast('بخش گزارش موارد ناایمن به زودی فعال می‌شود.', 'info')">
+          <span class="badge-soon">به زودی</span>
+          <i class="fa-solid fa-triangle-exclamation"></i>
+          <span>ارسال گزارش موارد نا ایمن</span>
+        </a>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- منوی پایین -->
+  <nav class="bottom-nav">
+    <button class="nav-item active" onclick="window.location.reload()">
+      <i class="fa-solid fa-house"></i>
+      <span>خانه</span>
+    </button>
+    <button class="nav-item" onclick="window.location.href='history.html'">
+      <i class="fa-solid fa-clock-rotate-left"></i>
+      <span>تاریخچه</span>
+    </button>
+    <button class="nav-item" onclick="openPwModal()">
+      <i class="fa-solid fa-key"></i>
+      <span>رمز عبور</span>
+    </button>
+    <button class="nav-item" onclick="doLogout(true)">
+      <i class="fa-solid fa-arrow-right-from-bracket"></i>
+      <span>خروج</span>
+    </button>
+  </nav>
+
+  <!-- تغییر رمز عبور -->
+  <div id="pwModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1000;align-items:center;justify-content:center;padding:20px">
+    <div style="background:#fff;border-radius:16px;padding:22px;width:100%;max-width:360px">
+      <h3 style="margin-bottom:14px;color:var(--copper-dark)"><i class="fa-solid fa-key"></i> تغییر رمز عبور</h3>
+      <input type="password" id="pwOld" placeholder="رمز فعلی" autocomplete="current-password" style="width:100%;padding:12px;margin-bottom:10px;border:1px solid #ddd;border-radius:10px;font-family:inherit">
+      <input type="password" id="pwNew" placeholder="رمز جدید (حداقل ۶ کاراکتر)" autocomplete="new-password" style="width:100%;padding:12px;margin-bottom:10px;border:1px solid #ddd;border-radius:10px;font-family:inherit">
+      <input type="password" id="pwNew2" placeholder="تکرار رمز جدید" autocomplete="new-password" style="width:100%;padding:12px;margin-bottom:14px;border:1px solid #ddd;border-radius:10px;font-family:inherit">
+      <div style="display:flex;gap:8px">
+        <button id="pwSave" onclick="savePw()" style="flex:1;padding:12px;border:0;border-radius:10px;background:var(--copper-main);color:#fff;font-family:inherit;font-weight:700;cursor:pointer">ذخیره</button>
+        <button onclick="closePwModal()" style="flex:1;padding:12px;border:0;border-radius:10px;background:#eee;font-family:inherit;font-weight:700;cursor:pointer">انصراف</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div id="toast-container"></div>
+
+  <script src="common.js"></script>
+  <script src="queue.js"></script>
+  <script>
+    var currentToken = '';
+    var currentUser = '';
+    var html5QrCode = null;
+    var isScanning = false;
+
+    (function initPage() {
+      currentToken = localStorage.getItem('token');
+      currentUser = localStorage.getItem('fullName') || localStorage.getItem('username');
+      var role = localStorage.getItem('role') || '';
+
+      if (!currentToken) { goToLogin(); return; }
+
+      document.getElementById('userInfo').textContent = currentUser;
+
+      // نمایش پنل مدیریت بر اساس نقش
+      if (role === 'manager' || role === 'admin') {
+        document.getElementById('adminPanel').style.display = 'block';
+        document.getElementById('adminDashboard').style.display = 'flex';
+        document.getElementById('adminReport').style.display = 'flex';
+      }
+      if (role === 'admin') {
+        document.getElementById('adminUsers').style.display = 'flex';
+        document.getElementById('adminLogs').style.display = 'flex';
+      } else {
+        document.getElementById('adminUsers').style.display = 'none';
+        document.getElementById('adminLogs').style.display = 'none';
+        if (role === 'inspector') {
+          document.getElementById('adminPanel').style.display = 'none';
+        }
+      }
+
+      // بایند کردن کلید Enter برای جستجو
+      document.getElementById('manualInput').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') manualSearch();
+      });
+
+      HSEQ.init({ cache: true });
+      HSEQ.refreshBanner();
+      window.addEventListener('hse-synced', function(e) { showToast(toFa(e.detail.synced) + ' بازرسی ذخیره‌شده با موفقیت ارسال شد.', 'success'); });
+    })();
+
+    // ============================================
+    // Auth & Scan
+    // ============================================
+
+    function startScanner() {
+      if (isScanning) return;
+      var btn = document.getElementById('startScanBtn');
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> در حال راه‌اندازی...';
+
+      document.getElementById('reader').style.display = 'block';
+
+      if (!html5QrCode) { html5QrCode = new Html5Qrcode('reader'); }
+
+      html5QrCode.start(
+        { facingMode: 'environment' },
+        { fps: 10, qrbox: { width: 250, height: 250 } },
+        onScanSuccess,
+        function() {}
+      ).then(function() {
+        isScanning = true;
+        btn.innerHTML = '<i class="fa-solid fa-camera"></i> دوربین فعال است';
+      }).catch(function(err) {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-qrcode"></i> شروع اسکن';
+        showToast('خطا در دسترسی به دوربین: ' + err, 'error');
+      });
+    }
+
+    function stopScanner() {
+      if (html5QrCode && isScanning) {
+        html5QrCode.stop().then(function() {
+          isScanning = false;
+          document.getElementById('reader').style.display = 'none';
+          var btn = document.getElementById('startScanBtn');
+          btn.disabled = false;
+          btn.innerHTML = '<i class="fa-solid fa-qrcode"></i> شروع اسکن';
+        });
+      }
+    }
+
+    function onScanSuccess(decodedText) {
+      stopScanner();
+      goToChecklist(decodedText);
+    }
+
+    function manualSearch() {
+      var input = document.getElementById('manualInput');
+      var code = input.value.trim();
+      if (!code) { showToast('لطفاً کد تجهیز را وارد کنید.', 'error'); return; }
+      goToChecklist(code);
+    }
+
+
+    // ============================================
+    // Change own password
+    // ============================================
+    function openPwModal() { ['pwOld','pwNew','pwNew2'].forEach(function(i){ document.getElementById(i).value=''; }); document.getElementById('pwModal').style.display='flex'; }
+    function closePwModal() { document.getElementById('pwModal').style.display='none'; }
+    function savePw() {
+      var o=document.getElementById('pwOld').value, n=document.getElementById('pwNew').value, n2=document.getElementById('pwNew2').value;
+      if (!o || !n) { showToast('همه فیلدها را پر کنید.', 'error'); return; }
+      if (n.length < 6) { showToast('رمز جدید باید حداقل ۶ کاراکتر باشد.', 'error'); return; }
+      if (n !== n2) { showToast('تکرار رمز جدید مطابقت ندارد.', 'error'); return; }
+      var btn=document.getElementById('pwSave'); btn.disabled=true;
+      apiCall({ action: 'auth.changePassword', payload: { oldPassword: o, newPassword: n } }).then(function(res) {
+        btn.disabled=false;
+        if (res.success) { closePwModal(); showToast('رمز تغییر کرد. دوباره وارد شوید.', 'success'); setTimeout(function(){ clearAuth(); goToLogin(); }, 1200); }
+        else showToast(res.error || 'خطا در تغییر رمز', 'error');
+      }).catch(function() { btn.disabled=false; showToast('خطا در ارتباط با سرور.', 'error'); });
+    }
+
+    function goToChecklist(barcode) {
+      sessionStorage.setItem('currentBarcode', String(barcode).trim());
+      sessionStorage.removeItem('returnTo');
+      window.location.href = 'checklist.html';
+    }
+  </script>
+
+  <script src="pwa.js" defer></script>
+</body>
+</html>

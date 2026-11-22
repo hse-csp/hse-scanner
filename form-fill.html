@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#1e3c72">
+  <title>فرم بازرسی</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="icon" type="image/png" href="icons/favicon-32.png">
+  <link href="assets/vazirmatn/Vazirmatn.css" rel="stylesheet">
+  <link rel="stylesheet" href="assets/fa/css/all.min.css">
+  <style>
+    :root {
+      --copper-main: #E67E22;      
+      --copper-dark: #C0611A;      
+      --copper-light: #FAD7A8;     
+      --copper-bg: #F5F7FA;        
+      --text-dark: #2C3E50;        
+      --text-muted: #7F8C8D;
+      
+      --status-green: #27ae60;
+      --status-red: #e74c3c;
+      --status-orange: #f39c12;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Vazirmatn', Tahoma, sans-serif; }
+    
+    body { 
+      background-color: var(--copper-bg); 
+      color: var(--text-dark);
+      padding: 0 0 100px 0; 
+      min-height: 100vh;
+    }
+
+    /* بخش ثابت بالا */
+    .sticky-top {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: var(--copper-bg);
+    }
+
+    .header {
+      background: linear-gradient(135deg, var(--copper-dark), var(--copper-main));
+      color: #fff;
+      padding: 16px 20px;
+      border-radius: 0 0 24px 24px;
+      box-shadow: 0 4px 15px rgba(230, 126, 34, 0.3);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .header h1 { font-size: 18px; font-weight: 700; }
+    
+    .back-btn { 
+      background: rgba(255,255,255,0.2); 
+      border: none; color: #fff; 
+      padding: 8px 14px; 
+      border-radius: 8px; 
+      cursor: pointer; 
+      font-family: inherit;
+      font-size: 13px;
+      display: flex; 
+      align-items: center; 
+      gap: 6px;
+    }
+
+    /* نوار پیشرفت */
+    .progress-container {
+      background: #fff;
+      padding: 12px 20px;
+      border-bottom: 1px solid #eee;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+    }
+    .progress-header { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 6px; color: var(--text-muted); font-weight: 700; }
+    .progress-bar { height: 8px; background: #e2e8f0; border-radius: 4px; overflow: hidden; }
+    .progress-fill { height: 100%; background: linear-gradient(90deg, var(--copper-main), var(--copper-dark)); width: 0%; transition: width 0.3s; }
+
+    .container { padding: 16px; max-width: 600px; margin: 0 auto; }
+
+    /* کارت‌ها */
+    .card {
+      background: #fff;
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 16px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+      border: 1px solid rgba(230, 126, 34, 0.1);
+    }
+
+    .card-title {
+      font-size: 15px; font-weight: 700; color: var(--copper-dark);
+      margin-bottom: 16px; display: flex; align-items: center; gap: 8px;
+      border-bottom: 1px dashed var(--copper-light); padding-bottom: 10px;
+    }
+
+    /* اطلاعات تجهیز */
+    .info-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f0f0f0; font-size: 13px; }
+    .info-row:last-child { border-bottom: none; }
+    .info-row .label { color: var(--text-muted); display: flex; align-items: center; gap: 6px; }
+    .info-row .value { font-weight: 700; color: var(--text-dark); }
+
+    /* آیتم‌های چک‌لیست */
+    .item {
+      background: #F8FAFC; border: 1px solid #e2e8f0;
+      border-radius: 12px; padding: 16px; margin-bottom: 12px;
+      transition: all 0.3s;
+    }
+    
+    .item-name {
+      font-size: 14px; font-weight: 700; margin-bottom: 12px; color: var(--text-dark);
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    
+    .status-buttons { display: flex; gap: 8px; }
+    
+    .status-btn {
+      flex: 1; padding: 10px 4px; border: 1px solid #e2e8f0; background: #fff;
+      border-radius: 8px; font-family: inherit; font-size: 12px; font-weight: 700;
+      cursor: pointer; transition: all 0.2s; color: var(--text-muted);
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+    }
+    
+    /* رنگ‌های فعال دکمه‌ها */
+    .status-btn.salem.active { background: var(--status-green); color: #fff; border-color: var(--status-green); }
+    .status-btn.defective.active { background: var(--status-red); color: #fff; border-color: var(--status-red); }
+    .status-btn.repair.active { background: var(--status-orange); color: #fff; border-color: var(--status-orange); }
+
+    /* وضعیت نهایی */
+    .final-section { background: #FFF9F0; border: 2px dashed var(--copper-main); }
+    .final-section .card-title { color: var(--copper-main); border-bottom: none; margin-bottom: 8px; padding-bottom: 0; }
+
+    /* دوربین و عکس */
+    .photo-box { text-align: center; }
+    #cameraPreview { width: 100%; border-radius: 12px; display: none; background: #000; margin-bottom: 12px; }
+    #capturedPhoto { max-width: 100%; max-height: 200px; object-fit: contain; border-radius: 12px; display: none; margin-bottom: 12px; }
+    
+    .photo-btn { width: 100%; padding: 14px; border-radius: 10px; border: none; font-family: inherit; font-size: 14px; font-weight: 700; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 8px; }
+    .btn-take { background: #34495e; color: #fff; }
+    .btn-capture { background: var(--status-red); color: #fff; }
+    .btn-cancel { background: #999; color: #fff; margin-top: 8px; }
+    .btn-change { background: var(--status-green); color: #fff; }
+
+    /* یادداشت */
+    .notes-box textarea {
+      width: 100%; padding: 12px; border: 1px solid #e2e8f0; border-radius: 10px; 
+      font-family: inherit; font-size: 14px; resize: vertical; min-height: 80px; background: #F8FAFC;
+    }
+    .notes-box textarea:focus { outline: none; border-color: var(--copper-main); background: #fff; }
+
+    /* دکمه ثبت پایین صفحه */
+    .fixed-bottom {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      background: #fff; padding: 16px; box-shadow: 0 -4px 15px rgba(0,0,0,0.05);
+      border-radius: 24px 24px 0 0; z-index: 100;
+    }
+    .submit-btn {
+      width: 100%; padding: 16px; border-radius: 50px; border: none;
+      background: linear-gradient(135deg, var(--copper-main), var(--copper-dark));
+      color: #fff; font-family: inherit; font-size: 16px; font-weight: 700;
+      cursor: pointer; box-shadow: 0 6px 15px rgba(230, 126, 34, 0.4);
+      transition: all 0.3s;
+      display: flex; justify-content: center; align-items: center; gap: 8px;
+    }
+    .submit-btn:disabled { background: #ccc; box-shadow: none; cursor: not-allowed; }
+
+    /* Bottom Sheet */
+    .bottom-sheet-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 200; display: none; opacity: 0; transition: opacity 0.3s; }
+    .bottom-sheet-overlay.show { display: block; opacity: 1; }
+    .bottom-sheet { position: fixed; bottom: -100%; left: 0; right: 0; background: #fff; border-radius: 24px 24px 0 0; padding: 24px 20px; z-index: 201; transition: bottom 0.3s ease-in-out; box-shadow: 0 -4px 20px rgba(0,0,0,0.1); }
+    .bottom-sheet.show { bottom: 0; }
+    .sheet-handle { width: 40px; height: 5px; background: #ddd; border-radius: 5px; margin: 0 auto 20px auto; }
+    .sheet-title { font-size: 18px; font-weight: 800; color: var(--copper-dark); margin-bottom: 16px; text-align: center; }
+    .summary-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #eee; font-size: 14px; }
+    .summary-row:last-of-type { border-bottom: none; margin-bottom: 20px; }
+    .btn-confirm-submit { width: 100%; padding: 16px; border-radius: 12px; border: none; background: var(--status-green); color: #fff; font-family: inherit; font-size: 16px; font-weight: 700; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 8px; }
+    .btn-confirm-submit:disabled { background: #ccc; cursor: not-allowed; }
+    .btn-cancel-submit { width: 100%; padding: 16px; border-radius: 12px; border: none; background: #f0f0f0; color: var(--text-dark); font-family: inherit; font-size: 16px; font-weight: 700; cursor: pointer; margin-top: 10px; }
+    
+    .loading-box { text-align: center; padding: 40px 20px; color: #666; font-size: 15px; }
+  
+    .hsec-title { font-size: 14px; font-weight: 800; color: var(--copper-dark); display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px dashed var(--copper-light); }
+    .hsec-title small { font-size: 11px; color: var(--text-muted); font-weight: 700; }
+    .hitem .item-name { justify-content: flex-start; gap: 6px; line-height: 1.9; font-weight: 600; }
+    .hitem .num { color: var(--copper-main); font-weight: 800; flex-shrink: 0; }
+    .hitem.missing { border-color: var(--status-red); background: #FFF5F5; }
+    .hlabel { font-size: 13px; font-weight: 800; color: var(--text-dark); background: #FEF5E7; border-radius: 10px; padding: 10px 12px; margin: 4px 0 12px; line-height: 1.9; }
+    .thumbs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 12px 0; }
+    .thumb { position: relative; aspect-ratio: 1; border-radius: 10px; overflow: hidden; background: #eee; }
+    .thumb img { width: 100%; height: 100%; object-fit: cover; }
+    .thumb button { position: absolute; top: 4px; left: 4px; width: 26px; height: 26px; border: 0; border-radius: 50%; background: rgba(0,0,0,.65); color: #fff; cursor: pointer; font-size: 12px; }
+    .photo-actions { display: flex; gap: 8px; }
+    .photo-actions .photo-btn { padding: 12px; font-size: 13px; }
+    .btn-gallery { background: #7f8c8d; color: #fff; }
+    .photo-hint { font-size: 11px; color: var(--text-muted); text-align: center; margin-top: 8px; }
+    .form-card { cursor: default; }
+    .form-card h3 { font-size: 16px; color: var(--text-dark); margin-bottom: 6px; }
+    .form-card p { font-size: 12px; color: var(--text-muted); margin-bottom: 12px; line-height: 1.8; }
+    .form-meta { display: flex; gap: 12px; font-size: 12px; color: var(--text-muted); margin-bottom: 14px; }
+    .form-meta span { display: flex; align-items: center; gap: 5px; }
+    .big-btn { width: 100%; padding: 14px; border: 0; border-radius: 12px; background: linear-gradient(135deg, var(--copper-main), var(--copper-dark)); color: #fff; font-family: inherit; font-size: 15px; font-weight: 800; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 8px; }
+    .big-btn.secondary { background: #f0f0f0; color: var(--text-dark); }
+    .empty-state { text-align: center; padding: 40px 20px; color: #999; font-size: 14px; line-height: 2; }
+    .empty-state i { font-size: 36px; display: block; margin-bottom: 10px; color: #ddd; }
+    .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+    .chip { background: #FEF5E7; color: var(--copper-dark); border-radius: 20px; padding: 4px 10px; font-size: 11px; font-weight: 700; }
+    .chip.none { background: #f0f0f0; color: #999; }
+    .badge-off { background: #FDEDEC; color: var(--status-red); border-radius: 20px; padding: 2px 10px; font-size: 11px; font-weight: 700; margin-right: 8px; }
+    .row-actions { display: flex; gap: 8px; }
+    .row-actions .big-btn { padding: 11px; font-size: 13px; }
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 300; display: none; align-items: flex-end; justify-content: center; }
+    .modal-overlay.show { display: flex; }
+    .modal-box { background: #fff; border-radius: 24px 24px 0 0; width: 100%; max-width: 600px; max-height: 85vh; display: flex; flex-direction: column; padding: 20px; }
+    .modal-box h3 { color: var(--copper-dark); font-size: 16px; margin-bottom: 12px; text-align: center; }
+    .user-list { overflow-y: auto; flex: 1; margin: 10px 0; border: 1px solid #eee; border-radius: 12px; }
+    .user-opt { display: flex; align-items: center; gap: 10px; padding: 12px 14px; border-bottom: 1px solid #f3f3f3; font-size: 13px; cursor: pointer; }
+    .user-opt:last-child { border-bottom: 0; }
+    .user-opt input { width: 20px; height: 20px; accent-color: var(--copper-main); }
+    .user-opt small { color: var(--text-muted); margin-right: auto; }
+    .search-input { width: 100%; padding: 12px; border: 1px solid #e2e8f0; border-radius: 10px; font-family: inherit; font-size: 14px; }
+    .bar-row { display: flex; gap: 8px; margin-bottom: 4px; }
+    .bar-row button { flex: 1; padding: 8px; border: 0; border-radius: 8px; background: #f0f0f0; font-family: inherit; font-size: 12px; font-weight: 700; cursor: pointer; }
+    .jump-btn { background: none; border: 0; color: var(--copper-dark); font-family: inherit; font-size: 12px; font-weight: 800; cursor: pointer; padding: 0; text-decoration: underline; }
+
+    .toast-container, #toast-container { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 999; display: flex; flex-direction: column; gap: 8px; }
+    .toast { background: #333; color: #fff; padding: 12px 20px; border-radius: 10px; font-size: 13px; font-weight: 700; box-shadow: 0 4px 12px rgba(0,0,0,.2); }
+    .toast.success { background: var(--status-green); } .toast.error { background: var(--status-red); } .toast.info { background: #3498db; }
+  </style>
+  <script src="pwa.js" defer></script>
+</head>
+<body>
+  <div class="sticky-top">
+    <header class="header">
+      <h1 id="formTitle">فرم بازرسی</h1>
+      <button class="back-btn" onclick="goBack()"><i class="fa-solid fa-arrow-right"></i> بازگشت</button>
+    </header>
+    <div class="progress-container">
+      <div class="progress-header">
+        <span>پیشرفت بازرسی <button class="jump-btn" onclick="jumpToMissing()">(رفتن به مورد بی‌پاسخ)</button></span>
+        <span id="progress-text">۰ از ۰</span>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+    </div>
+  </div>
+
+  <div class="container">
+    <div id="loadingCard" class="card"><div class="loading-box">در حال دریافت فرم...</div></div>
+    <div id="offlineNote" style="display:none;background:#FEF5E7;color:#B9770E;padding:10px 14px;border-radius:12px;margin-bottom:12px;font-size:12px;font-weight:700;text-align:center"><i class="fa-solid fa-wifi"></i> حالت آفلاین — بازرسی پس از اتصال ارسال می‌شود.</div>
+
+    <div id="formBody" style="display:none">
+      <div class="card" id="fieldsCard" style="display:none">
+        <div class="card-title"><i class="fa-solid fa-id-card"></i> اطلاعات بازرسی</div>
+        <div id="fields"></div>
+      </div>
+
+      <div id="sections"></div>
+
+      <div class="card">
+        <div class="card-title"><i class="fa-solid fa-camera"></i> عکس‌ها (اختیاری)</div>
+        <div class="thumbs" id="thumbs"></div>
+        <div class="photo-actions">
+          <button class="photo-btn btn-take" id="camBtn" onclick="document.getElementById('camInput').click()"><i class="fa-solid fa-camera"></i> دوربین</button>
+          <button class="photo-btn btn-gallery" id="galBtn" onclick="document.getElementById('galInput').click()"><i class="fa-solid fa-images"></i> گالری</button>
+        </div>
+        <div class="photo-hint" id="photoHint"></div>
+        <input type="file" id="camInput" accept="image/*" capture="environment" style="display:none" onchange="onPhotos(this)">
+        <input type="file" id="galInput" accept="image/*" multiple style="display:none" onchange="onPhotos(this)">
+      </div>
+
+      <div class="card notes-box">
+        <div class="card-title"><i class="fa-solid fa-note-sticky"></i> یادداشت (اختیاری)</div>
+        <textarea id="notesInput" placeholder="توضیحات کلی بازرسی..."></textarea>
+      </div>
+
+      <div class="card final-section" id="finalCard">
+        <div class="card-title"><i class="fa-solid fa-flag-checkered"></i> وضعیت نهایی</div>
+        <p style="font-size:11px; color:#777; margin-bottom:12px;">نتیجه‌ی کلی بازرسی را شما تعیین می‌کنید.</p>
+        <div class="status-buttons" id="finalButtons"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="fixed-bottom" id="submitBar" style="display:none">
+    <button class="submit-btn" id="submitBtn" onclick="openSummary()"><i class="fa-solid fa-paper-plane"></i> ثبت نهایی بازرسی</button>
+  </div>
+
+  <div class="bottom-sheet-overlay" id="sheetOverlay" onclick="closeSummary()"></div>
+  <div class="bottom-sheet" id="summarySheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">خلاصه‌ی بازرسی</div>
+    <div class="summary-row"><span>تأیید شده</span><b id="s-ok">-</b></div>
+    <div class="summary-row"><span>عدم تأیید</span><b id="s-bad">-</b></div>
+    <div class="summary-row"><span>تعداد عکس</span><b id="s-photos">-</b></div>
+    <div class="summary-row"><span>وضعیت نهایی</span><b id="s-final">-</b></div>
+    <button class="btn-confirm-submit" id="confirmBtn" onclick="submitForm()"><i class="fa-solid fa-check"></i> تأیید و ثبت</button>
+    <button class="btn-cancel-submit" onclick="closeSummary()">بازگشت و ویرایش</button>
+  </div>
+
+  <div id="toast-container"></div>
+  <script src="common.js"></script>
+  <script src="queue.js"></script>
+  <script>
+
+    var currentToken = localStorage.getItem('token') || '';
+    var formId = sessionStorage.getItem('formId') || '';
+    var RETURN_URL = sessionStorage.getItem('formReturn') || 'index.html';
+    var form = null, items = [], fieldDefs = [], checks = [], answers = {}, fieldVals = {}, photos = [], finalStatus = null, offlineMode = false, maxPhotos = 10;
+
+    function goBack() {
+      if ((Object.keys(answers).length || Object.keys(fieldVals).length) && !confirm('اطلاعات واردشده ذخیره نشده و از بین می‌رود. خارج می‌شوید؟')) return;
+      location.href = RETURN_URL;
+    }
+
+    function fromCache() {
+      return Promise.all([HSEQ.getForms(), HSEQ.getFormItems(formId), HSEQ.getFormFields(formId)]).then(function(r) {
+        var f = r[0].filter(function(x) { return x.formId === formId; })[0];
+        if (!f || !r[1]) return null;
+        offlineMode = true;
+        return { form: f, items: r[1], fields: r[2] || [] };
+      });
+    }
+
+    (function init() {
+      if (!currentToken) { goToLogin(); return; }
+      if (!formId) { location.replace(RETURN_URL); return; }
+      HSEQ.init();
+      var online = navigator.onLine ? apiCall({ action: 'forms.prepare', token: currentToken, payload: { formId: formId } }).catch(function() { return null; }) : Promise.resolve(null);
+      online.then(function(res) {
+        if (res && res.success) { HSEQ.cacheForm(res.data.form, res.data.items, res.data.fields); return res.data; }
+        if (res && res.code === 'AUTH') return 'stop';
+        if (res) { alert(res.error); location.replace(RETURN_URL); return 'stop'; }
+        return fromCache().then(function(d) {
+          if (!d) { alert('اتصال برقرار نیست و این فرم در حافظه‌ی آفلاین نیست. یک‌بار با اینترنت وارد برنامه شوید.'); location.replace(RETURN_URL); return 'stop'; }
+          return d;
+        });
+      }).then(function(d) {
+        if (!d || d === 'stop') return;
+        form = d.form; items = d.items; fieldDefs = d.fields || []; maxPhotos = form.maxPhotos || 10;
+        checks = items.filter(function(i) { return i.type === 'check'; });
+        document.getElementById('formTitle').textContent = form.title;
+        document.getElementById('loadingCard').style.display = 'none';
+        document.getElementById('formBody').style.display = 'block';
+        document.getElementById('submitBar').style.display = 'block';
+        if (offlineMode) document.getElementById('offlineNote').style.display = 'block';
+        renderFields(); renderSections(); renderFinal(); renderPhotos(); updateProgress();
+      });
+    })();
+
+    // ---------- فیلدهای سرتیتر (موقعیت، کد دستگاه، ...) ----------
+    function renderFields() {
+      if (!fieldDefs.length) return;
+      document.getElementById('fieldsCard').style.display = 'block';
+      var box = document.getElementById('fields'); box.innerHTML = '';
+      fieldDefs.forEach(function(f) {
+        var wrap = document.createElement('div'); wrap.style.marginBottom = '12px'; wrap.dataset.fid = f.fieldId;
+        var lab = document.createElement('label'); lab.style.cssText = 'display:block;font-size:12px;font-weight:700;color:var(--text-muted);margin-bottom:6px';
+        lab.textContent = f.label + (f.required ? ' *' : '');
+        var inp;
+        if (f.type === 'select') {
+          inp = document.createElement('select');
+          var o0 = document.createElement('option'); o0.value = ''; o0.textContent = 'انتخاب کنید...'; inp.appendChild(o0);
+          (f.options || []).forEach(function(o) { var op = document.createElement('option'); op.value = o; op.textContent = o; inp.appendChild(op); });
+        } else { inp = document.createElement('input'); inp.type = 'text'; inp.maxLength = 200; }
+        inp.style.cssText = 'width:100%;padding:12px;border:1px solid #e2e8f0;border-radius:10px;font-family:inherit;font-size:14px;background:#fff';
+        inp.addEventListener('input', function() { fieldVals[f.fieldId] = inp.value; wrap.classList.remove('missing'); inp.style.borderColor = '#e2e8f0'; });
+        wrap.appendChild(lab); wrap.appendChild(inp); box.appendChild(wrap);
+      });
+    }
+    function missingField() {
+      return fieldDefs.filter(function(f) { return f.required && !(fieldVals[f.fieldId] || '').trim(); })[0];
+    }
+
+    // ---------- بخش‌ها و آیتم‌ها ----------
+    function renderSections() {
+      var box = document.getElementById('sections'); box.innerHTML = '';
+      var groups = [], byName = {};
+      items.forEach(function(it) { if (!byName[it.section]) { byName[it.section] = { name: it.section, items: [] }; groups.push(byName[it.section]); } byName[it.section].items.push(it); });
+      groups.forEach(function(g) {
+        var card = document.createElement('div'); card.className = 'card'; card.style.padding = '16px';
+        var title = document.createElement('div'); title.className = 'hsec-title';
+        var nm = document.createElement('span'); nm.textContent = g.name;
+        var cnt = document.createElement('small'); title.appendChild(nm); title.appendChild(cnt); card.appendChild(title);
+        g._cnt = cnt; var n = 0;
+        g.items.forEach(function(it) {
+          if (it.type === 'label') { var l = document.createElement('div'); l.className = 'hlabel'; l.textContent = it.text; card.appendChild(l); return; }
+          n++;
+          var row = document.createElement('div'); row.className = 'item hitem'; row.dataset.id = it.itemId;
+          var name = document.createElement('div'); name.className = 'item-name';
+          var num = document.createElement('span'); num.className = 'num'; num.textContent = toFa(n) + '.';
+          var tx = document.createElement('span'); tx.textContent = it.text; name.appendChild(num); name.appendChild(tx);
+          var btns = document.createElement('div'); btns.className = 'status-buttons';
+          [['confirmed', 'salem', 'fa-check', 'تأیید'], ['not_confirmed', 'defective', 'fa-xmark', 'عدم تأیید']].forEach(function(b) {
+            var bt = document.createElement('button'); bt.className = 'status-btn ' + b[1]; bt.dataset.a = b[0];
+            bt.innerHTML = '<i class="fa-solid ' + b[2] + '"></i> ' + b[3];
+            bt.addEventListener('click', function() { setAnswer(it.itemId, b[0], row); });
+            btns.appendChild(bt);
+          });
+          row.appendChild(name); row.appendChild(btns); card.appendChild(row);
+        });
+        box.appendChild(card);
+      });
+      window._groups = groups; updateSectionCounts();
+    }
+
+    function setAnswer(id, ans, row) {
+      answers[id] = ans;
+      row.classList.remove('missing');
+      row.querySelectorAll('.status-btn').forEach(function(b) { b.classList.toggle('active', b.dataset.a === ans); });
+      updateProgress(); updateSectionCounts();
+    }
+    function updateSectionCounts() {
+      (window._groups || []).forEach(function(g) {
+        var c = g.items.filter(function(i) { return i.type === 'check'; });
+        var done = c.filter(function(i) { return answers[i.itemId]; }).length;
+        g._cnt.textContent = toFa(done) + ' از ' + toFa(c.length);
+      });
+    }
+    function updateProgress() {
+      var done = checks.filter(function(i) { return answers[i.itemId]; }).length, total = checks.length;
+      document.getElementById('progress-text').textContent = toFa(done) + ' از ' + toFa(total);
+      document.getElementById('progress-fill').style.width = (total ? done / total * 100 : 0) + '%';
+    }
+    function firstMissing() { return checks.filter(function(i) { return !answers[i.itemId]; })[0]; }
+    function jumpToMissing() {
+      var m = firstMissing();
+      if (!m) { showToast('همه‌ی موارد پاسخ داده شده‌اند.', 'success'); return; }
+      var row = document.querySelector('.hitem[data-id="' + m.itemId.replace(/"/g, '') + '"]');
+      if (row) { row.classList.add('missing'); row.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+    }
+
+    // ---------- وضعیت نهایی (بر اساس نوع فرم: سه‌حالته یا قبول/مردود) ----------
+    var FINAL_ICON = { salem: ['salem', 'fa-check'], needsRepair: ['repair', 'fa-triangle-exclamation'], defective: ['defective', 'fa-xmark'] };
+    function renderFinal() {
+      var box = document.getElementById('finalButtons'); box.innerHTML = '';
+      (form.finalOptions || []).forEach(function(o) {
+        var ic = FINAL_ICON[o.value] || ['salem', 'fa-check'];
+        var b = document.createElement('button'); b.className = 'status-btn ' + ic[0]; b.dataset.f = o.value;
+        b.innerHTML = '<i class="fa-solid ' + ic[1] + '"></i> '; b.appendChild(document.createTextNode(o.label));
+        b.addEventListener('click', function() {
+          finalStatus = o.value;
+          box.querySelectorAll('.status-btn').forEach(function(x) { x.classList.toggle('active', x === b); });
+        });
+        box.appendChild(b);
+      });
+    }
+    function finalLabel() { var o = (form.finalOptions || []).filter(function(x) { return x.value === finalStatus; })[0]; return o ? o.label : ''; }
+
+    // ---------- عکس‌ها (اختیاری، تا ۱۰) ----------
+    function renderPhotos() {
+      var box = document.getElementById('thumbs'); box.innerHTML = '';
+      photos.forEach(function(p, i) {
+        var t = document.createElement('div'); t.className = 'thumb';
+        var img = document.createElement('img'); img.src = 'data:image/jpeg;base64,' + p;
+        var del = document.createElement('button'); del.innerHTML = '<i class="fa-solid fa-xmark"></i>';
+        del.addEventListener('click', function() { photos.splice(i, 1); renderPhotos(); });
+        t.appendChild(img); t.appendChild(del); box.appendChild(t);
+      });
+      document.getElementById('photoHint').textContent = toFa(photos.length) + ' از ' + toFa(maxPhotos) + ' عکس';
+      var full = photos.length >= maxPhotos;
+      document.getElementById('camBtn').disabled = full; document.getElementById('galBtn').disabled = full;
+    }
+    function compress(file) {
+      return new Promise(function(resolve, reject) {
+        var img = new Image();
+        img.onload = function() {
+          var scale = Math.min(1, 1024 / img.width), c = document.createElement('canvas');
+          c.width = Math.round(img.width * scale); c.height = Math.round(img.height * scale);
+          c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+          URL.revokeObjectURL(img.src);
+          var b64 = c.toDataURL('image/jpeg', 0.6).split(',')[1];
+          b64.length > 850000 ? reject(new Error('big')) : resolve(b64);
+        };
+        img.onerror = function() { reject(new Error('bad')); };
+        img.src = URL.createObjectURL(file);
+      });
+    }
+    function onPhotos(input) {
+      var files = Array.prototype.slice.call(input.files || []);
+      input.value = '';
+      var room = maxPhotos - photos.length;
+      if (files.length > room) { showToast('حداکثر ' + toFa(maxPhotos) + ' عکس مجاز است.', 'info'); files = files.slice(0, room); }
+      files.reduce(function(p, f) {
+        return p.then(function() { return compress(f).then(function(b) { photos.push(b); }, function() { showToast('یکی از عکس‌ها نامعتبر یا حجیم بود.', 'error'); }); });
+      }, Promise.resolve()).then(renderPhotos);
+    }
+
+    // ---------- ثبت ----------
+    function openSummary() {
+      var mf = missingField();
+      if (mf) {
+        showToast('«' + mf.label + '» را وارد کنید.', 'error');
+        var w = document.querySelector('#fields [data-fid="' + mf.fieldId + '"]');
+        if (w) { w.scrollIntoView({ behavior: 'smooth', block: 'center' }); var i = w.querySelector('input,select'); if (i) { i.style.borderColor = 'var(--status-red)'; i.focus(); } }
+        return;
+      }
+      var m = firstMissing();
+      if (m) { showToast('به همه‌ی موارد پاسخ دهید.', 'error'); jumpToMissing(); return; }
+      if (!finalStatus) { showToast('وضعیت نهایی را انتخاب کنید.', 'error'); document.getElementById('finalCard').scrollIntoView({ behavior: 'smooth', block: 'center' }); return; }
+      var ok = checks.filter(function(i) { return answers[i.itemId] === 'confirmed'; }).length;
+      document.getElementById('s-ok').textContent = toFa(ok);
+      document.getElementById('s-bad').textContent = toFa(checks.length - ok);
+      document.getElementById('s-photos').textContent = toFa(photos.length);
+      document.getElementById('s-final').textContent = finalLabel();
+      document.getElementById('sheetOverlay').classList.add('show');
+      setTimeout(function() { document.getElementById('summarySheet').classList.add('show'); }, 10);
+    }
+    function closeSummary() {
+      document.getElementById('summarySheet').classList.remove('show');
+      setTimeout(function() { document.getElementById('sheetOverlay').classList.remove('show'); }, 250);
+    }
+    function uuid() { return (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : 'id-' + Date.now() + '-' + Math.random().toString(16).slice(2); }
+
+    function submitForm() {
+      var confirmBtn = document.getElementById('confirmBtn');
+      if (confirmBtn.disabled) return;
+      confirmBtn.disabled = true; closeSummary();
+      var btn = document.getElementById('submitBtn'); btn.disabled = true;
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> در حال ثبت...';
+      var payload = {
+        clientRequestId: uuid(), clientTimestamp: new Date().toISOString(), formId: formId,
+        fields: fieldDefs.map(function(f) { return { fieldId: f.fieldId, value: (fieldVals[f.fieldId] || '').trim() }; }),
+        answers: checks.map(function(i) { return { itemId: i.itemId, answer: answers[i.itemId] }; }),
+        finalStatus: finalStatus, notes: document.getElementById('notesInput').value.trim(), photos: photos.slice()
+      };
+      function reset() { confirmBtn.disabled = false; btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> ثبت نهایی بازرسی'; }
+      function finish(kind) {
+        sessionStorage.removeItem('formId');
+        btn.style.background = 'var(--status-green)';
+        btn.innerHTML = '<i class="fa-solid fa-check"></i> ' + (kind === 'ok' ? 'ثبت شد' : 'ذخیره شد');
+        showToast(kind === 'ok' ? 'بازرسی با موفقیت ثبت شد.' : 'بازرسی ذخیره شد و پس از اتصال ارسال می‌شود.', kind === 'ok' ? 'success' : 'info');
+        setTimeout(function() { location.replace(RETURN_URL); }, 900);
+      }
+      HSEQ.addPending(payload, { action: 'forms.save', label: form.title, finalLabel: finalLabel() }).then(function(localId) {
+        if (!navigator.onLine) { finish('queued'); return; }
+        var settled = false, timer = setTimeout(function() { if (!settled) { settled = true; finish('queued'); } }, 45000);
+        HSEQ.sendNow(localId).then(function(r) {
+          if (settled) return; settled = true; clearTimeout(timer);
+          if (r.result === 'ok') finish('ok');
+          else if (r.result === 'permanent') HSEQ.remove(localId).then(function() { reset(); alert(r.error); });
+          else finish('queued');
+        });
+      }).catch(function() { reset(); showToast('ذخیره‌ی بازرسی روی دستگاه ممکن نشد (فضای حافظه؟).', 'error'); });
+    }
+
+  </script>
+</body>
+</html>

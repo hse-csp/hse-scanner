@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ورود به سیستم بازرسی</title>
+  
+  <link href="assets/vazirmatn/Vazirmatn.css" rel="stylesheet" type="text/css" />
+  <link rel="stylesheet" href="assets/fa/css/all.min.css">
+
+  <style>
+    :root {
+      --copper-main: #E67E22;      
+      --copper-dark: #C0611A;      
+      --copper-light: #FAD7A8;     
+      --text-dark: #2C3E50;        
+      --text-muted: #7F8C8D;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Vazirmatn', Tahoma, sans-serif; }
+    
+    body { 
+      background: linear-gradient(135deg, var(--copper-dark), var(--copper-main));
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .login-card {
+      background: #fff;
+      border-radius: 24px;
+      padding: 40px 30px;
+      width: 100%;
+      max-width: 400px;
+      box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* خط تزئینی بالای کارت */
+    .login-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 6px;
+      background: linear-gradient(90deg, var(--copper-main), var(--copper-dark));
+    }
+
+    .logo-circle {
+      width: 70px; height: 70px;
+      background: var(--copper-light);
+      color: var(--copper-dark);
+      border-radius: 50%;
+      display: flex; justify-content: center; align-items: center;
+      margin: 0 auto 20px auto;
+      box-shadow: 0 4px 10px rgba(230, 126, 34, 0.2);
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: 1px;
+    }
+
+    .login-card h1 {
+      text-align: center;
+      color: var(--copper-dark);
+      margin-bottom: 6px;
+      font-size: 20px;
+      font-weight: 800;
+    }
+
+    .login-card h2 {
+      text-align: center;
+      color: var(--text-muted);
+      margin-bottom: 30px;
+      font-size: 13px;
+      font-weight: normal;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+      position: relative;
+    }
+
+    .form-group i {
+      position: absolute;
+      right: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      font-size: 16px;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 15px 45px 15px 15px;
+      border: 2px solid #eee;
+      border-radius: 12px;
+      font-size: 15px;
+      font-family: inherit;
+      background: #F9F9F9;
+      transition: all 0.3s;
+    }
+
+    .form-group input:focus {
+      outline: none;
+      border-color: var(--copper-main);
+      background: #fff;
+      box-shadow: 0 0 0 4px rgba(230, 126, 34, 0.1);
+    }
+
+    .login-btn {
+      width: 100%;
+      padding: 16px;
+      background: linear-gradient(135deg, var(--copper-main), var(--copper-dark));
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      font-family: inherit;
+      font-weight: 700;
+      cursor: pointer;
+      margin-top: 10px;
+      box-shadow: 0 6px 15px rgba(230, 126, 34, 0.4);
+      transition: all 0.3s;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .login-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(230, 126, 34, 0.5);
+    }
+
+    .login-btn:active {
+      transform: translateY(1px);
+    }
+
+    .login-btn:disabled {
+      background: #ccc;
+      box-shadow: none;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .error-msg {
+      color: #d32f2f;
+      text-align: center;
+      margin-top: 16px;
+      font-size: 13px;
+      padding: 10px;
+      background: #ffebee;
+      border-radius: 8px;
+      display: none;
+      border: 1px solid #ffcdd2;
+    }
+
+    .loading {
+      text-align: center;
+      color: var(--copper-main);
+      margin-top: 16px;
+      font-size: 14px;
+      display: none;
+      font-weight: bold;
+    }
+
+    .footer {
+      text-align: center;
+      color: var(--text-muted);
+      margin-top: 30px;
+      font-size: 12px;
+    }
+  </style>
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="icon" type="image/png" href="icons/favicon-32.png">
+</head>
+<body>
+
+  <div class="login-card">
+    <div class="logo-circle">
+      HSE
+    </div>
+    
+    <h1>سیستم بازرسی واحد HSE</h1>
+    <h2>لطفاً برای ورود، اطلاعات خود را وارد کنید</h2>
+
+    <div class="form-group">
+      <i class="fa-solid fa-id-card"></i>
+      <input type="text" id="username" placeholder="شماره پرسنلی" autocomplete="username" inputmode="numeric">
+    </div>
+
+    <div class="form-group">
+      <i class="fa-solid fa-lock"></i>
+      <input type="password" id="password" placeholder="رمز عبور" autocomplete="current-password">
+    </div>
+
+    <button class="login-btn" id="loginBtn" onclick="submitLogin()">
+      <i class="fa-solid fa-arrow-right-to-bracket"></i> ورود به سیستم
+    </button>
+
+    <div class="error-msg" id="errorMsg"></div>
+    <div class="loading" id="loading">در حال بررسی...</div>
+
+    <div class="footer">در صورت فراموشی رمز، با مدیر سیستم تماس بگیرید</div>
+  </div>
+
+  <script src="common.js"></script>
+  <script>
+    var submitting = false;
+
+    // اگر نشست معتبر هنوز موجود است، مستقیم وارد شو
+    (function () {
+      var exp = localStorage.getItem('expiresAt');
+      if (getToken() && (!exp || new Date(exp) > new Date())) location.replace('index.html');
+    })();
+
+    function showError(msg) {
+      var el = document.getElementById('errorMsg');
+      el.textContent = msg || 'خطای نامشخص';
+      el.style.display = 'block';
+    }
+
+    function submitLogin() {
+      if (submitting) return;
+      var username = document.getElementById('username').value.trim();
+      var password = document.getElementById('password').value;
+      var btn = document.getElementById('loginBtn');
+      var loadingEl = document.getElementById('loading');
+      document.getElementById('errorMsg').style.display = 'none';
+
+      if (!username || !password) { showError('لطفاً شماره پرسنلی و رمز عبور را وارد کنید.'); return; }
+      if (!navigator.onLine) { showError('برای ورود به اینترنت نیاز است.'); return; }
+
+      submitting = true; btn.disabled = true; loadingEl.style.display = 'block';
+      rawPost({ action: 'auth.login', payload: { username: username, password: password, deviceInfo: navigator.userAgent } }).then(function (res) {
+        submitting = false; btn.disabled = false; loadingEl.style.display = 'none';
+        if (res && res.success) {
+          localStorage.setItem('token', res.token);
+          localStorage.setItem('username', res.username);
+          localStorage.setItem('role', res.role);
+          localStorage.setItem('fullName', res.fullName || '');
+          localStorage.setItem('expiresAt', res.expiresAt || '');
+          location.replace('index.html');
+        } else {
+          showError((res && res.error) || 'ورود ناموفق بود.');
+          document.getElementById('password').value = '';
+        }
+      }).catch(function () {
+        submitting = false; btn.disabled = false; loadingEl.style.display = 'none';
+        showError('خطا در ارتباط با سرور. اینترنت خود را بررسی کنید.');
+      });
+    }
+
+    document.addEventListener('keypress', function (e) { if (e.key === 'Enter') submitLogin(); });
+  </script>
+  <script src="pwa.js" defer></script>
+</body>
+</html>
